@@ -15,13 +15,16 @@ echo "Running quality checks..."
 # ============================================================================
 # 1. COMPILATION CHECK - Must compile without errors or warnings
 # ============================================================================
-if [ -f "Makefile" ]; then
+if [ -f "Makefile" ] || [ -f "makefile" ]; then
     echo "→ Compiling with strict warnings..."
     
     make clean > /dev/null 2>&1 || true
     
     # Compile with all warnings enabled and treat warnings as errors
-    if ! make CFLAGS="-Wall -Wextra -Werror" 2>&1 | tee /tmp/compile_output.txt; then
+    make CFLAGS="-Wall -Wextra -Werror" > /tmp/compile_output.txt 2>&1
+    COMPILE_EXIT=$?
+    
+    if [ $COMPILE_EXIT -ne 0 ]; then
         echo -e "${RED}✗ COMPILATION FAILED${NC}"
         echo ""
         cat /tmp/compile_output.txt

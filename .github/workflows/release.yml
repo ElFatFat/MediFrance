@@ -49,11 +49,19 @@ jobs:
     - name: Compile C Project
       run: make
 
+    - name: Package Binary
+      # -j (junk paths) stores the file without the 'build/' folder structure inside the zip
+      run: |
+        zip -j medifrance_linux.zip build/medifrance
+
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ github.ref_name }}
         name: Release ${{ github.ref_name }}
-        files: build/my_program
+        # Point to the new zip file
+        files: medifrance_linux.zip
+        draft: false
+        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

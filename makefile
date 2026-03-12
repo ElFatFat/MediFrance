@@ -1,6 +1,6 @@
 # Compiler and flags
 CC      = gcc
-CFLAGS  = -Wall -Wextra -ansi -std=c99 $(shell pkg-config --cflags MLV)
+CFLAGS  = -Wall -Wextra -std=c99 $(shell pkg-config --cflags MLV)
 LDLIBS  = $(shell pkg-config --libs MLV)
 
 # Target executable name

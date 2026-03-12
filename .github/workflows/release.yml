@@ -30,24 +30,32 @@ jobs:
         key: ${{ runner.os }}-mlv-3.1.0
 
     - name: Download and Build libMLV
-      # This step only runs if the cache was NOT found
       if: steps.cache-mlv.outputs.cache-hit != 'true'
       run: |
-        wget http://www-igm.univ-mlv.fr/~boussica/mlv/api/French/html/archives/mlv-3.1.0.tar.gz
+        # Use -L to follow redirects and -O to ensure the filename is correct
+        curl -L http://www-igm.univ-mlv.fr/~boussica/mlv/api/French/html/archives/mlv-3.1.0.tar.gz -o mlv-3.1.0.tar.gz
         tar -xzf mlv-3.1.0.tar.gz
         cd mlv-3.1.0
         ./configure
         make
 
     - name: Install libMLV
-      # We always run 'make install' to move files from the (cached) folder to system paths
       run: |
-        cd mlv-3.1.0
-        sudo make install
-        sudo ldconfig
+        # Added a safety check: only enter the dir if it exists
+        if [ -d "mlv-3.1.0" ]; then
+          cd mlv-3.1.0
+          sudo make install
+          sudo ldconfig
+        else
+          echo "libMLV directory not found. Installation failed."
+          exit 1
+        fi
 
     - name: Compile C Project
-      run: make
+      run: |
+        # Ensure zip is present and run make
+        sudo apt-get install -y zip
+        make
 
     - name: Package Binary
       # -j (junk paths) stores the file without the 'build/' folder structure inside the zip

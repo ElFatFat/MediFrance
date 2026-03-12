@@ -4,8 +4,6 @@
 # Ensures code compiles cleanly and passes linter checks
 #
 
-set -e
-
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -18,31 +16,17 @@ echo "Running quality checks..."
 if [ -f "Makefile" ] || [ -f "makefile" ]; then
     echo "→ Compiling with strict warnings..."
     
+    # Clean build
     make clean > /dev/null 2>&1 || true
     
-    # Compile with all warnings enabled and treat warnings as errors
-    make CFLAGS="-Wall -Wextra -Werror" > /tmp/compile_output.txt 2>&1
-    COMPILE_EXIT=$?
-    
-    if [ $COMPILE_EXIT -ne 0 ]; then
+    # Compile with strict warnings - show output in real-time
+    if make CFLAGS="-Wall -Wextra -Werror" 2>&1; then
+        echo -e "${GREEN}✓ Compilation successful (no errors or warnings)${NC}"
+    else
         echo -e "${RED}✗ COMPILATION FAILED${NC}"
-        echo ""
-        cat /tmp/compile_output.txt
-        rm -f /tmp/compile_output.txt
+        echo -e "${RED}Fix the errors above before committing${NC}"
         exit 1
     fi
-    
-    # Check if there were any warnings (even if compilation succeeded)
-    if grep -qiE 'warning:|caution:' /tmp/compile_output.txt; then
-        echo -e "${RED}✗ COMPILATION PRODUCED WARNINGS${NC}"
-        echo ""
-        grep -iE 'warning:|caution:' /tmp/compile_output.txt
-        rm -f /tmp/compile_output.txt
-        exit 1
-    fi
-    
-    rm -f /tmp/compile_output.txt
-    echo -e "${GREEN}✓ Compilation successful (no errors or warnings)${NC}"
 else
     echo "⚠ No Makefile found - skipping compilation check"
 fi
@@ -59,15 +43,16 @@ if command -v cppcheck &> /dev/null; then
               ! -path "./.git/*")
     
     if [ -n "$C_FILES" ]; then
-        if ! cppcheck --enable=warning,style,performance,portability \
-                      --error-exitcode=1 \
-                      --quiet \
-                      --suppress=missingIncludeSystem \
-                      $C_FILES 2>&1; then
+        if cppcheck --enable=warning,style,performance,portability \
+                    --error-exitcode=1 \
+                    --quiet \
+                    --suppress=missingIncludeSystem \
+                    $C_FILES 2>&1; then
+            echo -e "${GREEN}✓ Linter check passed${NC}"
+        else
             echo -e "${RED}✗ LINTER FOUND ISSUES${NC}"
             exit 1
         fi
-        echo -e "${GREEN}✓ Linter check passed${NC}"
     fi
 else
     echo -e "${RED}✗ cppcheck not installed${NC}"

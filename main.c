@@ -23,5 +23,7 @@ int main(int argc, char *argv[]) {
     // 5. Clean up and close the window
     MLV_free_window();
 
+    (void)argc;
+    (void)argv;
     return 0;
 }

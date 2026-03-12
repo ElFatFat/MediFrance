@@ -1,0 +1,97 @@
+#!/bin/bash
+#
+# Pre-commit hook - Blocks unprofessional commits
+# Ensures code compiles cleanly and passes linter checks
+#
+
+set -e
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+echo "Running quality checks..."
+
+# ============================================================================
+# 1. COMPILATION CHECK - Must compile without errors or warnings
+# ============================================================================
+if [ -f "Makefile" ]; then
+    echo "→ Compiling with strict warnings..."
+    
+    make clean > /dev/null 2>&1 || true
+    
+    # Compile with all warnings enabled and treat warnings as errors
+    if ! make CFLAGS="-Wall -Wextra -Werror" 2>&1 | tee /tmp/compile_output.txt; then
+        echo -e "${RED}✗ COMPILATION FAILED${NC}"
+        echo ""
+        cat /tmp/compile_output.txt
+        rm -f /tmp/compile_output.txt
+        exit 1
+    fi
+    
+    # Check if there were any warnings (even if compilation succeeded)
+    if grep -qiE 'warning:|caution:' /tmp/compile_output.txt; then
+        echo -e "${RED}✗ COMPILATION PRODUCED WARNINGS${NC}"
+        echo ""
+        grep -iE 'warning:|caution:' /tmp/compile_output.txt
+        rm -f /tmp/compile_output.txt
+        exit 1
+    fi
+    
+    rm -f /tmp/compile_output.txt
+    echo -e "${GREEN}✓ Compilation successful (no errors or warnings)${NC}"
+else
+    echo "⚠ No Makefile found - skipping compilation check"
+fi
+
+# ============================================================================
+# 2. LINTER CHECK - cppcheck
+# ============================================================================
+if command -v cppcheck &> /dev/null; then
+    echo "→ Running linter (cppcheck)..."
+    
+    C_FILES=$(find . -type f \( -name "*.c" -o -name "*.cpp" \) \
+              ! -path "./build/*" \
+              ! -path "./mlv-source/*" \
+              ! -path "./.git/*")
+    
+    if [ -n "$C_FILES" ]; then
+        if ! cppcheck --enable=warning,style,performance,portability \
+                      --error-exitcode=1 \
+                      --quiet \
+                      --suppress=missingIncludeSystem \
+                      $C_FILES 2>&1; then
+            echo -e "${RED}✗ LINTER FOUND ISSUES${NC}"
+            exit 1
+        fi
+        echo -e "${GREEN}✓ Linter check passed${NC}"
+    fi
+else
+    echo -e "${RED}✗ cppcheck not installed${NC}"
+    echo "Install it with: sudo apt-get install cppcheck"
+    exit 1
+fi
+
+# ============================================================================
+# 3. BLOCK BINARY FILES
+# ============================================================================
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+for file in $STAGED_FILES; do
+    if [ -f "$file" ]; then
+        # Block binary build artifacts
+        if echo "$file" | grep -qE '\.(o|so|a|exe|out)$'; then
+            echo -e "${RED}✗ Binary file detected: $file${NC}"
+            echo "Binary files should not be committed"
+            exit 1
+        fi
+    fi
+done
+
+# ============================================================================
+# SUCCESS
+# ============================================================================
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${GREEN}All checks passed - commit allowed ✓${NC}"
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+exit 0

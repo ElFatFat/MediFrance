@@ -1,0 +1,51 @@
+name: Code Quality
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cppcheck \
+          libsdl-gfx1.2-dev \
+          libsdl1.2-dev \
+          libsdl-mixer1.2-dev \
+          libsdl-ttf2.0-dev \
+          libglib2.0-dev \
+          libxml2-dev \
+          libsdl-image1.2-dev
+
+    - name: Install libMLV
+      run: |
+        if [ -f libs/libmlv0_2.0.2-1_amd64.deb ] && [ -f libs/libmlv0-dev_2.0.2-1_amd64.deb ]; then
+          sudo dpkg -i libs/libmlv0_2.0.2-1_amd64.deb libs/libmlv0-dev_2.0.2-1_amd64.deb
+          sudo ldconfig
+        fi
+
+    - name: Compile with Strict Warnings
+      run: |
+        make clean || true
+        make CFLAGS="-Wall -Wextra -Werror"
+
+    - name: Run Linter
+      run: |
+        cppcheck --enable=warning,style,performance,portability \
+                 --error-exitcode=1 \
+                 --quiet \
+                 --suppress=missingIncludeSystem \
+                 $(find . -name "*.c" -o -name "*.cpp" | grep -v "./build/" | grep -v "./mlv-source/")

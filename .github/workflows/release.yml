@@ -17,48 +17,52 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Install System Dependencies
-      # These are fast and managed by apt, so we don't cache these.
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential pkg-config libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libxml2-dev freeglut3-dev libglew-dev
+        # Added libtool, autoconf, and glib as per official source install docs
+        sudo apt-get install -y build-essential pkg-config libtool autoconf \
+          libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
+          libxml2-dev libglib2.0-dev freeglut3-dev libglew-dev zip
 
     - name: Cache libMLV
       id: cache-mlv
       uses: actions/cache@v4
       with:
-        path: mlv-3.1.0
+        path: mlv-source
         key: ${{ runner.os }}-mlv-3.1.0
 
     - name: Download and Build libMLV
       if: steps.cache-mlv.outputs.cache-hit != 'true'
       run: |
-        # Use -L to follow redirects and -O to ensure the filename is correct
-        curl -L http://www-igm.univ-mlv.fr/~boussica/mlv/api/French/html/archives/mlv-3.1.0.tar.gz -o mlv-3.1.0.tar.gz
-        tar -xzf mlv-3.1.0.tar.gz
-        cd mlv-3.1.0
-        ./configure
-        make
-
-    - name: Install libMLV
-      run: |
-        # Added a safety check: only enter the dir if it exists
-        if [ -d "mlv-3.1.0" ]; then
-          cd mlv-3.1.0
-          sudo make install
-          sudo ldconfig
-        else
-          echo "libMLV directory not found. Installation failed."
+        # Using a very common User-Agent to prevent the server from blocking the download
+        curl -A "Mozilla/5.0 (X11; Linux x86_64)" -L "http://www-igm.univ-mlv.fr/~boussica/mlv/api/French/html/archives/mlv-3.1.0.tar.gz" -o mlv.tar.gz
+        
+        # Security check: if the file is just an HTML error page, stop here
+        if ! file mlv.tar.gz | grep -q "gzip compressed data"; then
+          echo "SERVER ERROR: The download failed. The server likely blocked the GitHub runner."
+          cat mlv.tar.gz
           exit 1
         fi
 
+        mkdir mlv-source
+        tar -xzf mlv.tar.gz -C mlv-source --strip-components=1
+        cd mlv-source
+        # --prefix=/usr is recommended in the docs to avoid path issues
+        ./configure --prefix=/usr
+        make -j$(nproc)
+
+    - name: Install libMLV
+      run: |
+        cd mlv-source
+        sudo make install
+        sudo ldconfig
+
     - name: Compile C Project
       run: |
-        # Ensure zip is present and run make
-        sudo apt-get install -y zip
+        mkdir -p build
         make
 
     - name: Package Binary
-      # -j (junk paths) stores the file without the 'build/' folder structure inside the zip
       run: |
         zip -j medifrance_linux.zip build/medifrance
 
@@ -67,7 +71,6 @@ jobs:
       with:
         tag_name: ${{ github.ref_name }}
         name: Release ${{ github.ref_name }}
-        # Point to the new zip file
         files: medifrance_linux.zip
         draft: false
         prerelease: false

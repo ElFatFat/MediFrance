@@ -1,0 +1,59 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install System Dependencies
+      # These are fast and managed by apt, so we don't cache these.
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential pkg-config libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libxml2-dev freeglut3-dev libglew-dev
+
+    - name: Cache libMLV
+      id: cache-mlv
+      uses: actions/cache@v4
+      with:
+        path: mlv-3.1.0
+        key: ${{ runner.os }}-mlv-3.1.0
+
+    - name: Download and Build libMLV
+      # This step only runs if the cache was NOT found
+      if: steps.cache-mlv.outputs.cache-hit != 'true'
+      run: |
+        wget http://www-igm.univ-mlv.fr/~boussica/mlv/api/French/html/archives/mlv-3.1.0.tar.gz
+        tar -xzf mlv-3.1.0.tar.gz
+        cd mlv-3.1.0
+        ./configure
+        make
+
+    - name: Install libMLV
+      # We always run 'make install' to move files from the (cached) folder to system paths
+      run: |
+        cd mlv-3.1.0
+        sudo make install
+        sudo ldconfig
+
+    - name: Compile C Project
+      run: make
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
+        files: build/my_program
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 int main(void) {
-    const char* csv_path = "communes-france-metrople-2025.csv";
+    const char* csv_path = "resources/communes-france-metrople-2025.csv";
     FILE* file = fopen(csv_path, "r");
     struct Commune* communes = NULL;
     size_t capacity = 0;

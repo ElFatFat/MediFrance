@@ -1,4 +1,4 @@
-# MediFrance
+# MediFrance - geomatics and public health project
 
 ## Local setup (Linux only)
 

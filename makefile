@@ -8,8 +8,8 @@ LDLIBS  = $(shell pkg-config --libs MLV)
 # Target executable name
 TARGET  = build/medifrance
 
-# Source files (automatically finds all .c files in the current directory)
-SRCS    = $(wildcard *.c)
+# Source files (main sources + modules)
+SRCS    = $(wildcard *.c modules/*.c)
 OBJS    = $(patsubst %.c,build/%.o,$(SRCS))
 
 # Default rule
@@ -20,7 +20,8 @@ $(TARGET): $(OBJS)
 	$(CC) $(OBJS) -o $(TARGET) $(LDLIBS)
 
 # Compile source files into object files
-build/%.o: %.c | build
+build/%.o: %.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 build:

@@ -1,5 +1,7 @@
 #include "main.h"
 
+#include "modules/gui.h"
+
 #include <MLV/MLV_all.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -77,14 +79,10 @@ int main(void) {
         );
     }
 
-    MLV_create_window("MediFrance", "MediFrance", 800, 600);
+    init_window();
 
-    MLV_clear_window(MLV_COLOR_BLACK);
-    MLV_draw_text(30, 30, "MediFrance - Basic LibMLV window", MLV_COLOR_WHITE);
-    MLV_actualise_window();
-    MLV_wait_seconds(3);
-    MLV_free_window();
-
+    MLV_wait_seconds(5);
+    close_window();
     free(communes);
     return 0;
 }

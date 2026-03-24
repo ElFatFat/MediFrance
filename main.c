@@ -14,12 +14,12 @@
 
 
 int main(void) {
-    #pragma omp parallel
+   /* #pragma omp parallel
 {
     if (omp_get_thread_num() == 0) {
         printf("Running with %d threads\n", omp_get_num_threads());
     }
-}
+}*/
     const char* csv_path = "resources/communes-france-metrople-2025.csv";
     FILE* file = fopen(csv_path, "r");
     struct Commune* communes = NULL;
@@ -45,8 +45,8 @@ int main(void) {
             commune.departement_name,
             &commune.code_postal,
             &commune.population,
-            &commune.x,
-            &commune.y
+            &commune.y,
+            &commune.x
         );
 
         if (parsed != 10) {
@@ -71,6 +71,56 @@ int main(void) {
         communes[count] = commune;
         count++;
     }
+    
+    const char* hopitaux_path = "resources/hopitaux_clean.csv";
+    FILE* file_hopitaux = fopen(hopitaux_path, "r");
+    Hopital* hopitaux = NULL;
+    size_t capacity_h = 0;
+    size_t count_h = 0;
+    char line_h[512];
+
+    if (file_hopitaux == NULL) {
+        perror("Impossible d'ouvrir le CSV des hopitaux");
+        return 1;
+    }
+
+    // On lit et on ignore la première ligne car c'est l'en-tête (Nom,Longitude,Latitude)
+    fgets(line_h, sizeof(line_h), file_hopitaux);
+
+    while (fgets(line_h, sizeof(line_h), file_hopitaux) != NULL) {
+        Hopital h;
+        
+        // On lit le nom (jusqu'à la virgule), puis la longitude, puis la latitude
+        int parsed = sscanf(line_h, "%255[^,],%f,%f", h.nom, &h.x, &h.y);
+
+        if (parsed != 3) {
+            continue; // Si la ligne est mal formatée, on passe à la suivante
+        }
+
+        // Ajout au tableau dynamique (exactement comme tes communes)
+        if (count_h == capacity_h) {
+            size_t new_capacity = (capacity_h == 0) ? 1024 : capacity_h * 2;
+            Hopital* resized = realloc(hopitaux, new_capacity * sizeof(*hopitaux));
+
+            if (resized == NULL) {
+                perror("Memory allocation failed for hospitals");
+                free(hopitaux);
+                fclose(file_hopitaux);
+                return 1;
+            }
+
+            hopitaux = resized;
+            capacity_h = new_capacity;
+        }
+        
+        hopitaux[count_h] = h;
+        count_h++;
+    }
+
+    fclose(file_hopitaux);
+    
+    
+    /*
 
     
 
@@ -182,6 +232,15 @@ int main(void) {
     free(communes);
     for(int i=0; i<POP_SIZE; i++) free(population[i].genes);
     for(int i=0; i<max_threads; i++) free(workspaces[i]);
-    free(workspaces);
+    free(workspaces);*/   
+
+    init_window();
+
+    create_cloud(communes, count);
+    draw_hospitals(hopitaux, count_h);
+
+    MLV_wait_seconds(5);
+    close_window();
+    
     return 0;
 }

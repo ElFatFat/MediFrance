@@ -192,7 +192,7 @@ void muter(Individu* ind, size_t count, unsigned int* seed) {
     }
 }
 
-void muter_intelligente(Individu* ind, Commune* communes, DataOptimisee* data, size_t count, unsigned int* seed) {
+void muter_intelligente(Individu* ind, DataOptimisee* data, size_t count, unsigned int* seed) {
     
     // 1. AJOUT MASSIF (On force l'exploration)
     int nb_ajouts = (rand_r(seed) % 15) + 5; // On ajoute de 5 à 19 hôpitaux

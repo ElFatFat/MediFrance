@@ -21,7 +21,15 @@ DataOptimisee* precalc_near(Commune* communes, size_t count) {
     int rows = (int)((maxY - minY) / CELL_SIZE) + 1;
 
     Cell** grid = malloc(rows * sizeof(Cell*));
-    for(int i=0; i<rows; i++) grid[i] = calloc(cols, sizeof(Cell));
+    for(int i=0; i<rows; i++) {
+        grid[i] = calloc(cols, sizeof(Cell));
+        if (grid[i] == NULL) {
+            perror("Erreur d'allocation de la grille");
+            // Gérer l'erreur proprement ici
+            return NULL;
+        }
+    }
+
 
 // --- ÉTAPE 2 : Remplir la grille ---
     for (int i = 0; i < (int)count; i++) {

@@ -39,8 +39,7 @@ jobs:
 
     - name: Compile with Strict Warnings
       run: |
-        make clean || true
-        make CFLAGS="-Wall -Wextra -Werror"
+        make quality
 
     - name: Run Linter
       run: |

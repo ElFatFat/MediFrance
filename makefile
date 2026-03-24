@@ -2,7 +2,10 @@
 CC      = gcc
 #CC for macOS in VM. Running gcc with x86_64 architecture to avoid issues with MLV library on ARM-based Macs.
 #CC      = x86_64-linux-gnu-gcc
-CFLAGS  = -fopenmp -Wall -Wextra -std=c99 $(shell pkg-config --cflags MLV)
+BASE_CFLAGS = -fopenmp -std=c99 $(shell pkg-config --cflags MLV)
+WARN_CFLAGS = -Wall -Wextra
+CFLAGS ?= $(BASE_CFLAGS) $(WARN_CFLAGS)
+STRICT_CFLAGS = $(BASE_CFLAGS) $(WARN_CFLAGS) -Werror
 LDLIBS  = $(shell pkg-config --libs MLV) -lm -fopenmp
 
 # Target executable name
@@ -14,6 +17,10 @@ OBJS    = $(patsubst %.c,build/%.o,$(SRCS))
 
 # Default rule
 all: $(TARGET)
+
+# Strict build for CI (same flags as normal build + -Werror)
+quality: clean
+	$(MAKE) CFLAGS="$(STRICT_CFLAGS)" all
 
 # Link the executable
 $(TARGET): $(OBJS)
@@ -34,4 +41,4 @@ clean:
 	rm -f $(OBJS) $(TARGET) *.o
 	rm -rf build
 
-.PHONY: all clean
+.PHONY: all clean quality

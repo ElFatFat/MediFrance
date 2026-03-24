@@ -142,7 +142,7 @@ int main(void) {
             }
 
             // On mute avec la seed
-            muter_intelligente(&population[i], communes, precalc_data, count, &seed);
+            muter_intelligente(&population[i], precalc_data, count, &seed);
         }
     }
     double t4 = omp_get_wtime();

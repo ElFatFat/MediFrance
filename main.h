@@ -1,6 +1,9 @@
+#ifndef MAIN_H
+#define MAIN_H
+
 #include <stdio.h>
 
-struct Commune {
+typedef struct Commune {
     int code_insee;
     char nom[50];
     int region;
@@ -11,4 +14,7 @@ struct Commune {
     int population;
     float x;
     float y;
-};
+    int visited;
+} Commune;
+
+#endif

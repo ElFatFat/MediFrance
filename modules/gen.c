@@ -9,9 +9,9 @@
 DataOptimisee* precalc_near(Commune* communes, size_t count) {
     // --- ÉTAPE 1 : Trouver les bornes et créer la grille ---
     float minX = communes[0].x;
-    float maxX = communes[0].x;
+    float maxX = minX;
     float minY = communes[0].y;
-    float maxY = communes[0].y;
+    float maxY = minY;
     for(size_t i=1; i<count; i++) {
         if(communes[i].x < minX) minX = communes[i].x;
         if(communes[i].x > maxX) maxX = communes[i].x;

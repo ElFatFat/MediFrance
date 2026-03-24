@@ -103,7 +103,6 @@ int main(void) {
     }
 
     for (int gen = 0; gen < 1000; gen++) {
-    double t_start = omp_get_wtime();
 
     // --- ÉTAPE 1 : FITNESS ---
     double t1 = omp_get_wtime();

@@ -70,8 +70,12 @@ DataOptimisee* precalc_near(Commune* communes, size_t count) {
         data[i].voisins = NULL;
         data[i].est_eligible_chru = (communes[i].population > 80000) ? 1 : 0;
 
-        int r = (int)((communes[i].x - minX) / CELL_SIZE);
-        int c = (int)((communes[i].y - minY) / CELL_SIZE);
+        // Indices cohérents avec le remplissage de la grille : ligne depuis y, colonne depuis x
+        int r = (int)((communes[i].y - minY) / CELL_SIZE);
+        int c = (int)((communes[i].x - minX) / CELL_SIZE);
+        // On s'assure que les indices restent dans les bornes valides
+        if (r < 0) r = 0; else if (r >= rows) r = rows - 1;
+        if (c < 0) c = 0; else if (c >= cols) c = cols - 1;
 
         // On crée un tampon temporaire pour stocker les voisins trouvés
         int temp_voisins[500]; // Une ville a rarement plus de 500 voisines à 10km

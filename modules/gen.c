@@ -184,7 +184,7 @@ void quick_sort_population(Individu* pop, int left, int right) {
 }
 
 // Copie un individu vers un autre
-void copier_individu(Individu* dest, Individu* src, size_t count) {
+void copier_individu(Individu* dest, const Individu* src, size_t count) {
     dest->fitness = src->fitness;
     dest->nb_hopitaux = src->nb_hopitaux;
     dest->nb_chru = src->nb_chru;
@@ -204,7 +204,7 @@ void muter(Individu* ind, size_t count, unsigned int* seed) {
     }
 }
 
-void muter_intelligente(Individu* ind, DataOptimisee* data, size_t count, unsigned int* seed) {
+void muter_intelligente(Individu* ind, const DataOptimisee* data, size_t count, unsigned int* seed) {
     
     // 1. AJOUT MASSIF (On force l'exploration)
     int nb_ajouts = (rand_r(seed) % 15) + 5; // On ajoute de 5 à 19 hôpitaux
@@ -236,7 +236,7 @@ void muter_intelligente(Individu* ind, DataOptimisee* data, size_t count, unsign
     }
 }
 
-void crossover(Individu* enfant, Individu* p1, Individu* p2, size_t count, unsigned int* seed) {
+void crossover(Individu* enfant, const Individu* p1, const Individu* p2, size_t count, unsigned int* seed) {
     int pivot1 = rand_r(seed) % (count / 2);
     int pivot2 = pivot1 + (rand_r(seed) % (count / 2));
     

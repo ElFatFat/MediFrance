@@ -6,7 +6,7 @@
 #define WINDOW_HEIGHT 600
 
 void init_window(void) {
-    MLV_create_window("MediFrance", "MediFrance", 800, 600);
+    MLV_create_window("MediFrance", "MediFrance", WINDOW_WIDTH, WINDOW_HEIGHT);
 
     MLV_clear_window(MLV_COLOR_BLACK);
     MLV_draw_text(30, 30, "MediFrance - Basic LibMLV window", MLV_COLOR_WHITE);

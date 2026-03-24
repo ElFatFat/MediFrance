@@ -81,8 +81,23 @@ int main(void) {
     //Creating workspaces for each thread to avoid false sharing
     int max_threads = omp_get_max_threads();
     unsigned char** workspaces = malloc(max_threads * sizeof(unsigned char*));
-    for(int i=0; i<max_threads; i++) 
+    if (workspaces == NULL) {
+        perror("Failed to allocate workspaces array");
+        free(communes);
+        return 1;
+    }
+    for (int i = 0; i < max_threads; i++) {
         workspaces[i] = calloc(count, sizeof(unsigned char));
+        if (workspaces[i] == NULL) {
+            perror("Failed to allocate per-thread workspace");
+            for (int j = 0; j < i; j++) {
+                free(workspaces[j]);
+            }
+            free(workspaces);
+            free(communes);
+            return 1;
+        }
+    }
 
 
     DataOptimisee* precalc_data = precalc_near(communes, count);

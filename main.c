@@ -14,12 +14,12 @@
 
 
 int main(void) {
-   /* #pragma omp parallel
+    #pragma omp parallel
 {
     if (omp_get_thread_num() == 0) {
         printf("Running with %d threads\n", omp_get_num_threads());
     }
-}*/
+}
     const char* csv_path = "resources/communes-france-metrople-2025.csv";
     FILE* file = fopen(csv_path, "r");
     struct Commune* communes = NULL;
@@ -120,7 +120,7 @@ int main(void) {
     fclose(file_hopitaux);
     
     
-    /*
+    
 
     
 
@@ -167,7 +167,9 @@ int main(void) {
         }
     }
 
-    for (int gen = 0; gen < 1000; gen++) {
+    int nb_gen = 100;
+    init_window();
+    for (int gen = 0; gen < nb_gen; gen++) {
 
     // --- ÉTAPE 1 : FITNESS ---
     double t1 = omp_get_wtime();
@@ -219,10 +221,16 @@ int main(void) {
                 t2 - t1, t3 - t2, t4 - t3, t4 - t1);
         printf("Meilleure Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d\n", population[0].fitness, population[0].hab_desert, population[0].nb_hopitaux, population[0].nb_chru);
     }
+
+    fitness_graph(population[0].fitness, nb_gen, gen, MLV_COLOR_BLUE);
+
+    fitness_graph(population[POP_SIZE-1].fitness, nb_gen, gen, MLV_COLOR_YELLOW);
 }
-    init_window();
+    MLV_clear_window(MLV_COLOR_BLACK);	
+
 
     create_cloud(communes, count);
+    draw_hospitals(communes, count, population[0]);
     MLV_wait_seconds(5);
     close_window();
     for(size_t i = 0; i < count; i++) {
@@ -232,15 +240,15 @@ int main(void) {
     free(communes);
     for(int i=0; i<POP_SIZE; i++) free(population[i].genes);
     for(int i=0; i<max_threads; i++) free(workspaces[i]);
-    free(workspaces);*/   
+    free(workspaces); 
 
-    init_window();
+    /*init_window();
 
     create_cloud(communes, count);
-    draw_hospitals(hopitaux, count_h);
+    draw_hospitals(communes, count, population[0]);
 
     MLV_wait_seconds(5);
-    close_window();
+    close_window();*/
     
     return 0;
 }

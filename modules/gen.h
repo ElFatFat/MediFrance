@@ -16,6 +16,7 @@ typedef struct {
     int nb_hopitaux;
     int nb_chru;
     long hab_desert;
+    long nb_lits;
 } Individu;
 
 typedef struct {

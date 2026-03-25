@@ -133,6 +133,7 @@ DataOptimisee* precalc_near(Commune* communes, size_t count) {
 void fitness(Individu* ind, Commune* communes, DataOptimisee* data, size_t count, unsigned char* couvert_local) {
     ind->nb_hopitaux = 0;
     ind->nb_chru = 0;
+    ind->nb_lits = 0;
     
     // On part du principe que TOUT le monde est au désert
     // (Utilise la constante de population totale de ton fichier)
@@ -144,10 +145,13 @@ void fitness(Individu* ind, Commune* communes, DataOptimisee* data, size_t count
             ind->nb_hopitaux++;
             if (data[i].est_eligible_chru) ind->nb_chru++;
 
+            long lits_pour_cet_hopital = 0;
+
             // Si pas encore couverte, on ajoute sa pop
             if (!couvert_local[i]) {
                 couvert_local[i] = 1;
                 pop_couverte += communes[i].population;
+                lits_pour_cet_hopital += communes[i].population;
             }
 
             for (int v = 0; v < data[i].nb_voisins; v++) {
@@ -155,8 +159,12 @@ void fitness(Individu* ind, Commune* communes, DataOptimisee* data, size_t count
                 if (!couvert_local[idx_v]) {
                     couvert_local[idx_v] = 1;
                     pop_couverte += communes[idx_v].population;
+                    lits_pour_cet_hopital += communes[idx_v].population;
                 }
             }
+
+            // 5.4 lits pour 1000 habitants
+            ind->nb_lits += (long)(lits_pour_cet_hopital * (5.4 / 1000.0));
         }
     }
 
@@ -191,6 +199,7 @@ void copier_individu(Individu* dest, const Individu* src, size_t count) {
     dest->nb_hopitaux = src->nb_hopitaux;
     dest->nb_chru = src->nb_chru;
     dest->hab_desert = src->hab_desert;
+    dest->nb_lits = src->nb_lits;
     // On copie les gènes (mémoire déjà allouée)
     memcpy(dest->genes, src->genes, count * sizeof(unsigned char));
 }

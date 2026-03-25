@@ -167,7 +167,7 @@ int main(void) {
         printf("\n--- Gen %d ---\n", gen);
         printf("Fitness: %.3fs | Tri: %.3fs | Repro: %.3fs | Total: %.3fs\n", 
                 t2 - t1, t3 - t2, t4 - t3, t4 - t1);
-        printf("Meilleure Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d\n", population[0].fitness, population[0].hab_desert, population[0].nb_hopitaux, population[0].nb_chru);
+        printf("Meilleure Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d Lits_Total: %ld\n", population[0].fitness, population[0].hab_desert, population[0].nb_hopitaux, population[0].nb_chru, population[0].nb_lits);
     }
 }
     init_window();

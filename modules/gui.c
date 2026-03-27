@@ -19,7 +19,7 @@ void render_point(float x, float y) {
     return;
 }
 
-void create_cloud(Commune *communes, size_t count) {
+void create_cloud(Town *communes, size_t count) {
     for (size_t i = 0; i < count; i++) {
         float x = communes[i].x;
         float y = communes[i].y;

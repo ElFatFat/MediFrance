@@ -23,17 +23,17 @@
 #define MAX_NEIGHBORS 500 // Nombre maximum de voisins à stocker pour chaque commune (pour limiter la mémoire)
 #define MAX_TRY 150 // Nombre maximum de tentatives pour trouver un hôpital à fermer lors de la mutation intelligente (pour éviter les boucles infinies)
 
-DataOptimisee* precalc_near(Commune* communes, size_t count) {
+OptimizedData* precalc_near(Town* towns, size_t count) {
     // --- ÉTAPE 1 : Trouver les bornes et créer la grille ---
-    float minX = communes[0].x;
+    float minX = towns[0].x;
     float maxX = minX;
-    float minY = communes[0].y;
+    float minY = towns[0].y;
     float maxY = minY;
     for(size_t i=1; i<count; i++) {
-        if(communes[i].x < minX) minX = communes[i].x;
-        if(communes[i].x > maxX) maxX = communes[i].x;
-        if(communes[i].y < minY) minY = communes[i].y;
-        if(communes[i].y > maxY) maxY = communes[i].y;
+        if(towns[i].x < minX) minX = towns[i].x;
+        if(towns[i].x > maxX) maxX = towns[i].x;
+        if(towns[i].y < minY) minY = towns[i].y;
+        if(towns[i].y > maxY) maxY = towns[i].y;
     }
 
     int cols = (int)((maxX - minX) / CELL_SIZE) + 1;
@@ -53,8 +53,8 @@ DataOptimisee* precalc_near(Commune* communes, size_t count) {
 // --- ÉTAPE 2 : Remplir la grille ---
     for (int i = 0; i < (int)count; i++) {
         // Calcul des indices avec un "clamp" pour la sécurité
-        int c = (int)((communes[i].x - minX) / CELL_SIZE);
-        int r = (int)((communes[i].y - minY) / CELL_SIZE);
+        int c = (int)((towns[i].x - minX) / CELL_SIZE);
+        int r = (int)((towns[i].y - minY) / CELL_SIZE);
 
         // Sécurité anti-débordement (si x == maxX ou y == maxY)
         if (c >= cols) c = cols - 1;
@@ -67,7 +67,7 @@ DataOptimisee* precalc_near(Commune* communes, size_t count) {
         if (cell->count >= cell->capacity) {
             // Initialisation de capacity si c'est le premier passage
             int new_cap = (cell->capacity == 0) ? 10 : cell->capacity * 2;
-            int* new_indices = realloc(cell->indices, new_cap * sizeof(int));
+            int* new_indices = realloc(cell->indexArray, new_cap * sizeof(int));
             
             if (new_indices == NULL) {
                 perror("Erreur realloc dans la grille");
@@ -75,30 +75,30 @@ DataOptimisee* precalc_near(Commune* communes, size_t count) {
                 return NULL;
             }
             
-            cell->indices = new_indices;
+            cell->indexArray = new_indices;
             cell->capacity = new_cap;
         }
-        cell->indices[cell->count++] = i;
+        cell->indexArray[cell->count++] = i;
     }
 
     // --- ÉTAPE 3 : Calculer les voisins (Double passe pour la mémoire) ---
-    DataOptimisee* data = malloc(count * sizeof(DataOptimisee));
+    OptimizedData* data = malloc(count * sizeof(OptimizedData));
 
     for (int i = 0; i < (int)count; i++) {
-        data[i].nb_voisins = 0;
-        data[i].voisins = NULL;
-        data[i].est_eligible_chru = (communes[i].population > CHRU_POP_THRESHOLD) ? 1 : 0;
+        data[i].neighbor_count = 0;
+        data[i].neighbors = NULL;
+        data[i].is_eligible_for_chru = (towns[i].population > CHRU_POP_THRESHOLD) ? 1 : 0;
 
         // Indices cohérents avec le remplissage de la grille : ligne depuis y, colonne depuis x
-        int r = (int)((communes[i].y - minY) / CELL_SIZE);
-        int c = (int)((communes[i].x - minX) / CELL_SIZE);
+        int r = (int)((towns[i].y - minY) / CELL_SIZE);
+        int c = (int)((towns[i].x - minX) / CELL_SIZE);
         // On s'assure que les indices restent dans les bornes valides
         if (r < 0) r = 0; else if (r >= rows) r = rows - 1;
         if (c < 0) c = 0; else if (c >= cols) c = cols - 1;
 
         // On crée un tampon temporaire pour stocker les voisins trouvés
-        int temp_voisins[MAX_NEIGHBORS]; // Une ville a rarement plus de 500 voisines à 10km
-        int nb_trouves = 0;
+        int tempNeighbors[MAX_NEIGHBORS]; // Une ville a rarement plus de 500 voisines à 10km
+        int foundCount = 0;
 
         for (int dr = -1; dr <= 1; dr++) {
             for (int dc = -1; dc <= 1; dc++) {
@@ -106,20 +106,20 @@ DataOptimisee* precalc_near(Commune* communes, size_t count) {
                 if (tr >= 0 && tr < rows && tc >= 0 && tc < cols) {
                     Cell* cell = &grid[tr][tc];
                     for (int k = 0; k < cell->count; k++) {
-                        int j = cell->indices[k];
+                        int j = cell->indexArray[k];
                         if (i == j) continue;
 
                         // On convertit la LATITUDE (y) en radians pour le cosinus
-                        float lat_rad = communes[i].y * LAT_TO_RAD; 
+                        float latitudeInRadians = towns[i].y * LAT_TO_RAD; 
 
                         // Le cosinus s'applique sur l'axe X (Longitude) !
-                        float dx = (communes[i].x - communes[j].x) * LATITUDE_FACTOR * cos(lat_rad);
-                        float dy = (communes[i].y - communes[j].y) * LATITUDE_FACTOR; // 1 degré de latitude ≈ 111.32 km, on peut aussi utiliser une constante
+                        float distanceX = (towns[i].x - towns[j].x) * LATITUDE_FACTOR * cos(latitudeInRadians);
+                        float distanceY = (towns[i].y - towns[j].y) * LATITUDE_FACTOR; // 1 degré de latitude ≈ 111.32 km, on peut aussi utiliser une constante
 
-                        float distSq = dx*dx + dy*dy;
+                        float distSq = distanceX*distanceX + distanceY*distanceY;
 
                         if (distSq <= 100.0) { // 10km au carré
-                            temp_voisins[nb_trouves++] = j;
+                            tempNeighbors[foundCount++] = j;
                         }
                     }
                 }
@@ -127,68 +127,68 @@ DataOptimisee* precalc_near(Commune* communes, size_t count) {
         }
 
         // Allocation finale et copie
-        if (nb_trouves > 0) {
-            data[i].nb_voisins = nb_trouves;
-            data[i].voisins = malloc(nb_trouves * sizeof(int));
-            for(int n=0; n<nb_trouves; n++) data[i].voisins[n] = temp_voisins[n];
+        if (foundCount > 0) {
+            data[i].neighbor_count = foundCount;
+            data[i].neighbors = malloc(foundCount * sizeof(int));
+            for(int n=0; n<foundCount; n++) data[i].neighbors[n] = tempNeighbors[n];
         }
 
-        data[i].max_pop_couverte = communes[i].population;
-        for(int v = 0; v < data[i].nb_voisins; v++) {
-            data[i].max_pop_couverte += communes[data[i].voisins[v]].population;
+        data[i].max_covered_population = towns[i].population;
+        for(int v = 0; v < data[i].neighbor_count; v++) {
+            data[i].max_covered_population += towns[data[i].neighbors[v]].population;
         }
     }
 
     // Nettoyage de la grille temporaire
-    for(int i=0; i<rows; i++) { if(grid[i]->indices) free(grid[i]->indices); }
+    for(int i=0; i<rows; i++) { if(grid[i]->indexArray) free(grid[i]->indexArray); }
     for(int i=0; i<rows; i++) free(grid[i]);
     free(grid);
 
     return data;
 }
 
-void fitness(Individu* ind, Commune* communes, DataOptimisee* data, size_t count, unsigned char* couvert_local) {
-    ind->nb_hopitaux = 0;
-    ind->nb_chru = 0;
-    ind->nb_lits = 0;
+void fitness(Individual* ind, Town* towns, OptimizedData* data, size_t count, unsigned char* coverage_buffer) {
+    ind->hospitals_count = 0;
+    ind->chru_count = 0;
+    ind->beds_count = 0;
     
     // On part du principe que TOUT le monde est au désert
     // (Utilise la constante de population totale de ton fichier)
-    long pop_couverte = 0; 
-    memset(couvert_local, 0, count);
+    long covered_population = 0; 
+    memset(coverage_buffer, 0, count);
 
     for (size_t i = 0; i < count; i++) {
         if (ind->genes[i]) {
-            ind->nb_hopitaux++;
-            if (data[i].est_eligible_chru) ind->nb_chru++;
+            ind->hospitals_count++;
+            if (data[i].is_eligible_for_chru) ind->chru_count++;
 
-            long lits_pour_cet_hopital = 0;
+            long hospitals_bed_count = 0;
 
             // Si pas encore couverte, on ajoute sa pop
-            if (!couvert_local[i]) {
-                couvert_local[i] = 1;
-                pop_couverte += communes[i].population;
-                lits_pour_cet_hopital += communes[i].population;
+            if (!coverage_buffer[i]) {
+                coverage_buffer[i] = 1;
+                covered_population += towns[i].population;
+                hospitals_bed_count += towns[i].population;
             }
 
-            for (int v = 0; v < data[i].nb_voisins; v++) {
-                int idx_v = data[i].voisins[v];
-                if (!couvert_local[idx_v]) {
-                    couvert_local[idx_v] = 1;
-                    pop_couverte += communes[idx_v].population;
-                    lits_pour_cet_hopital += communes[idx_v].population;
+            for (int v = 0; v < data[i].neighbor_count; v++) {
+                int neighbor_index = data[i].neighbors[v];
+                if (!coverage_buffer[neighbor_index]) {
+                    coverage_buffer[neighbor_index] = 1;
+                    covered_population += towns[neighbor_index].population;
+                    hospitals_bed_count += towns[neighbor_index].population;
                 }
             }
 
             // 5.4 lits pour 1000 habitants
-            ind->nb_lits += (long)(lits_pour_cet_hopital * (BEDS_PER_1000 / 1000.0));
+            ind->beds_count += (long)(hospitals_bed_count * (BEDS_PER_1000 / 1000.0));
         }
     }
 
-    ind->hab_desert = HABITANTS_TOTAL - pop_couverte; // 65M - les gens qu'on a sauvés
-    ind->fitness = HABITANTS_TOTAL - (double)ind->hab_desert - (HOSPITAL_COST * ind->nb_hopitaux) + (CHRU_BONUS * ind->nb_chru);
+    ind->desert_population = HABITANTS_TOTAL - covered_population; // 65M - les gens qu'on a sauvés
+    ind->fitness = HABITANTS_TOTAL - (double)ind->desert_population - (HOSPITAL_COST * ind->hospitals_count) + (CHRU_BONUS * ind->chru_count);
 }
-void quick_sort_population(Individu* pop, int left, int right) {
+void quick_sort_population(Individual* pop, int left, int right) {
     if (left >= right) return;
 
     double pivot = pop[right].fitness;
@@ -197,12 +197,12 @@ void quick_sort_population(Individu* pop, int left, int right) {
     for (int j = left; j < right; j++) {
         if (pop[j].fitness > pivot) { // Tri décroissant
             i++;
-            Individu temp = pop[i];
+            Individual temp = pop[i];
             pop[i] = pop[j];
             pop[j] = temp;
         }
     }
-    Individu temp = pop[i + 1];
+    Individual temp = pop[i + 1];
     pop[i + 1] = pop[right];
     pop[right] = temp;
 
@@ -211,50 +211,50 @@ void quick_sort_population(Individu* pop, int left, int right) {
 }
 
 // Copie un individu vers un autre
-void copier_individu(Individu* dest, const Individu* src, size_t count) {
+void copy_individual(Individual* dest, const Individual* src, size_t count) {
     dest->fitness = src->fitness;
-    dest->nb_hopitaux = src->nb_hopitaux;
-    dest->nb_chru = src->nb_chru;
-    dest->hab_desert = src->hab_desert;
-    dest->nb_lits = src->nb_lits;
+    dest->hospitals_count = src->hospitals_count;
+    dest->chru_count = src->chru_count;
+    dest->desert_population = src->desert_population;
+    dest->beds_count = src->beds_count;
     // On copie les gènes (mémoire déjà allouée)
     memcpy(dest->genes, src->genes, count * sizeof(unsigned char));
 }
 
 
-void muter_intelligente(Individu* ind, const DataOptimisee* data, size_t count, unsigned int* seed) {
+void mutate(Individual* ind, const OptimizedData* data, size_t count, unsigned int* seed) {
     
     // 1. AJOUT MASSIF (On force l'exploration)
     int nb_ajouts = (rand_r(seed) % (MAX_DISCOVER_HOSPITALS - MIN_DISCOVER_HOSPITALS + 1)) + MIN_DISCOVER_HOSPITALS; // On ajoute de 5 à 19 hôpitaux
     for (int m = 0; m < nb_ajouts; m++) {
         int r = rand_r(seed) % count;
         // On vérifie toujours que la zone PEUT être rentable théoriquement
-        if (data[r].max_pop_couverte >= HOSPITAL_COST) {
+        if (data[r].max_covered_population >= HOSPITAL_COST) {
             ind->genes[r] = 1;
         }
     }
 
     // 2. ÉLAGAGE MASSIF (On autorise à fermer les CHRU doublons !)
     if (rand_r(seed) % 100 < PROB_DELETE) { // PROB_DELETE% de chances de nettoyer
-        int tentative = 0;
-        int fermetures = 0;
-        int max_fermetures = (rand_r(seed) % (MAX_DELETE_HOSPITALS - MIN_DELETE_HOSPITALS + 1)) + MIN_DELETE_HOSPITALS; // On tente d'en fermer 5 à 19
+        int retryAttempts = 0;
+        int closeCount = 0;
+        int maxClosures = (rand_r(seed) % (MAX_DELETE_HOSPITALS - MIN_DELETE_HOSPITALS + 1)) + MIN_DELETE_HOSPITALS; // On tente d'en fermer 5 à 19
 
-        while (fermetures < max_fermetures && tentative < MAX_TRY) {
+        while (closeCount < maxClosures && retryAttempts < MAX_TRY) {
             int r = rand_r(seed) % count;
             
             // On ferme N'IMPORTE QUEL hôpital, même si c'est un potentiel CHRU !
             // La fitness décidera si c'était une bonne idée ou non.
             if (ind->genes[r] == 1) {
                 ind->genes[r] = 0; 
-                fermetures++;
+                closeCount++;
             }
-            tentative++;
+            retryAttempts++;
         }
     }
 }
 
-void crossover(Individu* enfant, const Individu* p1, const Individu* p2, size_t count, unsigned int* seed) {
+void crossover(Individual* enfant, const Individual* p1, const Individual* p2, size_t count, unsigned int* seed) {
     int pivot1 = rand_r(seed) % (count / 2);
     int pivot2 = pivot1 + (rand_r(seed) % (count / 2));
     

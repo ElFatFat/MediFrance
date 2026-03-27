@@ -38,7 +38,7 @@ int main(void) {
 
     const char* csv_path = CSV_PATH;
     FILE* file = fopen(csv_path, "r");
-    struct Commune* communes = NULL;
+    struct Town* towns = NULL;
     size_t capacity = 0;
     size_t count = 0;
     char line[512];
@@ -49,20 +49,20 @@ int main(void) {
     }
 
     while (fgets(line, sizeof(line), file) != NULL) {
-        struct Commune commune;
+        struct Town town;
         int parsed = sscanf(
             line,
             "%d,%49[^,],%d,%49[^,],%d,%49[^,],%d,%d,%f,%f",
-            &commune.code_insee,
-            commune.nom,
-            &commune.region,
-            commune.region_name,
-            &commune.departement,
-            commune.departement_name,
-            &commune.code_postal,
-            &commune.population,
-            &commune.x,
-            &commune.y
+            &town.insee_code,
+            town.name,
+            &town.region,
+            town.region_name,
+            &town.departement,
+            town.department_name,
+            &town.postal_code,
+            &town.population,
+            &town.x,
+            &town.y
         );
 
         if (parsed != 10) {
@@ -71,20 +71,20 @@ int main(void) {
 
         if (count == capacity) {
             size_t new_capacity = (capacity == 0) ? 1024 : capacity * 2;
-            struct Commune* resized = realloc(communes, new_capacity * sizeof(*communes));
+            struct Town* resized = realloc(towns, new_capacity * sizeof(*towns));
 
             if (resized == NULL) {
                 perror("Memory allocation failed");
-                free(communes);
+                free(towns);
                 fclose(file);
                 return 1;
             }
 
-            communes = resized;
+            towns = resized;
             capacity = new_capacity;
         }
-        commune.visited = 0; // Initialisation du flag de visite
-        communes[count] = commune;
+        town.visited = 0; // Initialisation du flag de visite
+        towns[count] = town;
         count++;
     }
 
@@ -97,7 +97,7 @@ int main(void) {
     unsigned char** workspaces = malloc(num_threads * sizeof(unsigned char*));
     if (workspaces == NULL) {
         perror("Failed to allocate workspaces array");
-        free(communes);
+        free(towns);
         return 1;
     }
     for (int i = 0; i < num_threads; i++) {
@@ -108,21 +108,21 @@ int main(void) {
                 free(workspaces[j]);
             }
             free(workspaces);
-            free(communes);
+            free(towns);
             return 1;
         }
     }
 
 
-    DataOptimisee* precalc_data = precalc_near(communes, count);
+    OptimizedData* precalc_data = precalc_near(towns, count);
     if (precalc_data == NULL) return 1;
 
-    Individu population[POP_SIZE];
+    Individual population[POP_SIZE];
     for (int i = 0; i < POP_SIZE; i++) {
         population[i].genes = calloc(count, sizeof(unsigned char));
         for (size_t g = 0; g < count; g++) {
             // On place quelques hôpitaux au hasard sur les très grosses zones pour amorcer
-            if (precalc_data[g].max_pop_couverte > STARTING_HOSPITALS_THRESHOLD && (rand() % 100 < STARTING_HOSPITALS_THRESHOLD_PROBABILITY)) {
+            if (precalc_data[g].max_covered_population > STARTING_HOSPITALS_THRESHOLD && (rand() % 100 < STARTING_HOSPITALS_THRESHOLD_PROBABILITY)) {
                 population[i].genes[g] = 1;
             } else {
                 // Le reste commence quasiment vide
@@ -136,7 +136,7 @@ int main(void) {
         double t1 = omp_get_wtime();
         #pragma omp parallel for schedule(dynamic, ITERATIONS_PER_THREAD)
         for (int i = 0; i < POP_SIZE; i++) {
-            fitness(&population[i], communes, precalc_data, count, workspaces[omp_get_thread_num()]);
+            fitness(&population[i], towns, precalc_data, count, workspaces[omp_get_thread_num()]);
         }
         double t2 = omp_get_wtime();
 
@@ -175,11 +175,11 @@ int main(void) {
                     }
                     crossover(&population[i], &population[p1], &population[p2], count, &seed);
                 } else {
-                    copier_individu(&population[i], &population[rand_r(&seed) % RANDOM_PARENT_POOL_SIZE], count);
+                    copy_individual(&population[i], &population[rand_r(&seed) % RANDOM_PARENT_POOL_SIZE], count);
                 }
 
                 // On mute avec la seed
-                muter_intelligente(&population[i], precalc_data, count, &seed);
+                mutate(&population[i], precalc_data, count, &seed);
             }
         }
         double t4 = omp_get_wtime();
@@ -189,11 +189,11 @@ int main(void) {
             printf("\n--- Gen %d ---\n", gen);
             printf("Fitness: %.3fs | Tri: %.3fs | Repro: %.3fs | Total: %.3fs\n", 
                     t2 - t1, t3 - t2, t4 - t3, t4 - t1);
-            printf("Meilleure Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d Lits_Total: %ld\n", population[0].fitness, population[0].hab_desert, population[0].nb_hopitaux, population[0].nb_chru, population[0].nb_lits);
+            printf("Meilleure Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d Lits_Total: %ld\n", population[0].fitness, population[0].desert_population, population[0].hospitals_count, population[0].chru_count, population[0].beds_count);
         }
     }
     free(precalc_data);
-    free(communes);
+    free(towns);
     for(int i=0; i<POP_SIZE; i++) free(population[i].genes);
     for(int i=0; i<num_threads; i++) free(workspaces[i]);
     free(workspaces);

@@ -29,8 +29,8 @@ typedef struct {
     unsigned char* coverage_buffer; // Tableau de 36000 octets
 } ThreadWorkspace;
 
-OptimizedData* precalc_near(Town* towns, size_t count);
-void fitness(Individual* ind, Town* towns, OptimizedData* data, size_t count, unsigned char* coverage_buffer);
+OptimizedData* precalc_near(Town* restrict towns, size_t count);
+void fitness(Individual* restrict ind, Town* restrict towns, OptimizedData* restrict data, size_t count, unsigned char* restrict coverage_buffer);
 void quick_sort_population(Individual* pop, int left, int right);
 void copy_individual(Individual* dest, const Individual* src, size_t count);
 void mutate(Individual* ind, const OptimizedData* data, size_t count, unsigned int* seed);

@@ -15,13 +15,15 @@
 
 #define STARTING_HOSPITALS_THRESHOLD 30000 //Choix arbitraire pour amorcer la population avec des hôpitaux sur les zones très peuplées
 #define STARTING_HOSPITALS_THRESHOLD_PROBABILITY 20 //Probabilité (en %) de placer un hôpital sur une zone très peuplée au démarrage
-#define STARTING_HOSPITALS_PROBABILITY 2 //Probabilité (en %) de placer un hôpital sur une zone au démarrage (en dehors des zones très peuplées)
+#define STARTING_HOSPITALS_PROBABILITY 2 //Probabilité (en dixièmes de %, donc 0.X%) de placer un hôpital sur une zone au démarrage (en dehors des zones très peuplées)
 #define SEED_OFFSET 12345 //Offset pour la seed de base, afin d'avoir des résultats différents à chaque exécution
 #define TOURNAMENT_PROBABILITY 70 //Probabilité (en %) de faire du tournoi pour sélectionner les parents plutôt que du random pur
 #define TOURNAMENT_SIZE 5 //Taille du tournoi (nombre de candidats comparés)
 #define RANDOM_PARENT_POOL_SIZE 20 //Taille du pool de parents aléatoires (dans le cas où on ne fait pas de tournoi)
+#define ELITISM_COUNT 5 //Nombre d'individus élitistes (qui sont copiés tels quels à la génération suivante sans mutation)
 
 #define MAX_THREADS 8 // Nombre maximum de threads à utiliser (pour limiter la mémoire utilisée par les workspaces)
+#define ITERATIONS_PER_THREAD 10 // Nombre d'individus traités par chaque thread avant de synchroniser (pour limiter la contention sur les workspaces)
 
 
 #define PRINT_EVERY_X_GEN 10
@@ -132,7 +134,7 @@ int main(void) {
     for (int gen = 0; gen < GEN_MAX; gen++) {
         // --- ÉTAPE 1 : FITNESS ---
         double t1 = omp_get_wtime();
-        #pragma omp parallel for schedule(dynamic, 10)
+        #pragma omp parallel for schedule(dynamic, ITERATIONS_PER_THREAD)
         for (int i = 0; i < POP_SIZE; i++) {
             fitness(&population[i], communes, precalc_data, count, workspaces[omp_get_thread_num()]);
         }
@@ -149,7 +151,7 @@ int main(void) {
             unsigned int seed = SEED_OFFSET + omp_get_thread_num() * 100 + gen;
 
             #pragma omp for schedule(static)
-            for (int i = 5; i < POP_SIZE; i++) {
+            for (int i = ELITISM_COUNT; i < POP_SIZE; i++) {
 
 
                 // On fait du tournoi pour sélectionner les parents (70% de chances de faire du tournoi, 30% de faire du random)

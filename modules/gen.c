@@ -14,6 +14,15 @@
 #define LATITUDE_FACTOR 111.32 // Facteur de conversion pour les degrés de latitude en km
 #define BEDS_PER_1000 5.4 // Nombre de lits pour 1000 habitants
 
+#define MAX_DISCOVER_HOSPITALS 20 // Nombre maximum d'hôpitaux à découvrir lors de la mutation intelligente (pour limiter les changements drastiques)
+#define MIN_DISCOVER_HOSPITALS 5 // Nombre minimum d'hôpitaux à découvrir lors de la mutation intelligente (pour assurer une exploration suffisante)
+
+#define MAX_DELETE_HOSPITALS 20 // Nombre maximum d'hôpitaux à supprimer lors de la mutation intelligente (pour limiter les changements drastiques)
+#define MIN_DELETE_HOSPITALS 5 // Nombre minimum d'hôpitaux à supprimer lors de la mutation intelligente (pour assurer une exploration suffisante)
+
+#define MAX_NEIGHBORS 500 // Nombre maximum de voisins à stocker pour chaque commune (pour limiter la mémoire)
+#define MAX_TRY 150 // Nombre maximum de tentatives pour trouver un hôpital à fermer lors de la mutation intelligente (pour éviter les boucles infinies)
+
 DataOptimisee* precalc_near(Commune* communes, size_t count) {
     // --- ÉTAPE 1 : Trouver les bornes et créer la grille ---
     float minX = communes[0].x;
@@ -88,7 +97,7 @@ DataOptimisee* precalc_near(Commune* communes, size_t count) {
         if (c < 0) c = 0; else if (c >= cols) c = cols - 1;
 
         // On crée un tampon temporaire pour stocker les voisins trouvés
-        int temp_voisins[500]; // Une ville a rarement plus de 500 voisines à 10km
+        int temp_voisins[MAX_NEIGHBORS]; // Une ville a rarement plus de 500 voisines à 10km
         int nb_trouves = 0;
 
         for (int dr = -1; dr <= 1; dr++) {
@@ -216,7 +225,7 @@ void copier_individu(Individu* dest, const Individu* src, size_t count) {
 void muter_intelligente(Individu* ind, const DataOptimisee* data, size_t count, unsigned int* seed) {
     
     // 1. AJOUT MASSIF (On force l'exploration)
-    int nb_ajouts = (rand_r(seed) % 15) + 5; // On ajoute de 5 à 19 hôpitaux
+    int nb_ajouts = (rand_r(seed) % (MAX_DISCOVER_HOSPITALS - MIN_DISCOVER_HOSPITALS + 1)) + MIN_DISCOVER_HOSPITALS; // On ajoute de 5 à 19 hôpitaux
     for (int m = 0; m < nb_ajouts; m++) {
         int r = rand_r(seed) % count;
         // On vérifie toujours que la zone PEUT être rentable théoriquement
@@ -229,9 +238,9 @@ void muter_intelligente(Individu* ind, const DataOptimisee* data, size_t count, 
     if (rand_r(seed) % 100 < PROB_DELETE) { // PROB_DELETE% de chances de nettoyer
         int tentative = 0;
         int fermetures = 0;
-        int max_fermetures = (rand_r(seed) % 15) + 5; // On tente d'en fermer 5 à 19
+        int max_fermetures = (rand_r(seed) % (MAX_DELETE_HOSPITALS - MIN_DELETE_HOSPITALS + 1)) + MIN_DELETE_HOSPITALS; // On tente d'en fermer 5 à 19
 
-        while (fermetures < max_fermetures && tentative < 150) {
+        while (fermetures < max_fermetures && tentative < MAX_TRY) {
             int r = rand_r(seed) % count;
             
             // On ferme N'IMPORTE QUEL hôpital, même si c'est un potentiel CHRU !

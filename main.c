@@ -13,6 +13,14 @@
 #define GEN_MAX 1000
 #define CSV_PATH "resources/communes-france-metrople-2025.csv"
 
+#define STARTING_HOSPITALS_THRESHOLD 30000 //Choix arbitraire pour amorcer la population avec des hôpitaux sur les zones très peuplées
+#define STARTING_HOSPITALS_THRESHOLD_PROBABILITY 20 //Probabilité (en %) de placer un hôpital sur une zone très peuplée au démarrage
+#define STARTING_HOSPITALS_PROBABILITY 2 //Probabilité (en %) de placer un hôpital sur une zone au démarrage (en dehors des zones très peuplées)
+#define SEED_OFFSET 12345 //Offset pour la seed de base, afin d'avoir des résultats différents à chaque exécution
+#define TOURNAMENT_PROBABILITY 70 //Probabilité (en %) de faire du tournoi pour sélectionner les parents plutôt que du random pur
+#define TOURNAMENT_SIZE 5 //Taille du tournoi (nombre de candidats comparés)
+#define RANDOM_PARENT_POOL_SIZE 20 //Taille du pool de parents aléatoires (dans le cas où on ne fait pas de tournoi)
+
 
 #define PRINT_EVERY_X_GEN 10
 
@@ -114,11 +122,11 @@ int main(void) {
         population[i].genes = calloc(count, sizeof(unsigned char));
         for (size_t g = 0; g < count; g++) {
             // On place quelques hôpitaux au hasard sur les très grosses zones pour amorcer
-            if (precalc_data[g].max_pop_couverte > 30000 && (rand() % 100 < 20)) {
+            if (precalc_data[g].max_pop_couverte > STARTING_HOSPITALS_THRESHOLD && (rand() % 100 < STARTING_HOSPITALS_THRESHOLD_PROBABILITY)) {
                 population[i].genes[g] = 1;
             } else {
                 // Le reste commence quasiment vide
-                population[i].genes[g] = (rand() % 1000 < 2) ? 1 : 0; 
+                population[i].genes[g] = (rand() % 1000 < STARTING_HOSPITALS_PROBABILITY) ? 1 : 0; 
             }
         }
     }
@@ -141,25 +149,34 @@ int main(void) {
     #pragma omp parallel 
     {
         // On crée une graine unique par thread et par génération
-        unsigned int seed = 12345 + omp_get_thread_num() * 100 + gen;
+        unsigned int seed = SEED_OFFSET + omp_get_thread_num() * 100 + gen;
 
         #pragma omp for schedule(static)
         for (int i = 5; i < POP_SIZE; i++) {
-            
-            if (rand_r(&seed) % 100 < 70) {
-                // On choisit parmi le Top 50% de la population au lieu du Top 4% (20)
-                // On favorise quand même les meilleurs grâce à un petit "Tournoi" à 2
-                int p1_a = rand_r(&seed) % (POP_SIZE / 2);
-                int p1_b = rand_r(&seed) % (POP_SIZE / 2);
-                int p1 = (population[p1_a].fitness > population[p1_b].fitness) ? p1_a : p1_b;
 
-                int p2_a = rand_r(&seed) % (POP_SIZE / 2);
-                int p2_b = rand_r(&seed) % (POP_SIZE / 2);
-                int p2 = (population[p2_a].fitness > population[p2_b].fitness) ? p2_a : p2_b;
 
+            // On fait du tournoi pour sélectionner les parents (70% de chances de faire du tournoi, 30% de faire du random)
+            if (rand_r(&seed) % 100 < TOURNAMENT_PROBABILITY) {
+                // Sélectionne TOURNAMENT_SIZE candidats pour chaque parent et prend le meilleur
+                int p1 = -1, p2 = -1;
+                double best_fitness_p1 = -1e100, best_fitness_p2 = -1e100;
+                for (int t = 0; t < TOURNAMENT_SIZE; t++) {
+                    int idx = rand_r(&seed) % (POP_SIZE / 2);
+                    if (population[idx].fitness > best_fitness_p1 || p1 == -1) {
+                        p1 = idx;
+                        best_fitness_p1 = population[idx].fitness;
+                    }
+                }
+                for (int t = 0; t < TOURNAMENT_SIZE; t++) {
+                    int idx = rand_r(&seed) % (POP_SIZE / 2);
+                    if (population[idx].fitness > best_fitness_p2 || p2 == -1) {
+                        p2 = idx;
+                        best_fitness_p2 = population[idx].fitness;
+                    }
+                }
                 crossover(&population[i], &population[p1], &population[p2], count, &seed);
             } else {
-                copier_individu(&population[i], &population[rand_r(&seed) % 20], count);
+                copier_individu(&population[i], &population[rand_r(&seed) % RANDOM_PARENT_POOL_SIZE], count);
             }
 
             // On mute avec la seed

@@ -9,24 +9,24 @@
 
 #include <MLV/MLV_all.h>
 
-#define POP_SIZE 100
-#define GEN_MAX 1000
+#define POP_SIZE 200
+#define GEN_MAX 10000
 #define CSV_PATH "resources/communes-france-metrople-2025.csv"
 
 #define STARTING_HOSPITALS_THRESHOLD 30000 //Choix arbitraire pour amorcer la population avec des hôpitaux sur les zones très peuplées
 #define STARTING_HOSPITALS_THRESHOLD_PROBABILITY 20 //Probabilité (en %) de placer un hôpital sur une zone très peuplée au démarrage
 #define STARTING_HOSPITALS_PROBABILITY 2 //Probabilité (en dixièmes de %, donc 0.X%) de placer un hôpital sur une zone au démarrage (en dehors des zones très peuplées)
 #define SEED_OFFSET 12345 //Offset pour la seed de base, afin d'avoir des résultats différents à chaque exécution
-#define TOURNAMENT_PROBABILITY 70 //Probabilité (en %) de faire du tournoi pour sélectionner les parents plutôt que du random pur
-#define TOURNAMENT_SIZE 5 //Taille du tournoi (nombre de candidats comparés)
+#define TOURNAMENT_PROBABILITY 80 //Probabilité (en %) de faire du tournoi pour sélectionner les parents plutôt que du random pur
+#define TOURNAMENT_SIZE 10 //Taille du tournoi (nombre de candidats comparés)
 #define RANDOM_PARENT_POOL_SIZE 20 //Taille du pool de parents aléatoires (dans le cas où on ne fait pas de tournoi)
-#define ELITISM_COUNT 5 //Nombre d'individus élitistes (qui sont copiés tels quels à la génération suivante sans mutation)
+#define ELITISM_COUNT 15 //Nombre d'individus élitistes (qui sont copiés tels quels à la génération suivante sans mutation)
 
 #define MAX_THREADS 8 // Nombre maximum de threads à utiliser (pour limiter la mémoire utilisée par les workspaces)
-#define ITERATIONS_PER_THREAD 10 // Nombre d'individus traités par chaque thread avant de synchroniser (pour limiter la contention sur les workspaces)
+#define ITERATIONS_PER_THREAD 2 // Nombre d'individus traités par chaque thread avant de synchroniser (pour limiter la contention sur les workspaces)
 
 
-#define PRINT_EVERY_X_GEN 10
+#define PRINT_EVERY_X_GEN 100
 
 
 
@@ -47,7 +47,7 @@ int main(void) {
         perror("Unable to open CSV file");
         return 1;
     }
-
+    double start_time = omp_get_wtime();
     while (fgets(line, sizeof(line), file) != NULL) {
         struct Town town;
         int parsed = sscanf(
@@ -88,11 +88,12 @@ int main(void) {
         count++;
     }
 
-    
+    double load_time = omp_get_wtime() - start_time;
 
     fclose(file);
 
     printf("Loaded %zu communes from %s\n", count, csv_path);
+    printf("Time taken to load data: %.2f seconds\n", load_time);
 
     // Align workspaces array to 64 bytes to reduce false sharing
     unsigned char** workspaces = NULL;
@@ -116,9 +117,11 @@ int main(void) {
         }
     }
 
-
+    double precalc_start_time = omp_get_wtime();
     OptimizedData* precalc_data = precalc_near(towns, count);
     if (precalc_data == NULL) return 1;
+    double precalc_time = omp_get_wtime() - precalc_start_time;
+    printf("Time taken for precalculation: %.2f seconds\n", precalc_time);
 
     Individual* population = malloc(POP_SIZE * sizeof(Individual));
     if (population == NULL) {
@@ -142,6 +145,7 @@ int main(void) {
             return 1;
         }
     }
+    double init_time = omp_get_wtime();
     // Initialize population genes outside the main loop
     for (int i = 0; i < POP_SIZE; i++) {
         for (size_t g = 0; g < count; g++) {
@@ -214,6 +218,8 @@ int main(void) {
             printf("Meilleure Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d Lits_Total: %ld\n", population[0].fitness, population[0].desert_population, population[0].hospitals_count, population[0].chru_count, population[0].beds_count);
         }
     }
+    double total_time = omp_get_wtime() - init_time;
+    printf("Total time taken: %.2f seconds\n", total_time);
     free(precalc_data);
     free(towns);
     for(int i=0; i<POP_SIZE; i++) free(population[i].genes);

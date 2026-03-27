@@ -6,7 +6,6 @@
 
 #define CELL_SIZE 0.1 // Environ 11km, parfait pour un rayon de 10km
 #define HABITANTS_TOTAL 65141355 // Population totale de la France (constante pour le fitness)
-#define PROB_DELETE 80 // 80% de chances de supprimer un bâtiment lors de la mutation intelligente
 #define HOSPITAL_COST 5000.0
 #define CHRU_BONUS 4000.0
 #define CHRU_POP_THRESHOLD 80000
@@ -14,13 +13,14 @@
 #define LATITUDE_FACTOR 111.32 // Facteur de conversion pour les degrés de latitude en km
 #define BEDS_PER_1000 5.4 // Nombre de lits pour 1000 habitants
 
+#define PROB_DELETE 80 // 80% de chances de supprimer un bâtiment lors de la mutation intelligente
 #define MAX_DISCOVER_HOSPITALS 20 // Nombre maximum d'hôpitaux à découvrir lors de la mutation intelligente (pour limiter les changements drastiques)
 #define MIN_DISCOVER_HOSPITALS 5 // Nombre minimum d'hôpitaux à découvrir lors de la mutation intelligente (pour assurer une exploration suffisante)
-
 #define MAX_DELETE_HOSPITALS 20 // Nombre maximum d'hôpitaux à supprimer lors de la mutation intelligente (pour limiter les changements drastiques)
 #define MIN_DELETE_HOSPITALS 5 // Nombre minimum d'hôpitaux à supprimer lors de la mutation intelligente (pour assurer une exploration suffisante)
 
 #define MAX_NEIGHBORS 500 // Nombre maximum de voisins à stocker pour chaque commune (pour limiter la mémoire)
+
 #define MAX_TRY 150 // Nombre maximum de tentatives pour trouver un hôpital à fermer lors de la mutation intelligente (pour éviter les boucles infinies)
 
 OptimizedData* precalc_near(Town* restrict towns, size_t count) {

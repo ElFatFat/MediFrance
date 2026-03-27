@@ -94,7 +94,10 @@ int main(void) {
 
     printf("Loaded %zu communes from %s\n", count, csv_path);
 
-    unsigned char** workspaces = malloc(num_threads * sizeof(unsigned char*));
+    // Align workspaces array to 64 bytes to reduce false sharing
+    unsigned char** workspaces = NULL;
+    workspaces = aligned_alloc(64, num_threads * sizeof(unsigned char*));
+
     if (workspaces == NULL) {
         perror("Failed to allocate workspaces array");
         free(towns);
@@ -117,16 +120,35 @@ int main(void) {
     OptimizedData* precalc_data = precalc_near(towns, count);
     if (precalc_data == NULL) return 1;
 
-    Individual population[POP_SIZE];
+    Individual* population = malloc(POP_SIZE * sizeof(Individual));
+    if (population == NULL) {
+        perror("Failed to allocate population array");
+        free(precalc_data);
+        free(towns);
+        for(int i=0; i<num_threads; i++) free(workspaces[i]);
+        free(workspaces);
+        return 1;
+    }
     for (int i = 0; i < POP_SIZE; i++) {
         population[i].genes = calloc(count, sizeof(unsigned char));
+        if (population[i].genes == NULL) {
+            perror("Failed to allocate genes array");
+            for (int j = 0; j < i; j++) free(population[j].genes);
+            free(population);
+            free(precalc_data);
+            free(towns);
+            for(int k=0; k<num_threads; k++) free(workspaces[k]);
+            free(workspaces);
+            return 1;
+        }
+    }
+    // Initialize population genes outside the main loop
+    for (int i = 0; i < POP_SIZE; i++) {
         for (size_t g = 0; g < count; g++) {
-            // On place quelques hôpitaux au hasard sur les très grosses zones pour amorcer
             if (precalc_data[g].max_covered_population > STARTING_HOSPITALS_THRESHOLD && (rand() % 100 < STARTING_HOSPITALS_THRESHOLD_PROBABILITY)) {
                 population[i].genes[g] = 1;
             } else {
-                // Le reste commence quasiment vide
-                population[i].genes[g] = (rand() % 1000 < STARTING_HOSPITALS_PROBABILITY) ? 1 : 0; 
+                population[i].genes[g] = (rand() % 1000 < STARTING_HOSPITALS_PROBABILITY) ? 1 : 0;
             }
         }
     }
@@ -195,6 +217,7 @@ int main(void) {
     free(precalc_data);
     free(towns);
     for(int i=0; i<POP_SIZE; i++) free(population[i].genes);
+    free(population);
     for(int i=0; i<num_threads; i++) free(workspaces[i]);
     free(workspaces);
     return 0;

@@ -5,6 +5,14 @@
 
 
 #define CELL_SIZE 0.1 // Environ 11km, parfait pour un rayon de 10km
+#define HABITANTS_TOTAL 65141355 // Population totale de la France (constante pour le fitness)
+#define PROB_DELETE 80 // 80% de chances de supprimer un bâtiment lors de la mutation intelligente
+#define HOSPITAL_COST 5000.0
+#define CHRU_BONUS 4000.0
+#define CHRU_POP_THRESHOLD 80000
+#define LAT_TO_RAD 0.0174533 // Conversion degrés en radians pour le calcul de la distance
+#define LATITUDE_FACTOR 111.32 // Facteur de conversion pour les degrés de latitude en km
+#define BEDS_PER_1000 5.4 // Nombre de lits pour 1000 habitants
 
 DataOptimisee* precalc_near(Commune* communes, size_t count) {
     // --- ÉTAPE 1 : Trouver les bornes et créer la grille ---
@@ -70,7 +78,7 @@ DataOptimisee* precalc_near(Commune* communes, size_t count) {
     for (int i = 0; i < (int)count; i++) {
         data[i].nb_voisins = 0;
         data[i].voisins = NULL;
-        data[i].est_eligible_chru = (communes[i].population > 80000) ? 1 : 0;
+        data[i].est_eligible_chru = (communes[i].population > CHRU_POP_THRESHOLD) ? 1 : 0;
 
         // Indices cohérents avec le remplissage de la grille : ligne depuis y, colonne depuis x
         int r = (int)((communes[i].y - minY) / CELL_SIZE);
@@ -93,11 +101,11 @@ DataOptimisee* precalc_near(Commune* communes, size_t count) {
                         if (i == j) continue;
 
                         // On convertit la LATITUDE (y) en radians pour le cosinus
-                        float lat_rad = communes[i].y * 0.0174533; 
+                        float lat_rad = communes[i].y * LAT_TO_RAD; 
 
                         // Le cosinus s'applique sur l'axe X (Longitude) !
-                        float dx = (communes[i].x - communes[j].x) * 111.32 * cos(lat_rad);
-                        float dy = (communes[i].y - communes[j].y) * 111.32; 
+                        float dx = (communes[i].x - communes[j].x) * LATITUDE_FACTOR * cos(lat_rad);
+                        float dy = (communes[i].y - communes[j].y) * LATITUDE_FACTOR; // 1 degré de latitude ≈ 111.32 km, on peut aussi utiliser une constante
 
                         float distSq = dx*dx + dy*dy;
 
@@ -164,12 +172,12 @@ void fitness(Individu* ind, Commune* communes, DataOptimisee* data, size_t count
             }
 
             // 5.4 lits pour 1000 habitants
-            ind->nb_lits += (long)(lits_pour_cet_hopital * (5.4 / 1000.0));
+            ind->nb_lits += (long)(lits_pour_cet_hopital * (BEDS_PER_1000 / 1000.0));
         }
     }
 
-    ind->hab_desert = 65141355 - pop_couverte; // 65M - les gens qu'on a sauvés
-    ind->fitness = 65141355.0 - (double)ind->hab_desert - (5000.0 * ind->nb_hopitaux) + (4000.0 * ind->nb_chru);
+    ind->hab_desert = HABITANTS_TOTAL - pop_couverte; // 65M - les gens qu'on a sauvés
+    ind->fitness = HABITANTS_TOTAL - (double)ind->hab_desert - (HOSPITAL_COST * ind->nb_hopitaux) + (CHRU_BONUS * ind->nb_chru);
 }
 void quick_sort_population(Individu* pop, int left, int right) {
     if (left >= right) return;
@@ -204,16 +212,6 @@ void copier_individu(Individu* dest, const Individu* src, size_t count) {
     memcpy(dest->genes, src->genes, count * sizeof(unsigned char));
 }
 
-void muter(Individu* ind, size_t count, unsigned int* seed) {
-    // 0.1% de mutations sur 36000 gènes = environ 36 mutations
-    // On calcule un nombre de mutations autour de cette moyenne
-    int nb_mutations = (count / 1000) + (rand_r(seed) % 10); 
-    
-    for (int m = 0; m < nb_mutations; m++) {
-        int r = rand_r(seed) % count;
-        ind->genes[r] = !ind->genes[r];
-    }
-}
 
 void muter_intelligente(Individu* ind, const DataOptimisee* data, size_t count, unsigned int* seed) {
     
@@ -222,13 +220,13 @@ void muter_intelligente(Individu* ind, const DataOptimisee* data, size_t count, 
     for (int m = 0; m < nb_ajouts; m++) {
         int r = rand_r(seed) % count;
         // On vérifie toujours que la zone PEUT être rentable théoriquement
-        if (data[r].max_pop_couverte >= 5000) {
+        if (data[r].max_pop_couverte >= HOSPITAL_COST) {
             ind->genes[r] = 1;
         }
     }
 
     // 2. ÉLAGAGE MASSIF (On autorise à fermer les CHRU doublons !)
-    if (rand_r(seed) % 100 < 80) { // 80% de chances de nettoyer
+    if (rand_r(seed) % 100 < PROB_DELETE) { // PROB_DELETE% de chances de nettoyer
         int tentative = 0;
         int fermetures = 0;
         int max_fermetures = (rand_r(seed) % 15) + 5; // On tente d'en fermer 5 à 19

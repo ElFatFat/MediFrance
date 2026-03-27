@@ -33,7 +33,6 @@ DataOptimisee* precalc_near(Commune* communes, size_t count);
 void fitness(Individu* ind, Commune* communes, DataOptimisee* data, size_t count, unsigned char* couvert_local);
 void quick_sort_population(Individu* pop, int left, int right);
 void copier_individu(Individu* dest, const Individu* src, size_t count);
-void muter(Individu* ind, size_t count, unsigned int* seed);
 void muter_intelligente(Individu* ind, const DataOptimisee* data, size_t count, unsigned int* seed);
 void crossover(Individu* enfant, const Individu* p1, const Individu* p2, size_t count, unsigned int* seed);
 #endif

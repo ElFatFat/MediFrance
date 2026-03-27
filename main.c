@@ -9,18 +9,24 @@
 
 #include <MLV/MLV_all.h>
 
-#define POP_SIZE 500
+#define POP_SIZE 100
+#define GEN_MAX 1000
+#define CSV_PATH "resources/communes-france-metrople-2025.csv"
+
+
+#define PRINT_EVERY_X_GEN 10
 
 
 
 int main(void) {
     #pragma omp parallel
-{
-    if (omp_get_thread_num() == 0) {
-        printf("Running with %d threads\n", omp_get_num_threads());
+    {
+        if (omp_get_thread_num() == 0) {
+            printf("Running with %d threads\n", omp_get_num_threads());
+        }
     }
-}
-    const char* csv_path = "resources/communes-france-metrople-2025.csv";
+
+    const char* csv_path = CSV_PATH;
     FILE* file = fopen(csv_path, "r");
     struct Commune* communes = NULL;
     size_t capacity = 0;
@@ -117,7 +123,7 @@ int main(void) {
         }
     }
 
-    for (int gen = 0; gen < 1000; gen++) {
+    for (int gen = 0; gen < GEN_MAX; gen++) {
 
     // --- ÉTAPE 1 : FITNESS ---
     double t1 = omp_get_wtime();
@@ -163,21 +169,21 @@ int main(void) {
     double t4 = omp_get_wtime();
 
     // Affichage des chronos toutes les 10 générations (pour ne pas polluer le terminal)
-    if (gen % 10 == 0) {
+    if (gen % PRINT_EVERY_X_GEN == 0) {
         printf("\n--- Gen %d ---\n", gen);
         printf("Fitness: %.3fs | Tri: %.3fs | Repro: %.3fs | Total: %.3fs\n", 
                 t2 - t1, t3 - t2, t4 - t3, t4 - t1);
         printf("Meilleure Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d Lits_Total: %ld\n", population[0].fitness, population[0].hab_desert, population[0].nb_hopitaux, population[0].nb_chru, population[0].nb_lits);
     }
 }
-    init_window();
+/*     init_window();
 
     create_cloud(communes, count);
     MLV_wait_seconds(5);
     close_window();
     for(size_t i = 0; i < count; i++) {
         if(precalc_data[i].voisins) free(precalc_data[i].voisins);
-    }
+    } */
     free(precalc_data);
     free(communes);
     for(int i=0; i<POP_SIZE; i++) free(population[i].genes);

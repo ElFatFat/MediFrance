@@ -23,7 +23,7 @@
 #define MAX_NEIGHBORS 500 // Nombre maximum de voisins à stocker pour chaque commune (pour limiter la mémoire)
 #define MAX_TRY 150 // Nombre maximum de tentatives pour trouver un hôpital à fermer lors de la mutation intelligente (pour éviter les boucles infinies)
 
-OptimizedData* precalc_near(Town* towns, size_t count) {
+OptimizedData* precalc_near(Town* restrict towns, size_t count) {
     // --- ÉTAPE 1 : Trouver les bornes et créer la grille ---
     float minX = towns[0].x;
     float maxX = minX;
@@ -147,7 +147,7 @@ OptimizedData* precalc_near(Town* towns, size_t count) {
     return data;
 }
 
-void fitness(Individual* ind, Town* towns, OptimizedData* data, size_t count, unsigned char* coverage_buffer) {
+void fitness(Individual* restrict ind, Town* restrict towns, OptimizedData* restrict data, size_t count, unsigned char* restrict coverage_buffer) {
     ind->hospitals_count = 0;
     ind->chru_count = 0;
     ind->beds_count = 0;
@@ -171,6 +171,8 @@ void fitness(Individual* ind, Town* towns, OptimizedData* data, size_t count, un
                 hospitals_bed_count += towns[i].population;
             }
 
+            // Vectorize neighbor loop
+            #pragma omp simd
             for (int v = 0; v < data[i].neighbor_count; v++) {
                 int neighbor_index = data[i].neighbors[v];
                 if (!coverage_buffer[neighbor_index]) {

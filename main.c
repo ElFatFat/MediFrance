@@ -167,7 +167,7 @@ int main(void) {
         }
     }
 
-    int nb_gen = 100;
+    int nb_gen = 10;
     init_window();
     for (int gen = 0; gen < nb_gen; gen++) {
 
@@ -230,8 +230,9 @@ int main(void) {
 
 
     create_cloud(communes, count);
-    draw_hospitals(communes, count, population[0]);
+    //draw_hospitals(communes, count, population[0]);
     MLV_wait_seconds(5);
+    settings_menu(communes, count, population[0]);
     close_window();
     for(size_t i = 0; i < count; i++) {
         if(precalc_data[i].voisins) free(precalc_data[i].voisins);

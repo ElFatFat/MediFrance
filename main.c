@@ -9,7 +9,7 @@
 
 #include <MLV/MLV_all.h>
 
-#define POP_SIZE 200
+#define POP_SIZE 500
 #define GEN_MAX 10000
 #define CSV_PATH "resources/communes-france-metrople-2025.csv"
 
@@ -26,7 +26,7 @@
 #define ITERATIONS_PER_THREAD 2 // Nombre d'individus traités par chaque thread avant de synchroniser (pour limiter la contention sur les workspaces)
 
 
-#define PRINT_EVERY_X_GEN 100
+#define PRINT_EVERY_X_GEN 1000
 
 
 
@@ -220,6 +220,7 @@ int main(void) {
     }
     double total_time = omp_get_wtime() - init_time;
     printf("Total time taken: %.2f seconds\n", total_time);
+    printf("Best solution found: Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d Lits_Total: %ld\n", population[0].fitness, population[0].desert_population, population[0].hospitals_count, population[0].chru_count, population[0].beds_count);
     free(precalc_data);
     free(towns);
     for(int i=0; i<POP_SIZE; i++) free(population[i].genes);

@@ -14,12 +14,12 @@
 #define BEDS_PER_1000 5.4 // Nombre de lits pour 1000 habitants
 
 #define PROB_DELETE 80 // 80% de chances de supprimer un bâtiment lors de la mutation intelligente
-#define MAX_DISCOVER_HOSPITALS 20 // Nombre maximum d'hôpitaux à découvrir lors de la mutation intelligente (pour limiter les changements drastiques)
-#define MIN_DISCOVER_HOSPITALS 5 // Nombre minimum d'hôpitaux à découvrir lors de la mutation intelligente (pour assurer une exploration suffisante)
-#define MAX_DELETE_HOSPITALS 20 // Nombre maximum d'hôpitaux à supprimer lors de la mutation intelligente (pour limiter les changements drastiques)
-#define MIN_DELETE_HOSPITALS 5 // Nombre minimum d'hôpitaux à supprimer lors de la mutation intelligente (pour assurer une exploration suffisante)
+#define MAX_DISCOVER_HOSPITALS 10 // Nombre maximum d'hôpitaux à découvrir lors de la mutation intelligente (pour limiter les changements drastiques)
+#define MIN_DISCOVER_HOSPITALS 3 // Nombre minimum d'hôpitaux à découvrir lors de la mutation intelligente (pour assurer une exploration suffisante)
+#define MAX_DELETE_HOSPITALS 10 // Nombre maximum d'hôpitaux à supprimer lors de la mutation intelligente (pour limiter les changements drastiques)
+#define MIN_DELETE_HOSPITALS 3 // Nombre minimum d'hôpitaux à supprimer lors de la mutation intelligente (pour assurer une exploration suffisante)
 
-#define MAX_NEIGHBORS 500 // Nombre maximum de voisins à stocker pour chaque commune (pour limiter la mémoire)
+#define MAX_NEIGHBORS 200 // Nombre maximum de voisins à stocker pour chaque commune (pour limiter la mémoire)
 
 #define MAX_TRY 150 // Nombre maximum de tentatives pour trouver un hôpital à fermer lors de la mutation intelligente (pour éviter les boucles infinies)
 

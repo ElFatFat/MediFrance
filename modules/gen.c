@@ -4,13 +4,11 @@
 #include <string.h>
 
 
-#define CELL_SIZE 0.1 // Environ 11km, parfait pour un rayon de 10km
+#define CELL_SIZE 10000.0 // 10 km (Lambert 93 en metres)
 #define HABITANTS_TOTAL 65141355 // Population totale de la France (constante pour le fitness)
 #define HOSPITAL_COST 5000.0
 #define CHRU_BONUS 4000.0
 #define CHRU_POP_THRESHOLD 80000
-#define LAT_TO_RAD 0.0174533 // Conversion degrés en radians pour le calcul de la distance
-#define LATITUDE_FACTOR 111.32 // Facteur de conversion pour les degrés de latitude en km
 #define BEDS_PER_1000 5.4 // Nombre de lits pour 1000 habitants
 
 #define PROB_DELETE 80 // 80% de chances de supprimer un bâtiment lors de la mutation intelligente
@@ -23,17 +21,54 @@
 
 #define MAX_TRY 150 // Nombre maximum de tentatives pour trouver un hôpital à fermer lors de la mutation intelligente (pour éviter les boucles infinies)
 
+// Projection Lambert 93 (EPSG:2154) depuis coordonnees geographiques (WGS84/RGF93).
+static inline void project_to_lambert93(double lat_deg, double lon_deg, double* x, double* y) {
+    const double deg_to_rad = M_PI / 180.0;
+    const double n = 0.7256077650532670;
+    const double c = 11754255.426096;
+    const double xs = 700000.0;
+    const double ys = 12655612.049876;
+    const double lon0 = 3.0 * deg_to_rad;
+    const double e = 0.081819191042816;
+
+    const double phi = lat_deg * deg_to_rad;
+    const double lambda = lon_deg * deg_to_rad;
+    const double sin_phi = sin(phi);
+
+    const double lat_iso = log(tan(M_PI_4 + (phi * 0.5)) *
+                               pow((1.0 - e * sin_phi) / (1.0 + e * sin_phi), e * 0.5));
+    const double r = c * exp(-n * lat_iso);
+    const double gamma = n * (lambda - lon0);
+
+    *x = xs + r * sin(gamma);
+    *y = ys - r * cos(gamma);
+}
+
 OptimizedData* precalc_near(Town* restrict towns, size_t count) {
+    double* lambert_x = malloc(count * sizeof(double));
+    double* lambert_y = malloc(count * sizeof(double));
+    if (lambert_x == NULL || lambert_y == NULL) {
+        perror("Erreur d'allocation Lambert 93");
+        free(lambert_x);
+        free(lambert_y);
+        return NULL;
+    }
+
+    for (size_t i = 0; i < count; i++) {
+        // CSV: x = latitude, y = longitude.
+        project_to_lambert93((double)towns[i].x, (double)towns[i].y, &lambert_x[i], &lambert_y[i]);
+    }
+
     // --- ÉTAPE 1 : Trouver les bornes et créer la grille ---
-    float minX = towns[0].x;
-    float maxX = minX;
-    float minY = towns[0].y;
+    double minX = lambert_x[0];
+    double maxX = minX;
+    double minY = lambert_y[0];
     float maxY = minY;
     for(size_t i=1; i<count; i++) {
-        if(towns[i].x < minX) minX = towns[i].x;
-        if(towns[i].x > maxX) maxX = towns[i].x;
-        if(towns[i].y < minY) minY = towns[i].y;
-        if(towns[i].y > maxY) maxY = towns[i].y;
+        if(lambert_x[i] < minX) minX = lambert_x[i];
+        if(lambert_x[i] > maxX) maxX = lambert_x[i];
+        if(lambert_y[i] < minY) minY = lambert_y[i];
+        if(lambert_y[i] > maxY) maxY = lambert_y[i];
     }
 
     int cols = (int)((maxX - minX) / CELL_SIZE) + 1;
@@ -53,8 +88,8 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
 // --- ÉTAPE 2 : Remplir la grille ---
     for (int i = 0; i < (int)count; i++) {
         // Calcul des indices avec un "clamp" pour la sécurité
-        int c = (int)((towns[i].x - minX) / CELL_SIZE);
-        int r = (int)((towns[i].y - minY) / CELL_SIZE);
+        int c = (int)((lambert_x[i] - minX) / CELL_SIZE);
+        int r = (int)((lambert_y[i] - minY) / CELL_SIZE);
 
         // Sécurité anti-débordement (si x == maxX ou y == maxY)
         if (c >= cols) c = cols - 1;
@@ -90,8 +125,8 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
         data[i].is_eligible_for_chru = (towns[i].population > CHRU_POP_THRESHOLD) ? 1 : 0;
 
         // Indices cohérents avec le remplissage de la grille : ligne depuis y, colonne depuis x
-        int r = (int)((towns[i].y - minY) / CELL_SIZE);
-        int c = (int)((towns[i].x - minX) / CELL_SIZE);
+        int r = (int)((lambert_y[i] - minY) / CELL_SIZE);
+        int c = (int)((lambert_x[i] - minX) / CELL_SIZE);
         // On s'assure que les indices restent dans les bornes valides
         if (r < 0) r = 0; else if (r >= rows) r = rows - 1;
         if (c < 0) c = 0; else if (c >= cols) c = cols - 1;
@@ -109,16 +144,11 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
                         int j = cell->indexArray[k];
                         if (i == j) continue;
 
-                        // On convertit la LATITUDE (y) en radians pour le cosinus
-                        float latitudeInRadians = towns[i].y * LAT_TO_RAD; 
+                        double distanceX = lambert_x[i] - lambert_x[j];
+                        double distanceY = lambert_y[i] - lambert_y[j];
+                        double distSq = distanceX * distanceX + distanceY * distanceY;
 
-                        // Le cosinus s'applique sur l'axe X (Longitude) !
-                        float distanceX = (towns[i].x - towns[j].x) * LATITUDE_FACTOR * cos(latitudeInRadians);
-                        float distanceY = (towns[i].y - towns[j].y) * LATITUDE_FACTOR; // 1 degré de latitude ≈ 111.32 km, on peut aussi utiliser une constante
-
-                        float distSq = distanceX*distanceX + distanceY*distanceY;
-
-                        if (distSq <= 100.0) { // 10km au carré
+                        if (distSq <= 100000000.0 && foundCount < MAX_NEIGHBORS) { // 10km au carre
                             tempNeighbors[foundCount++] = j;
                         }
                     }
@@ -140,9 +170,15 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
     }
 
     // Nettoyage de la grille temporaire
-    for(int i=0; i<rows; i++) { if(grid[i]->indexArray) free(grid[i]->indexArray); }
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            if (grid[i][j].indexArray) free(grid[i][j].indexArray);
+        }
+    }
     for(int i=0; i<rows; i++) free(grid[i]);
     free(grid);
+    free(lambert_x);
+    free(lambert_y);
 
     return data;
 }

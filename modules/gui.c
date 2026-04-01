@@ -83,25 +83,40 @@ void draw_base_interface() {
 }
 
 void settings_menu(Commune *communes, size_t count, Individu ind) {
-    int x, y;
-
     draw_base_interface();
-
     create_cloud(communes, count);
-    
     MLV_actualise_window();
 
-    while (1) {
-        MLV_wait_mouse(&x, &y);
+    MLV_Keyboard_button kb_button;
+    MLV_Mouse_button mb;
+    int mx, my;
 
-        if (x >= 960 && x <= 1160 && y >= 600 && y <= 660) {
-            printf("Bouton LANCER clique !\n");
-            
-            draw_base_interface();
-            create_cloud(communes, count);
-            draw_hospitals(communes, count, ind);
-            
-            MLV_actualise_window();
+    while (1) {
+        /* MLV_wait_event: kb_button, kb_modifier, unicode, mouse_button,
+           mouse_x, mouse_y, mouse_x_rel, mouse_y_rel, clock */
+        MLV_Event event = MLV_wait_event(
+            &kb_button, NULL, NULL,
+            &mb, &mx, &my, NULL, NULL, NULL
+        );
+
+        if (event == MLV_WINDOW_QUIT) {
+            break;
+        }
+
+        if (event == MLV_KEY && kb_button == MLV_KEYBOARD_ESCAPE) {
+            break;
+        }
+
+        if (event == MLV_MOUSE_BUTTON && mb == MLV_BUTTON_LEFT) {
+            if (mx >= 960 && mx <= 1160 && my >= 600 && my <= 660) {
+                printf("Bouton LANCER clique !\n");
+
+                draw_base_interface();
+                create_cloud(communes, count);
+                draw_hospitals(communes, count, ind);
+
+                MLV_actualise_window();
+            }
         }
     }
 }

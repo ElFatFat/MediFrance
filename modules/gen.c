@@ -45,6 +45,10 @@ static inline void project_to_lambert93(double lat_deg, double lon_deg, double* 
 }
 
 OptimizedData* precalc_near(Town* restrict towns, size_t count) {
+    if (towns == NULL || count == 0) {
+        return NULL;
+    }
+
     double* lambert_x = malloc(count * sizeof(double));
     double* lambert_y = malloc(count * sizeof(double));
     if (lambert_x == NULL || lambert_y == NULL) {
@@ -54,17 +58,17 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
         return NULL;
     }
 
-    for (size_t i = 0; i < count; i++) {
+    // Initialise les bornes avec la premiere commune projetee.
+    project_to_lambert93((double)towns[0].x, (double)towns[0].y, &lambert_x[0], &lambert_y[0]);
+    double minX = lambert_x[0];
+    double maxX = lambert_x[0];
+    double minY = lambert_y[0];
+    double maxY = lambert_y[0];
+
+    for (size_t i = 1; i < count; i++) {
         // CSV: x = latitude, y = longitude.
         project_to_lambert93((double)towns[i].x, (double)towns[i].y, &lambert_x[i], &lambert_y[i]);
-    }
 
-    // --- ÉTAPE 1 : Trouver les bornes et créer la grille ---
-    double minX = lambert_x[0];
-    double maxX = minX;
-    double minY = lambert_y[0];
-    float maxY = minY;
-    for(size_t i=1; i<count; i++) {
         if(lambert_x[i] < minX) minX = lambert_x[i];
         if(lambert_x[i] > maxX) maxX = lambert_x[i];
         if(lambert_y[i] < minY) minY = lambert_y[i];

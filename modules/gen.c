@@ -84,6 +84,16 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
     // --- ÉTAPE 3 : Calculer les voisins (Double passe pour la mémoire) ---
     OptimizedData* data = malloc(count * sizeof(OptimizedData));
 
+    if(data == NULL) {
+        perror("Erreur d'allocation des données optimisées");
+        free(data);
+        // Nettoyage de la grille avant de quitter
+        for(int i=0; i<rows; i++) { if(grid[i]->indexArray) free(grid[i]->indexArray); }
+        for(int i=0; i<rows; i++) free(grid[i]);
+        free(grid);
+        return NULL;
+    }
+
     for (int i = 0; i < (int)count; i++) {
         data[i].neighbor_count = 0;
         data[i].neighbors = NULL;
@@ -118,7 +128,7 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
 
                         float distSq = distanceX*distanceX + distanceY*distanceY;
 
-                        if (distSq <= 100.0) { // 10km au carré
+                        if (distSq <= 100.0 && foundCount < MAX_NEIGHBORS) { // 10km au carré
                             tempNeighbors[foundCount++] = j;
                         }
                     }

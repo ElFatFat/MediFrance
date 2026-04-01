@@ -127,6 +127,7 @@ DataOptimisee* precalc_near(Commune* communes, size_t count) {
     for(int i=0; i<rows; i++) free(grid[i]);
     free(grid);
 
+
     return data;
 }
 

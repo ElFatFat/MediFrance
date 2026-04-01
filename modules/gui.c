@@ -91,7 +91,11 @@ void settings_menu(Commune *communes, size_t count, Individu ind) {
     
     MLV_actualise_window();
 
-    while (1) {
+    MLV_Keyboard_button touche;
+
+    touche=MLV_KEYBOARD_NONE;
+
+    while(touche != MLV_KEYBOARD_ESCAPE){
         MLV_wait_mouse(&x, &y);
 
         if (x >= 960 && x <= 1160 && y >= 600 && y <= 660) {
@@ -103,6 +107,9 @@ void settings_menu(Commune *communes, size_t count, Individu ind) {
             
             MLV_actualise_window();
         }
+        MLV_wait_keyboard(&touche, NULL, NULL);
+        
+
     }
 }
 

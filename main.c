@@ -72,57 +72,6 @@ int main(void) {
         count++;
     }
     
-    const char* hopitaux_path = "resources/hopitaux_clean.csv";
-    FILE* file_hopitaux = fopen(hopitaux_path, "r");
-    Hopital* hopitaux = NULL;
-    size_t capacity_h = 0;
-    size_t count_h = 0;
-    char line_h[512];
-
-    if (file_hopitaux == NULL) {
-        perror("Impossible d'ouvrir le CSV des hopitaux");
-        return 1;
-    }
-
-    // On lit et on ignore la première ligne car c'est l'en-tête (Nom,Longitude,Latitude)
-    fgets(line_h, sizeof(line_h), file_hopitaux);
-
-    while (fgets(line_h, sizeof(line_h), file_hopitaux) != NULL) {
-        Hopital h;
-        
-        // On lit le nom (jusqu'à la virgule), puis la longitude, puis la latitude
-        int parsed = sscanf(line_h, "%255[^,],%f,%f", h.nom, &h.x, &h.y);
-
-        if (parsed != 3) {
-            continue; // Si la ligne est mal formatée, on passe à la suivante
-        }
-
-        // Ajout au tableau dynamique (exactement comme tes communes)
-        if (count_h == capacity_h) {
-            size_t new_capacity = (capacity_h == 0) ? 1024 : capacity_h * 2;
-            Hopital* resized = realloc(hopitaux, new_capacity * sizeof(*hopitaux));
-
-            if (resized == NULL) {
-                perror("Memory allocation failed for hospitals");
-                free(hopitaux);
-                fclose(file_hopitaux);
-                return 1;
-            }
-
-            hopitaux = resized;
-            capacity_h = new_capacity;
-        }
-        
-        hopitaux[count_h] = h;
-        count_h++;
-    }
-
-    fclose(file_hopitaux);
-    
-    
-    
-
-    
 
     fclose(file);
 

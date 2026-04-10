@@ -119,7 +119,16 @@ int main(void) {
 
     double precalc_start_time = omp_get_wtime();
     OptimizedData* precalc_data = precalc_near(towns, count);
-    if (precalc_data == NULL) return 1;
+    if (precalc_data == NULL) {
+        //cleaning in case of precalc failure
+        fprintf(stderr, "Failed to precalculate near data\n");
+        for (int i = 0; i < num_threads; i++) {
+            free(workspaces[i]);
+        }
+        free(workspaces);
+        free(towns);
+        return 1;
+    }
     double precalc_time = omp_get_wtime() - precalc_start_time;
     printf("Time taken for precalculation: %.2f seconds\n", precalc_time);
 
@@ -132,12 +141,36 @@ int main(void) {
         free(workspaces);
         return 1;
     }
+    Individual* next_population = malloc(POP_SIZE * sizeof(Individual));
+    if (next_population == NULL) {
+        perror("Failed to allocate next population array");
+        free(population);
+        free(precalc_data);
+        free(towns);
+        for(int i=0; i<num_threads; i++) free(workspaces[i]);
+        free(workspaces);
+        return 1;
+    }
     for (int i = 0; i < POP_SIZE; i++) {
         population[i].genes = calloc(count, sizeof(unsigned char));
         if (population[i].genes == NULL) {
             perror("Failed to allocate genes array");
             for (int j = 0; j < i; j++) free(population[j].genes);
             free(population);
+            free(next_population);
+            free(precalc_data);
+            free(towns);
+            for(int k=0; k<num_threads; k++) free(workspaces[k]);
+            free(workspaces);
+            return 1;
+        }
+        next_population[i].genes = calloc(count, sizeof(unsigned char));
+        if (next_population[i].genes == NULL) {
+            perror("Failed to allocate next genes array");
+            for (int j = 0; j <= i; j++) free(population[j].genes);
+            for (int j = 0; j < i; j++) free(next_population[j].genes);
+            free(population);
+            free(next_population);
             free(precalc_data);
             free(towns);
             for(int k=0; k<num_threads; k++) free(workspaces[k]);
@@ -172,6 +205,11 @@ int main(void) {
         quick_sort_population(population, 0, POP_SIZE - 1);
         double t3 = omp_get_wtime();
 
+        // Copie de l'elite vers le buffer de prochaine generation.
+        for (int i = 0; i < ELITISM_COUNT; i++) {
+            copy_individual(&next_population[i], &population[i], count);
+        }
+
         // --- ÉTAPE 3 : REPRODUCTION & MUTATION ---
         #pragma omp parallel 
         {
@@ -201,16 +239,22 @@ int main(void) {
                             best_fitness_p2 = population[idx].fitness;
                         }
                     }
-                    crossover(&population[i], &population[p1], &population[p2], count, &seed);
+                    crossover(&next_population[i], &population[p1], &population[p2], count, &seed);
                 } else {
-                    copy_individual(&population[i], &population[rand_r(&seed) % RANDOM_PARENT_POOL_SIZE], count);
+                    int random_pool_size = (RANDOM_PARENT_POOL_SIZE < POP_SIZE) ? RANDOM_PARENT_POOL_SIZE : POP_SIZE;
+                    copy_individual(&next_population[i], &population[rand_r(&seed) % random_pool_size], count);
                 }
 
                 // On mute avec la seed
-                mutate(&population[i], precalc_data, count, &seed);
+                mutate(&next_population[i], precalc_data, count, &seed);
             }
         }
         double t4 = omp_get_wtime();
+
+        // Bascule les buffers: prochaine generation devient la population courante.
+        Individual* temp_population = population;
+        population = next_population;
+        next_population = temp_population;
 
         // Affichage des chronos toutes les 10 générations (pour ne pas polluer le terminal)
         if (gen % PRINT_EVERY_X_GEN == 0) {
@@ -237,6 +281,8 @@ int main(void) {
     free(towns);
     for(int i=0; i<POP_SIZE; i++) free(population[i].genes);
     free(population);
+    for(int i=0; i<POP_SIZE; i++) free(next_population[i].genes);
+    free(next_population);
     for(int i=0; i<num_threads; i++) free(workspaces[i]);
     free(workspaces);
     return 0;

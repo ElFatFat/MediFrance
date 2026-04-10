@@ -144,6 +144,7 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
     for(int i=0; i<rows; i++) free(grid[i]);
     free(grid);
 
+
     return data;
 }
 

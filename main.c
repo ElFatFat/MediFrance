@@ -61,8 +61,8 @@ int main(void) {
             town.department_name,
             &town.postal_code,
             &town.population,
-            &town.x,
-            &town.y
+            &town.y,
+            &town.x
         );
 
         if (parsed != 10) {
@@ -157,6 +157,8 @@ int main(void) {
         }
     }
 
+    init_window();
+
     for (int gen = 0; gen < GEN_MAX; gen++) {
         // --- ÉTAPE 1 : FITNESS ---
         double t1 = omp_get_wtime();
@@ -217,10 +219,20 @@ int main(void) {
                     t2 - t1, t3 - t2, t4 - t3, t4 - t1);
             printf("Meilleure Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d Lits_Total: %ld\n", population[0].fitness, population[0].desert_population, population[0].hospitals_count, population[0].chru_count, population[0].beds_count);
         }
+        fitness_graph(population[0].fitness, GEN_MAX, gen, MLV_COLOR_BLUE);
+    
+        fitness_graph(population[POP_SIZE-1].fitness, GEN_MAX, gen, MLV_COLOR_YELLOW);
     }
-    double total_time = omp_get_wtime() - init_time;
-    printf("Total time taken: %.2f seconds\n", total_time);
-    printf("Best solution found: Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d Lits_Total: %ld\n", population[0].fitness, population[0].desert_population, population[0].hospitals_count, population[0].chru_count, population[0].beds_count);
+    MLV_clear_window(MLV_COLOR_BLACK);	
+    
+    create_cloud(towns, count);
+
+    settings_menu(towns, count, population[0]);
+    close_window();
+    for(size_t i = 0; i < count; i++) {
+        if(precalc_data[i].neighbors) free(precalc_data[i].neighbors);
+    }
+    
     free(precalc_data);
     free(towns);
     for(int i=0; i<POP_SIZE; i++) free(population[i].genes);

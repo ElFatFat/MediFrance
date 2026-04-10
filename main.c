@@ -178,7 +178,6 @@ int main(void) {
             return 1;
         }
     }
-    double init_time = omp_get_wtime();
     // Initialize population genes outside the main loop
     for (int i = 0; i < POP_SIZE; i++) {
         for (size_t g = 0; g < count; g++) {

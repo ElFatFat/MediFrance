@@ -3,19 +3,19 @@
 
 #include <stdio.h>
 
-typedef struct Commune {
-    int code_insee;
-    char nom[50];
+typedef struct Town {
+    int insee_code;
+    char name[50];
     int region;
     char region_name[50];
     int departement;
-    char departement_name[50];
-    int code_postal;
+    char department_name[50];
+    int postal_code;
     int population;
     float x;
     float y;
     int visited;
-} Commune;
+} Town;
 
 typedef struct Hopital {
     char nom[256];

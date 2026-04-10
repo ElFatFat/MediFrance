@@ -22,7 +22,8 @@ void render_hospital(float x, float y) {
     return;
 }*/
 
-void create_cloud(Commune *communes, size_t count) {
+void create_cloud(Town *communes, size_t count) {
+    printf("Affichage de la carte...\n");
     for (size_t i = 0; i < count; i++) {
         float x = communes[i].x; 
         float y = communes[i].y; 
@@ -30,12 +31,15 @@ void create_cloud(Commune *communes, size_t count) {
         int screen_x = (int)((x + 5.5) * 41.3 + 90);
         int screen_y = (int)((51.5 - y) * 60);
 
-        MLV_draw_point(screen_x, screen_y, MLV_COLOR_RED);
+        if (screen_x >= 0 && screen_x < WINDOW_WIDTH && screen_y >= 0 && screen_y < WINDOW_HEIGHT) {
+            MLV_draw_point(screen_x, screen_y, MLV_COLOR_RED);
+        }
     }
+    printf("Carte affichée...\n");
 
 }
 
-void draw_hospitals(Commune *communes, size_t count, Individu ind) {
+void draw_hospitals(Town *communes, size_t count, Individual ind) {
     MLV_Color hospital_color = MLV_rgba(0, 255, 0, 128);
     for (size_t i = 0; i < count; i++) {
         if(ind.genes[i] == 1) {
@@ -45,7 +49,9 @@ void draw_hospitals(Commune *communes, size_t count, Individu ind) {
             int screen_x = (int)((x + 5.5) * 41.3 + 90);
             int screen_y = (int)((51.5 - y) * 60);
 
-            MLV_draw_filled_circle(screen_x, screen_y, 6, hospital_color);
+            if (screen_x >= -6 && screen_x < WINDOW_WIDTH + 6 && screen_y >= -6 && screen_y < WINDOW_HEIGHT + 6) {
+                MLV_draw_filled_circle(screen_x, screen_y, 6, hospital_color);
+            }
         }
     }
 }
@@ -82,7 +88,7 @@ void draw_base_interface() {
     );
 }
 
-void settings_menu(Commune *communes, size_t count, Individu ind) {
+void settings_menu(Town *communes, size_t count, Individual ind) {
     int x, y;
 
     draw_base_interface();
@@ -96,9 +102,9 @@ void settings_menu(Commune *communes, size_t count, Individu ind) {
     touche=MLV_KEYBOARD_NONE;
 
     while(touche != MLV_KEYBOARD_ESCAPE){
-        MLV_wait_mouse(&x, &y);
+        MLV_Event event = MLV_wait_keyboard_or_mouse(&touche, NULL, NULL, &x, &y);
 
-        if (x >= 960 && x <= 1160 && y >= 600 && y <= 660) {
+        if (event == MLV_MOUSE_BUTTON && x >= 960 && x <= 1160 && y >= 600 && y <= 660) {
             printf("Bouton LANCER clique !\n");
             
             draw_base_interface();
@@ -107,9 +113,6 @@ void settings_menu(Commune *communes, size_t count, Individu ind) {
             
             MLV_actualise_window();
         }
-        MLV_wait_keyboard(&touche, NULL, NULL);
-        
-
     }
 }
 

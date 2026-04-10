@@ -2,7 +2,7 @@
 CC      = gcc
 #CC for macOS in VM. Running gcc with x86_64 architecture to avoid issues with MLV library on ARM-based Macs.
 #CC      = x86_64-linux-gnu-gcc
-BASE_CFLAGS = -fopenmp -std=c99 $(shell pkg-config --cflags MLV)
+BASE_CFLAGS = -fopenmp -Ofast $(shell pkg-config --cflags MLV)
 WARN_CFLAGS = -Wall -Wextra
 CFLAGS ?= $(BASE_CFLAGS) $(WARN_CFLAGS)
 STRICT_CFLAGS = $(BASE_CFLAGS) $(WARN_CFLAGS) -Werror
@@ -35,6 +35,10 @@ build:
 
 build/modules:
 	@mkdir -p build/modules
+
+# Clean, build and run the program
+run: clean all
+	./$(TARGET)
 
 # Clean up build artifacts
 clean:

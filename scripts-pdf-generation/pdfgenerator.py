@@ -18,20 +18,35 @@ except FileNotFoundError:
 
 class HospitalOrganizationReport(FPDF):
     def header(self):
+        margin = 10
+        
+        w_esiee = 50  
+        h_esiee = (w_esiee * 1286) / 3840
+        
+        w_min = 24    
+        h_min = 24
+
+        y_center = 18
+        y_esiee = y_center - (h_esiee / 2)
+        y_min = y_center - (h_min / 2)
+        
         try:
-            self.image(f"{ASSET_DIR}logo-esiee.png", 10, 8, 33)
-            self.image(f"{ASSET_DIR}logo-sante.png", 165, 8, 35)
+            self.image(f"{ASSET_DIR}logo-esiee.png", x=margin, y=y_esiee, w=w_esiee)
+            
+            self.image(f"{ASSET_DIR}logo-sante.png", x=self.w - margin - w_min, y=y_min, w=w_min)
         except:
             pass
-        
-        self.set_font("Helvetica", "B", 12)
-        self.ln(10)
+
+        self.set_y(38)
+        self.set_font("Helvetica", "B", 14)
         self.cell(0, 10, "Rapport d'infrastructure hospitalière en France", 
                   border=0, align="C", new_x="LMARGIN", new_y="NEXT")
+        
         self.set_font("Helvetica", "I", 12)
         self.cell(0, 5, "Simulation de la couverture hospitalière optimale", 
                   border=0, align="C", new_x="LMARGIN", new_y="NEXT")
         self.ln(10)
+
 
     def footer(self):
         self.set_y(-15)
@@ -54,9 +69,9 @@ def generate_report(df):
 
     pdf = HospitalOrganizationReport()
     pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.add_page()
 
     for _, row in stats.iterrows():
+        pdf.add_page()
         dept_name = row["nom_dep"]
         bed_rate = (row["total_beds"] / row["total_pop"]) * 1000
 
@@ -66,14 +81,25 @@ def generate_report(df):
                  new_x="LMARGIN", new_y="NEXT", align="L")
         pdf.ln(2)
 
-        pdf.set_font("Helvetica", "", 11)
-        summary_text = (f"- Nombre total d'hôpitaux et CHRU : {int(row['total_hosp'])} dont {int(row['total_chru'])} CHRU.\n"
-                        f"- Nombre de villes et d'habitants en désert médical : {int(row['total_desert_towns'])} villes pour un total de {int(row['total_desert_pop']):,} habitants.\n"
-                        f"- Capacité totale en lits : {int(row['total_beds']):,} lits.\n"
-                        f"- Taux de lits : {bed_rate:.2f} lits pour 1000 habitants.")
+        pdf.set_font("Helvetica", "B", 11)
+        with pdf.table(col_widths=(60, 120), text_align="LEFT", borders_layout="NONE", cell_fill_color=255, cell_fill_mode="ALL") as summary_table:
+            row1 = summary_table.row()
+            row1.cell("Infrastructure :")
+            row1.cell(f"{int(row['total_hosp'])} hôpitaux (dont {int(row['total_chru'])} CHRU)")
+            
+            row2 = summary_table.row()
+            row2.cell("Déserts médicaux :")
+            row2.cell(f"{int(row['total_desert_towns'])} villes ({int(row['total_desert_pop']):,} habitants)")
+            
+            row3 = summary_table.row()
+            row3.cell("Capacité totale :")
+            row3.cell(f"{int(row['total_beds']):,} lits")
+            
+            row4 = summary_table.row()
+            row4.cell("Taux d'équipement :")
+            row4.cell(f"{bed_rate:.2f} lits pour 1000 habitants")
         
-        pdf.multi_cell(0, 7, summary_text)
-        pdf.ln(3)
+        pdf.ln(5)
 
         pdf.set_font("Helvetica", "B", 10)
         pdf.cell(0, 8, "Implantation détaillée des hôpitaux:", new_x="LMARGIN", new_y="NEXT")

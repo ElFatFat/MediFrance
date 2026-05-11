@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "main.h"
+#include "modules/data.h"
 
 #include "modules/gui.h"
 #include "modules/gen.h"
@@ -41,57 +42,12 @@ int main(void) {
     struct Town* towns = NULL;
     size_t capacity = 0;
     size_t count = 0;
-    char line[512];
-
-    if (file == NULL) {
-        perror("Unable to open CSV file");
+    towns = charger_communes(csv_path, &count);
+    if (towns == NULL) {
+        perror("Unable to load communes");
         return 1;
     }
-    double start_time = omp_get_wtime();
-    while (fgets(line, sizeof(line), file) != NULL) {
-        struct Town town;
-        int parsed = sscanf(
-            line,
-            "%d,%49[^,],%d,%49[^,],%d,%49[^,],%d,%d,%f,%f",
-            &town.insee_code,
-            town.name,
-            &town.region,
-            town.region_name,
-            &town.departement,
-            town.department_name,
-            &town.postal_code,
-            &town.population,
-            &town.y,
-            &town.x
-        );
-
-        if (parsed != 10) {
-            continue;
-        }
-
-        if (count == capacity) {
-            size_t new_capacity = (capacity == 0) ? 1024 : capacity * 2;
-            struct Town* resized = realloc(towns, new_capacity * sizeof(*towns));
-
-            if (resized == NULL) {
-                perror("Memory allocation failed");
-                free(towns);
-                fclose(file);
-                return 1;
-            }
-
-            towns = resized;
-            capacity = new_capacity;
-        }
-        town.visited = 0; // Initialisation du flag de visite
-        towns[count] = town;
-        count++;
-    }
-
     double load_time = omp_get_wtime() - start_time;
-
-    fclose(file);
-
     printf("Loaded %zu communes from %s\n", count, csv_path);
     printf("Time taken to load data: %.2f seconds\n", load_time);
 

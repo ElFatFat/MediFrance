@@ -1,6 +1,10 @@
+from os import path
+
 import pandas as pd
 from fpdf import FPDF
 import os
+import subprocess
+import platform
 
 INPUT_CSV = "data/france_complet_test.csv"
 OUTPUT_DIR = "report"
@@ -15,6 +19,20 @@ try:
 except FileNotFoundError:
     print(f"Erreur: {INPUT_CSV} n'existe pas.")
     exit()
+
+def open_explorer(file_path):
+    try:
+        abs_path = os.path.abspath(file_path)
+        #Handling WSL's case
+        if "microsoft" in platform.release().lower():
+            cmd = f'explorer.exe /select,$(wslpath -w "{abs_path}")'
+            subprocess.run(["bash", "-c", cmd])
+        #Handling Linux case
+        else:
+            parent_dir = os.path.dirname(abs_path)
+            subprocess.run(["xdg-open", parent_dir])
+    except Exception as e:
+        print(f"Erreur lors de l'ouverture du dossier : {e}")
 
 class HospitalOrganizationReport(FPDF):
     def header(self):
@@ -126,6 +144,7 @@ def generate_report(df):
 
     pdf.output(OUTPUT_PDF)
     print(f"Rapport généré avec succès dans : {OUTPUT_PDF}")
+    open_explorer(OUTPUT_PDF)
 
 
 if __name__ == "__main__":

@@ -1,18 +1,15 @@
 #include <stdio.h>
-#include <omp.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <omp.h>
 #include "main.h"
 #include "modules/data.h"
-
-#include "modules/gui.h"
 #include "modules/gen.h"
-
-#include <MLV/MLV_all.h>
 
 #define POP_SIZE 500
 #define GEN_MAX 10000
-#define CSV_PATH "resources/communes-france-metrople-2025.csv"
+#define CSV_PATH "data/communes-france-metrople-2025.csv"
 
 #define STARTING_HOSPITALS_THRESHOLD 30000 //Choix arbitraire pour amorcer la population avec des hôpitaux sur les zones très peuplées
 #define STARTING_HOSPITALS_THRESHOLD_PROBABILITY 20 //Probabilité (en %) de placer un hôpital sur une zone très peuplée au démarrage
@@ -38,10 +35,9 @@ int main(void) {
     printf("Running with %d threads (limit: %d, available: %d)\n", num_threads, MAX_THREADS, available_threads);
 
     const char* csv_path = CSV_PATH;
-    FILE* file = fopen(csv_path, "r");
     struct Town* towns = NULL;
-    size_t capacity = 0;
     size_t count = 0;
+    double start_time = omp_get_wtime();
     towns = charger_communes(csv_path, &count);
     if (towns == NULL) {
         perror("Unable to load communes");
@@ -145,8 +141,6 @@ int main(void) {
         }
     }
 
-    init_window();
-
     for (int gen = 0; gen < GEN_MAX; gen++) {
         // --- ÉTAPE 1 : FITNESS ---
         double t1 = omp_get_wtime();
@@ -218,16 +212,7 @@ int main(void) {
                     t2 - t1, t3 - t2, t4 - t3, t4 - t1);
             printf("Meilleure Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d Lits_Total: %ld\n", population[0].fitness, population[0].desert_population, population[0].hospitals_count, population[0].chru_count, population[0].beds_count);
         }
-        fitness_graph(population[0].fitness, GEN_MAX, gen, MLV_COLOR_BLUE);
-    
-        fitness_graph(population[POP_SIZE-1].fitness, GEN_MAX, gen, MLV_COLOR_YELLOW);
     }
-    MLV_clear_window(MLV_COLOR_BLACK);	
-    
-    create_cloud(towns, count);
-
-    settings_menu(towns, count, population[0]);
-    close_window();
     for(size_t i = 0; i < count; i++) {
         if(precalc_data[i].neighbors) free(precalc_data[i].neighbors);
     }

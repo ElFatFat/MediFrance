@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "data.h"
 
 Town* charger_communes(const char* csv_path, size_t* count) {

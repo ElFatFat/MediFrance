@@ -12,7 +12,7 @@ LDLIBS  = $(shell pkg-config --libs MLV) -lm -fopenmp
 TARGET  = build/medifrance
 
 # Source files (automatically finds all .c files in the current directory and modules)
-SRCS    = $(wildcard *.c) $(wildcard modules/*.c)
+SRCS    = $(filter-out modules/gui.c, $(wildcard *.c) $(wildcard modules/*.c))
 OBJS    = $(patsubst %.c,build/%.o,$(SRCS))
 
 # Default rule

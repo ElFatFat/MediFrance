@@ -1,7 +1,9 @@
 #include "gen.h"
+#include "gui.h" // Pour draw_fitness_point (tracé temps réel de la courbe)
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <omp.h>
 
 
 #define CELL_SIZE 0.1 // Environ 11km, parfait pour un rayon de 10km
@@ -22,6 +24,19 @@
 #define MAX_NEIGHBORS 200 // Nombre maximum de voisins à stocker pour chaque commune (pour limiter la mémoire)
 
 #define MAX_TRY 150 // Nombre maximum de tentatives pour trouver un hôpital à fermer lors de la mutation intelligente (pour éviter les boucles infinies)
+
+// --- Paramètres d'orchestration de l'algorithme génétique ---
+#define DEFAULT_POP_SIZE 500 // Valeur de repli si la taille de population fournie est invalide
+#define DEFAULT_GEN_MAX 100 // Valeur de repli si le nombre de générations fourni est invalide
+#define STARTING_HOSPITALS_THRESHOLD 30000 // Choix arbitraire pour amorcer la population avec des hôpitaux sur les zones très peuplées
+#define STARTING_HOSPITALS_THRESHOLD_PROBABILITY 20 // Probabilité (en %) de placer un hôpital sur une zone très peuplée au démarrage
+#define STARTING_HOSPITALS_PROBABILITY 2 // Probabilité (en dixièmes de %, donc 0.X%) de placer un hôpital sur une zone au démarrage (hors zones très peuplées)
+#define SEED_OFFSET 12345 // Offset pour la seed de base, afin d'avoir des résultats différents à chaque exécution
+#define TOURNAMENT_PROBABILITY 80 // Probabilité (en %) de faire du tournoi pour sélectionner les parents plutôt que du random pur
+#define TOURNAMENT_SIZE 10 // Taille du tournoi (nombre de candidats comparés)
+#define RANDOM_PARENT_POOL_SIZE 20 // Taille du pool de parents aléatoires (dans le cas où on ne fait pas de tournoi)
+#define ITERATIONS_PER_THREAD 2 // Nombre d'individus traités par chaque thread avant de synchroniser (pour limiter la contention sur les workspaces)
+#define PRINT_EVERY_X_GEN 1000 // Affichage des chronos toutes les X générations (pour ne pas polluer le terminal)
 
 OptimizedData* precalc_near(Town* restrict towns, size_t count) {
     // --- ÉTAPE 1 : Trouver les bornes et créer la grille ---
@@ -270,11 +285,194 @@ void mutate(Individual* ind, const OptimizedData* data, size_t count, unsigned i
 void crossover(Individual* enfant, const Individual* p1, const Individual* p2, size_t count, unsigned int* seed) {
     int pivot1 = rand_r(seed) % (count / 2);
     int pivot2 = pivot1 + (rand_r(seed) % (count / 2));
-    
+
     // Parent 1 (Début)
     memcpy(enfant->genes, p1->genes, pivot1);
     // Parent 2 (Milieu)
     memcpy(enfant->genes + pivot1, p2->genes + pivot1, pivot2 - pivot1);
     // Parent 1 (Fin)
     memcpy(enfant->genes + pivot2, p1->genes + pivot2, count - pivot2);
+}
+
+GAResult run_genetic_algorithm(const GAContext* ctx, int pop_size, int gen_max, int elitism_count) {
+    Town* towns = ctx->towns;
+    size_t count = ctx->count;
+    OptimizedData* precalc_data = ctx->precalc_data;
+    unsigned char** workspaces = ctx->workspaces;
+
+    GAResult result;
+    result.best.genes = NULL; // Sentinelle : NULL signale un échec à l'appelant
+    result.best_fitness_history = NULL;
+    result.worst_fitness_history = NULL;
+    result.generations = 0;
+
+    // --- Garde-fous sur les paramètres (saisie utilisateur potentiellement invalide) ---
+    if (pop_size < 2) pop_size = DEFAULT_POP_SIZE;
+    if (gen_max < 1) gen_max = DEFAULT_GEN_MAX;
+    // Au moins 1 élite pour garantir que le meilleur individu est conservé d'une génération à l'autre
+    if (elitism_count < 1) elitism_count = 1;
+    if (elitism_count > pop_size / 2) elitism_count = pop_size / 2;
+
+    // Historique de fitness (une valeur par génération) pour tracer la courbe a posteriori.
+    // En cas d'échec d'allocation, on continue sans historique (la courbe ne sera pas tracée).
+    double* best_history = malloc(gen_max * sizeof(double));
+    double* worst_history = malloc(gen_max * sizeof(double));
+    if (best_history == NULL || worst_history == NULL) {
+        free(best_history);
+        free(worst_history);
+        best_history = NULL;
+        worst_history = NULL;
+    }
+
+    printf("Lancement de l'algorithme genetique (population=%d, generations=%d, elites=%d)\n",
+           pop_size, gen_max, elitism_count);
+
+    Individual* population = malloc(pop_size * sizeof(Individual));
+    Individual* next_population = malloc(pop_size * sizeof(Individual));
+    if (population == NULL || next_population == NULL) {
+        perror("Echec d'allocation des tableaux de population");
+        free(population);
+        free(next_population);
+        free(best_history);
+        free(worst_history);
+        return result;
+    }
+
+    int allocated = 0;
+    for (int i = 0; i < pop_size; i++) {
+        population[i].genes = calloc(count, sizeof(unsigned char));
+        next_population[i].genes = calloc(count, sizeof(unsigned char));
+        if (population[i].genes == NULL || next_population[i].genes == NULL) {
+            perror("Echec d'allocation des genes");
+            free(population[i].genes);
+            free(next_population[i].genes);
+            break;
+        }
+        allocated++;
+    }
+    if (allocated < pop_size) {
+        for (int j = 0; j < allocated; j++) {
+            free(population[j].genes);
+            free(next_population[j].genes);
+        }
+        free(population);
+        free(next_population);
+        free(best_history);
+        free(worst_history);
+        return result;
+    }
+
+    // --- Amorçage de la population ---
+    for (int i = 0; i < pop_size; i++) {
+        for (size_t g = 0; g < count; g++) {
+            if (precalc_data[g].max_covered_population > STARTING_HOSPITALS_THRESHOLD && (rand() % 100 < STARTING_HOSPITALS_THRESHOLD_PROBABILITY)) {
+                population[i].genes[g] = 1;
+            } else {
+                population[i].genes[g] = (rand() % 1000 < STARTING_HOSPITALS_PROBABILITY) ? 1 : 0;
+            }
+        }
+    }
+
+    for (int gen = 0; gen < gen_max; gen++) {
+        // --- ÉTAPE 1 : FITNESS ---
+        double t1 = omp_get_wtime();
+        #pragma omp parallel for schedule(dynamic, ITERATIONS_PER_THREAD)
+        for (int i = 0; i < pop_size; i++) {
+            fitness(&population[i], towns, precalc_data, count, workspaces[omp_get_thread_num()]);
+        }
+        double t2 = omp_get_wtime();
+
+        // --- ÉTAPE 2 : TRI ---
+        quick_sort_population(population, 0, pop_size - 1);
+        double t3 = omp_get_wtime();
+
+        // Enregistre la meilleure et la pire fitness de cette génération (population triée)
+        if (best_history) best_history[gen] = population[0].fitness;
+        if (worst_history) worst_history[gen] = population[pop_size - 1].fitness;
+
+        // Tracé temps réel de la courbe sous la carte (les hôpitaux ne sont pas redessinés ici)
+        draw_fitness_point(gen, gen_max, population[0].fitness, population[pop_size - 1].fitness);
+
+        // Copie de l'elite vers le buffer de prochaine generation.
+        for (int i = 0; i < elitism_count; i++) {
+            copy_individual(&next_population[i], &population[i], count);
+        }
+
+        // --- ÉTAPE 3 : REPRODUCTION & MUTATION ---
+        #pragma omp parallel
+        {
+            // On crée une graine unique par thread et par génération
+            unsigned int seed = SEED_OFFSET + omp_get_thread_num() * 100 + gen;
+
+            #pragma omp for schedule(static)
+            for (int i = elitism_count; i < pop_size; i++) {
+
+                // On fait du tournoi pour sélectionner les parents (TOURNAMENT_PROBABILITY% de chances), sinon du random pur
+                if (rand_r(&seed) % 100 < TOURNAMENT_PROBABILITY) {
+                    // Sélectionne TOURNAMENT_SIZE candidats pour chaque parent et prend le meilleur
+                    int p1 = -1, p2 = -1;
+                    double best_fitness_p1 = -1e100, best_fitness_p2 = -1e100;
+                    for (int t = 0; t < TOURNAMENT_SIZE; t++) {
+                        int idx = rand_r(&seed) % (pop_size / 2);
+                        if (population[idx].fitness > best_fitness_p1 || p1 == -1) {
+                            p1 = idx;
+                            best_fitness_p1 = population[idx].fitness;
+                        }
+                    }
+                    for (int t = 0; t < TOURNAMENT_SIZE; t++) {
+                        int idx = rand_r(&seed) % (pop_size / 2);
+                        if (population[idx].fitness > best_fitness_p2 || p2 == -1) {
+                            p2 = idx;
+                            best_fitness_p2 = population[idx].fitness;
+                        }
+                    }
+                    crossover(&next_population[i], &population[p1], &population[p2], count, &seed);
+                } else {
+                    int random_pool_size = (RANDOM_PARENT_POOL_SIZE < pop_size) ? RANDOM_PARENT_POOL_SIZE : pop_size;
+                    copy_individual(&next_population[i], &population[rand_r(&seed) % random_pool_size], count);
+                }
+
+                // On mute avec la seed
+                mutate(&next_population[i], precalc_data, count, &seed);
+            }
+        }
+        double t4 = omp_get_wtime();
+
+        // Bascule les buffers: prochaine generation devient la population courante.
+        Individual* temp_population = population;
+        population = next_population;
+        next_population = temp_population;
+
+        // Affichage des chronos toutes les PRINT_EVERY_X_GEN générations (pour ne pas polluer le terminal)
+        if (gen % PRINT_EVERY_X_GEN == 0) {
+            printf("\n--- Gen %d ---\n", gen);
+            printf("Fitness: %.3fs | Tri: %.3fs | Repro: %.3fs | Total: %.3fs\n",
+                    t2 - t1, t3 - t2, t4 - t3, t4 - t1);
+            printf("Meilleure Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d Lits_Total: %ld\n",
+                    population[0].fitness, population[0].desert_population,
+                    population[0].hospitals_count, population[0].chru_count, population[0].beds_count);
+        }
+    }
+
+    // Le meilleur individu (élite conservée) est en tête de population après la dernière bascule.
+    result.best.genes = malloc(count * sizeof(unsigned char));
+    if (result.best.genes != NULL) {
+        copy_individual(&result.best, &population[0], count);
+        result.best_fitness_history = best_history;
+        result.worst_fitness_history = worst_history;
+        result.generations = gen_max;
+    } else {
+        perror("Echec d'allocation du resultat");
+        free(best_history);
+        free(worst_history);
+    }
+
+    for (int i = 0; i < pop_size; i++) {
+        free(population[i].genes);
+        free(next_population[i].genes);
+    }
+    free(population);
+    free(next_population);
+
+    return result;
 }

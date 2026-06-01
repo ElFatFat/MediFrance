@@ -18,7 +18,7 @@ typedef struct Town {
 } Town;
 
 typedef struct Hopital {
-    char nom[256];
+    char name[256];
     float x; // Longitude
     float y; // Latitude
 } Hopital;

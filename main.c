@@ -6,12 +6,13 @@
 
 #include "modules/gui.h"
 #include "modules/gen.h"
+#include "modules/export.h"
 
 #include <MLV/MLV_all.h>
 
 #define POP_SIZE 500
 #define GEN_MAX 10000
-#define CSV_PATH "resources/communes-france-metrople-2025.csv"
+#define CSV_PATH "data/communes-france-metrople-2025.csv"
 
 #define STARTING_HOSPITALS_THRESHOLD 30000 //Choix arbitraire pour amorcer la population avec des hôpitaux sur les zones très peuplées
 #define STARTING_HOSPITALS_THRESHOLD_PROBABILITY 20 //Probabilité (en %) de placer un hôpital sur une zone très peuplée au démarrage
@@ -265,6 +266,10 @@ int main(void) {
         fitness_graph(population[0].fitness, GEN_MAX, gen, MLV_COLOR_BLUE);
     
         fitness_graph(population[POP_SIZE-1].fitness, GEN_MAX, gen, MLV_COLOR_YELLOW);
+    }
+
+    if (export_resultats_csv("data/resultats_hopitaux.csv", towns, count, precalc_data, &population[0]) != 0) {
+        fprintf(stderr, "Avertissement : export CSV échoué\n");
     }
     MLV_clear_window(MLV_COLOR_BLACK);	
     

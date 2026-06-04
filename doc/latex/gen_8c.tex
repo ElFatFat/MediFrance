@@ -7,14 +7,15 @@ Moteur algorithmique de la simulation génétique et de la modélisation géospa
 
 {\ttfamily \+\#include "{}gen.\+h"{}}\newline
 {\ttfamily \+\#include $<$math.\+h$>$}\newline
+{\ttfamily \+\#include $<$stdio.\+h$>$}\newline
 {\ttfamily \+\#include $<$stdlib.\+h$>$}\newline
 {\ttfamily \+\#include $<$string.\+h$>$}\newline
 \doxysubsubsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
-\+\#define \doxymbox{\hyperlink{gen_8c_a7a4127f14f16563da90eb3c836bc404f}{CELL\+\_\+\+SIZE}}~0.\+1
+\+\#define \doxymbox{\hyperlink{gen_8c_a7a4127f14f16563da90eb3c836bc404f}{CELL\+\_\+\+SIZE}}~0.\+1f
 \item 
-\+\#define \doxymbox{\hyperlink{gen_8c_af024f7c359925f78d2baf3761991f9f3}{HABITANTS\+\_\+\+TOTAL}}~65141355
+\+\#define \doxymbox{\hyperlink{gen_8c_a85973c3c404e740ee4edcb31be7e8640}{CELL\+\_\+\+SEARCH\+\_\+\+RADIUS}}~2
 \item 
 \+\#define \doxymbox{\hyperlink{gen_8c_a6b2d35c814f5f73894a604470e0d7860}{HOSPITAL\+\_\+\+COST}}~5000.\+0
 \item 
@@ -22,11 +23,11 @@ Moteur algorithmique de la simulation génétique et de la modélisation géospa
 \item 
 \+\#define \doxymbox{\hyperlink{gen_8c_a39cc7ed0ecbb9517026f3f02b3fbf417}{CHRU\+\_\+\+POP\+\_\+\+THRESHOLD}}~80000
 \item 
-\+\#define \doxymbox{\hyperlink{gen_8c_abdf9046863c3f5294cade34cfa29e0ae}{LAT\+\_\+\+TO\+\_\+\+RAD}}~0.\+0174533
+\+\#define \doxymbox{\hyperlink{gen_8c_abdf9046863c3f5294cade34cfa29e0ae}{LAT\+\_\+\+TO\+\_\+\+RAD}}~0.\+0174533f
 \item 
-\+\#define \doxymbox{\hyperlink{gen_8c_ab787fbc51ab4cc26237c01039fec7ea7}{LATITUDE\+\_\+\+FACTOR}}~111.\+32
+\+\#define \doxymbox{\hyperlink{gen_8c_ab787fbc51ab4cc26237c01039fec7ea7}{LATITUDE\+\_\+\+FACTOR}}~111.\+32f
 \item 
-\+\#define \doxymbox{\hyperlink{gen_8c_a15ce3a8b7daeab5ddc01de61f783e2b1}{BEDS\+\_\+\+PER\+\_\+1000}}~5.\+4
+\+\#define \doxymbox{\hyperlink{gen_8c_a15ce3a8b7daeab5ddc01de61f783e2b1}{BEDS\+\_\+\+PER\+\_\+1000}}~5.\+4f
 \item 
 \+\#define \doxymbox{\hyperlink{gen_8c_a57e1bdcc9cd0039e198507ae492cc65d}{PROB\+\_\+\+DELETE}}~80
 \item 
@@ -45,18 +46,41 @@ Moteur algorithmique de la simulation génétique et de la modélisation géospa
 \doxysubsubsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-\doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*} \doxymbox{\hyperlink{gen_8c_a6cec5a7122032798f0faa0b0ce053d6f}{precalc\+\_\+near}} (Town \texorpdfstring{$\ast$}{*}restrict towns, size\+\_\+t count)
+void \doxymbox{\hyperlink{gen_8c_aab84f5d957572e618361d137320f5e41}{set\+\_\+habitants\+\_\+total}} (long total)
+\item 
+long \doxymbox{\hyperlink{gen_8c_a66e67dcc0db3fc0078ea32cdbe009dca}{get\+\_\+habitants\+\_\+total}} (void)
+\item 
+void \doxymbox{\hyperlink{gen_8c_addb90137c4fabfba204e975c5d5ac4cf}{log\+\_\+precalc\+\_\+summary}} (const \doxymbox{\hyperlink{structOptimizedData}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}data, size\+\_\+t count)
+\item 
+\doxymbox{\hyperlink{structPopulationSummary}{Population\+Summary}} \doxymbox{\hyperlink{gen_8c_ac90c6eca4081b04bd584fc9d4253c577}{summarize\+\_\+population}} (const \doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}pop, int pop\+\_\+size)
+\item 
+void \doxymbox{\hyperlink{gen_8c_a9a24c34192d1b18c7e3d9bde3b62c017}{log\+\_\+population\+\_\+summary}} (const \doxymbox{\hyperlink{structPopulationSummary}{Population\+Summary}} \texorpdfstring{$\ast$}{*}s, int gen, int gen\+\_\+max)
+\item 
+void \doxymbox{\hyperlink{gen_8c_ab652b4b63e1743d05c6de88b28c3d35a}{log\+\_\+generation\+\_\+timings}} (int gen, double fitness\+\_\+s, double sort\+\_\+s, double repro\+\_\+s)
+\item 
+void \doxymbox{\hyperlink{gen_8c_aca31a49357a6374f1ced9e65aa2e136d}{log\+\_\+solution\+\_\+details}} (const \doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}ind, long total\+\_\+pop, const char \texorpdfstring{$\ast$}{*}label)
+\item 
+float \doxymbox{\hyperlink{gen_8c_ad03cce4b8e5f7953afbf3b5f1a6c8f9f}{town\+\_\+distance\+\_\+km}} (const Town \texorpdfstring{$\ast$}{*}a, const Town \texorpdfstring{$\ast$}{*}b)
+\item 
+\doxymbox{\hyperlink{structOptimizedData}{Optimized\+Data}} \texorpdfstring{$\ast$}{*} \doxymbox{\hyperlink{gen_8c_a6cec5a7122032798f0faa0b0ce053d6f}{precalc\+\_\+near}} (Town \texorpdfstring{$\ast$}{*}restrict towns, size\+\_\+t count)
 \begin{DoxyCompactList}\small\item\em Effectue la sectorisation spatiale par grille de hachage et liste les communes à \texorpdfstring{$<$}{<} 10km. \end{DoxyCompactList}\item 
-void \doxymbox{\hyperlink{gen_8c_a2130763af2275811d57ca432ade18661}{fitness}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}restrict ind, Town \texorpdfstring{$\ast$}{*}restrict towns, \doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}restrict data, size\+\_\+t count, unsigned char \texorpdfstring{$\ast$}{*}restrict coverage\+\_\+buffer)
+void \doxymbox{\hyperlink{gen_8c_a2130763af2275811d57ca432ade18661}{fitness}} (\doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}restrict ind, Town \texorpdfstring{$\ast$}{*}restrict towns, \doxymbox{\hyperlink{structOptimizedData}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}restrict data, size\+\_\+t count, unsigned char \texorpdfstring{$\ast$}{*}restrict coverage\+\_\+buffer)
 \begin{DoxyCompactList}\small\item\em Calcule la valeur de fitness globale et les statistiques d\textquotesingle{}un individu. \end{DoxyCompactList}\item 
-void \doxymbox{\hyperlink{gen_8c_a2ef24c894c8474a841a2b8750bb6068a}{quick\+\_\+sort\+\_\+population}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}pop, int left, int right)
+int \doxymbox{\hyperlink{gen_8c_ab6f718130844983b1e6be8e3c5f72646}{audit\+\_\+coverage}} (const Town \texorpdfstring{$\ast$}{*}towns, size\+\_\+t count, const \doxymbox{\hyperlink{structOptimizedData}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}data, const \doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}ind)
+\item 
+void \doxymbox{\hyperlink{gen_8c_a2ef24c894c8474a841a2b8750bb6068a}{quick\+\_\+sort\+\_\+population}} (\doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}pop, int left, int right)
 \begin{DoxyCompactList}\small\item\em Trie par partitionnement récursif (Quicksort) la population d\textquotesingle{}individus par ordre décroissant. \end{DoxyCompactList}\item 
-void \doxymbox{\hyperlink{gen_8c_a9f35970a2e93d420619fefa6831f15f3}{copy\+\_\+individual}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}dest, const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}src, size\+\_\+t count)
+void \doxymbox{\hyperlink{gen_8c_a9f35970a2e93d420619fefa6831f15f3}{copy\+\_\+individual}} (\doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}dest, const \doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}src, size\+\_\+t count)
 \begin{DoxyCompactList}\small\item\em Réalise une copie complète bloc à bloc des attributs et des gènes d\textquotesingle{}un individu source vers une destination. \end{DoxyCompactList}\item 
-void \doxymbox{\hyperlink{gen_8c_a4be36c24ac07e27f922ecbb557f38491}{mutate}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}ind, const \doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}data, size\+\_\+t count, unsigned int \texorpdfstring{$\ast$}{*}seed)
+void \doxymbox{\hyperlink{gen_8c_a4be36c24ac07e27f922ecbb557f38491}{mutate}} (\doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}ind, const \doxymbox{\hyperlink{structOptimizedData}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}data, size\+\_\+t count, unsigned int \texorpdfstring{$\ast$}{*}seed)
 \begin{DoxyCompactList}\small\item\em Induit des perturbations génotypiques via l\textquotesingle{}ajout stratégique et l\textquotesingle{}élagage aléatoire d\textquotesingle{}hôpitaux. \end{DoxyCompactList}\item 
-void \doxymbox{\hyperlink{gen_8c_a6f22b5042a9b07a7b4362cd5b9c2f089}{crossover}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}enfant, const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}p1, const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}p2, size\+\_\+t count, unsigned int \texorpdfstring{$\ast$}{*}seed)
+void \doxymbox{\hyperlink{gen_8c_a6f22b5042a9b07a7b4362cd5b9c2f089}{crossover}} (\doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}enfant, const \doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}p1, const \doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}p2, size\+\_\+t count, unsigned int \texorpdfstring{$\ast$}{*}seed)
 \begin{DoxyCompactList}\small\item\em Produit un descendant hybride par combinaison croisée en deux points à partir de deux parents distincts. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+static long \doxymbox{\hyperlink{gen_8c_abb2281c7be25b782014176fc87b76c2a}{g\+\_\+habitants\+\_\+total}} = 65141355
+\end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}
@@ -71,13 +95,19 @@ Moteur algorithmique de la simulation génétique et de la modélisation géospa
 \index{BEDS\_PER\_1000@{BEDS\_PER\_1000}!gen.c@{gen.c}}
 \doxysubsubsection{\texorpdfstring{BEDS\_PER\_1000}{BEDS\_PER\_1000}}
 {\footnotesize\ttfamily \label{gen_8c_a15ce3a8b7daeab5ddc01de61f783e2b1} 
-\+\#define BEDS\+\_\+\+PER\+\_\+1000~5.\+4}
+\+\#define BEDS\+\_\+\+PER\+\_\+1000~5.\+4f}
+
+\Hypertarget{gen_8c_a85973c3c404e740ee4edcb31be7e8640}\index{gen.c@{gen.c}!CELL\_SEARCH\_RADIUS@{CELL\_SEARCH\_RADIUS}}
+\index{CELL\_SEARCH\_RADIUS@{CELL\_SEARCH\_RADIUS}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{CELL\_SEARCH\_RADIUS}{CELL\_SEARCH\_RADIUS}}
+{\footnotesize\ttfamily \label{gen_8c_a85973c3c404e740ee4edcb31be7e8640} 
+\+\#define CELL\+\_\+\+SEARCH\+\_\+\+RADIUS~2}
 
 \Hypertarget{gen_8c_a7a4127f14f16563da90eb3c836bc404f}\index{gen.c@{gen.c}!CELL\_SIZE@{CELL\_SIZE}}
 \index{CELL\_SIZE@{CELL\_SIZE}!gen.c@{gen.c}}
 \doxysubsubsection{\texorpdfstring{CELL\_SIZE}{CELL\_SIZE}}
 {\footnotesize\ttfamily \label{gen_8c_a7a4127f14f16563da90eb3c836bc404f} 
-\+\#define CELL\+\_\+\+SIZE~0.\+1}
+\+\#define CELL\+\_\+\+SIZE~0.\+1f}
 
 \Hypertarget{gen_8c_a84aa2bbc9443809ff3702c9567320730}\index{gen.c@{gen.c}!CHRU\_BONUS@{CHRU\_BONUS}}
 \index{CHRU\_BONUS@{CHRU\_BONUS}!gen.c@{gen.c}}
@@ -91,12 +121,6 @@ Moteur algorithmique de la simulation génétique et de la modélisation géospa
 {\footnotesize\ttfamily \label{gen_8c_a39cc7ed0ecbb9517026f3f02b3fbf417} 
 \+\#define CHRU\+\_\+\+POP\+\_\+\+THRESHOLD~80000}
 
-\Hypertarget{gen_8c_af024f7c359925f78d2baf3761991f9f3}\index{gen.c@{gen.c}!HABITANTS\_TOTAL@{HABITANTS\_TOTAL}}
-\index{HABITANTS\_TOTAL@{HABITANTS\_TOTAL}!gen.c@{gen.c}}
-\doxysubsubsection{\texorpdfstring{HABITANTS\_TOTAL}{HABITANTS\_TOTAL}}
-{\footnotesize\ttfamily \label{gen_8c_af024f7c359925f78d2baf3761991f9f3} 
-\+\#define HABITANTS\+\_\+\+TOTAL~65141355}
-
 \Hypertarget{gen_8c_a6b2d35c814f5f73894a604470e0d7860}\index{gen.c@{gen.c}!HOSPITAL\_COST@{HOSPITAL\_COST}}
 \index{HOSPITAL\_COST@{HOSPITAL\_COST}!gen.c@{gen.c}}
 \doxysubsubsection{\texorpdfstring{HOSPITAL\_COST}{HOSPITAL\_COST}}
@@ -107,13 +131,13 @@ Moteur algorithmique de la simulation génétique et de la modélisation géospa
 \index{LAT\_TO\_RAD@{LAT\_TO\_RAD}!gen.c@{gen.c}}
 \doxysubsubsection{\texorpdfstring{LAT\_TO\_RAD}{LAT\_TO\_RAD}}
 {\footnotesize\ttfamily \label{gen_8c_abdf9046863c3f5294cade34cfa29e0ae} 
-\+\#define LAT\+\_\+\+TO\+\_\+\+RAD~0.\+0174533}
+\+\#define LAT\+\_\+\+TO\+\_\+\+RAD~0.\+0174533f}
 
 \Hypertarget{gen_8c_ab787fbc51ab4cc26237c01039fec7ea7}\index{gen.c@{gen.c}!LATITUDE\_FACTOR@{LATITUDE\_FACTOR}}
 \index{LATITUDE\_FACTOR@{LATITUDE\_FACTOR}!gen.c@{gen.c}}
 \doxysubsubsection{\texorpdfstring{LATITUDE\_FACTOR}{LATITUDE\_FACTOR}}
 {\footnotesize\ttfamily \label{gen_8c_ab787fbc51ab4cc26237c01039fec7ea7} 
-\+\#define LATITUDE\+\_\+\+FACTOR~111.\+32}
+\+\#define LATITUDE\+\_\+\+FACTOR~111.\+32f}
 
 \Hypertarget{gen_8c_ad872eb7468119cbb74c97e138a042512}\index{gen.c@{gen.c}!MAX\_DELETE\_HOSPITALS@{MAX\_DELETE\_HOSPITALS}}
 \index{MAX\_DELETE\_HOSPITALS@{MAX\_DELETE\_HOSPITALS}!gen.c@{gen.c}}
@@ -162,11 +186,17 @@ Moteur algorithmique de la simulation génétique et de la modélisation géospa
 \label{doc-func-members}
 \Hypertarget{gen_8c_doc-func-members}
 \doxysubsection{Function Documentation}
+\Hypertarget{gen_8c_ab6f718130844983b1e6be8e3c5f72646}\index{gen.c@{gen.c}!audit\_coverage@{audit\_coverage}}
+\index{audit\_coverage@{audit\_coverage}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{audit\_coverage()}{audit\_coverage()}}
+{\footnotesize\ttfamily \label{gen_8c_ab6f718130844983b1e6be8e3c5f72646} 
+int audit\+\_\+coverage (\begin{DoxyParamCaption}\item[{const Town \texorpdfstring{$\ast$}{*}}]{towns}{, }\item[{size\+\_\+t}]{count}{, }\item[{const \doxymbox{\hyperlink{structOptimizedData}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}}]{data}{, }\item[{const \doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}}]{ind}{}\end{DoxyParamCaption})}
+
 \Hypertarget{gen_8c_a9f35970a2e93d420619fefa6831f15f3}\index{gen.c@{gen.c}!copy\_individual@{copy\_individual}}
 \index{copy\_individual@{copy\_individual}!gen.c@{gen.c}}
 \doxysubsubsection{\texorpdfstring{copy\_individual()}{copy\_individual()}}
 {\footnotesize\ttfamily \label{gen_8c_a9f35970a2e93d420619fefa6831f15f3} 
-void copy\+\_\+individual (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{dest}{, }\item[{const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{src}{, }\item[{size\+\_\+t}]{count}{}\end{DoxyParamCaption})}
+void copy\+\_\+individual (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}}]{dest}{, }\item[{const \doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}}]{src}{, }\item[{size\+\_\+t}]{count}{}\end{DoxyParamCaption})}
 
 
 
@@ -185,7 +215,7 @@ Réalise une copie complète bloc à bloc des attributs et des gènes d\textquot
 \index{crossover@{crossover}!gen.c@{gen.c}}
 \doxysubsubsection{\texorpdfstring{crossover()}{crossover()}}
 {\footnotesize\ttfamily \label{gen_8c_a6f22b5042a9b07a7b4362cd5b9c2f089} 
-void crossover (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{enfant}{, }\item[{const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{p1}{, }\item[{const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{p2}{, }\item[{size\+\_\+t}]{count}{, }\item[{unsigned int \texorpdfstring{$\ast$}{*}}]{seed}{}\end{DoxyParamCaption})}
+void crossover (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}}]{enfant}{, }\item[{const \doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}}]{p1}{, }\item[{const \doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}}]{p2}{, }\item[{size\+\_\+t}]{count}{, }\item[{unsigned int \texorpdfstring{$\ast$}{*}}]{seed}{}\end{DoxyParamCaption})}
 
 
 
@@ -208,7 +238,7 @@ Produit un descendant hybride par combinaison croisée en deux points à partir 
 \index{fitness@{fitness}!gen.c@{gen.c}}
 \doxysubsubsection{\texorpdfstring{fitness()}{fitness()}}
 {\footnotesize\ttfamily \label{gen_8c_a2130763af2275811d57ca432ade18661} 
-void fitness (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}restrict}]{ind}{, }\item[{Town \texorpdfstring{$\ast$}{*}restrict}]{towns}{, }\item[{\doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}restrict}]{data}{, }\item[{size\+\_\+t}]{count}{, }\item[{unsigned char \texorpdfstring{$\ast$}{*}restrict}]{coverage\+\_\+buffer}{}\end{DoxyParamCaption})}
+void fitness (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}restrict}]{ind}{, }\item[{Town \texorpdfstring{$\ast$}{*}restrict}]{towns}{, }\item[{\doxymbox{\hyperlink{structOptimizedData}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}restrict}]{data}{, }\item[{size\+\_\+t}]{count}{, }\item[{unsigned char \texorpdfstring{$\ast$}{*}restrict}]{coverage\+\_\+buffer}{}\end{DoxyParamCaption})}
 
 
 
@@ -227,11 +257,41 @@ Calcule la valeur de fitness globale et les statistiques d\textquotesingle{}un i
 {\em coverage\+\_\+buffer} & Zone tampon intermédiaire pour éviter le double-\/comptage. \\
 \hline
 \end{DoxyParams}
+\Hypertarget{gen_8c_a66e67dcc0db3fc0078ea32cdbe009dca}\index{gen.c@{gen.c}!get\_habitants\_total@{get\_habitants\_total}}
+\index{get\_habitants\_total@{get\_habitants\_total}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{get\_habitants\_total()}{get\_habitants\_total()}}
+{\footnotesize\ttfamily \label{gen_8c_a66e67dcc0db3fc0078ea32cdbe009dca} 
+long get\+\_\+habitants\+\_\+total (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{gen_8c_ab652b4b63e1743d05c6de88b28c3d35a}\index{gen.c@{gen.c}!log\_generation\_timings@{log\_generation\_timings}}
+\index{log\_generation\_timings@{log\_generation\_timings}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{log\_generation\_timings()}{log\_generation\_timings()}}
+{\footnotesize\ttfamily \label{gen_8c_ab652b4b63e1743d05c6de88b28c3d35a} 
+void log\+\_\+generation\+\_\+timings (\begin{DoxyParamCaption}\item[{int}]{gen}{, }\item[{double}]{fitness\+\_\+s}{, }\item[{double}]{sort\+\_\+s}{, }\item[{double}]{repro\+\_\+s}{}\end{DoxyParamCaption})}
+
+\Hypertarget{gen_8c_a9a24c34192d1b18c7e3d9bde3b62c017}\index{gen.c@{gen.c}!log\_population\_summary@{log\_population\_summary}}
+\index{log\_population\_summary@{log\_population\_summary}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{log\_population\_summary()}{log\_population\_summary()}}
+{\footnotesize\ttfamily \label{gen_8c_a9a24c34192d1b18c7e3d9bde3b62c017} 
+void log\+\_\+population\+\_\+summary (\begin{DoxyParamCaption}\item[{const \doxymbox{\hyperlink{structPopulationSummary}{Population\+Summary}} \texorpdfstring{$\ast$}{*}}]{s}{, }\item[{int}]{gen}{, }\item[{int}]{gen\+\_\+max}{}\end{DoxyParamCaption})}
+
+\Hypertarget{gen_8c_addb90137c4fabfba204e975c5d5ac4cf}\index{gen.c@{gen.c}!log\_precalc\_summary@{log\_precalc\_summary}}
+\index{log\_precalc\_summary@{log\_precalc\_summary}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{log\_precalc\_summary()}{log\_precalc\_summary()}}
+{\footnotesize\ttfamily \label{gen_8c_addb90137c4fabfba204e975c5d5ac4cf} 
+void log\+\_\+precalc\+\_\+summary (\begin{DoxyParamCaption}\item[{const \doxymbox{\hyperlink{structOptimizedData}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}}]{data}{, }\item[{size\+\_\+t}]{count}{}\end{DoxyParamCaption})}
+
+\Hypertarget{gen_8c_aca31a49357a6374f1ced9e65aa2e136d}\index{gen.c@{gen.c}!log\_solution\_details@{log\_solution\_details}}
+\index{log\_solution\_details@{log\_solution\_details}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{log\_solution\_details()}{log\_solution\_details()}}
+{\footnotesize\ttfamily \label{gen_8c_aca31a49357a6374f1ced9e65aa2e136d} 
+void log\+\_\+solution\+\_\+details (\begin{DoxyParamCaption}\item[{const \doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}}]{ind}{, }\item[{long}]{total\+\_\+pop}{, }\item[{const char \texorpdfstring{$\ast$}{*}}]{label}{}\end{DoxyParamCaption})}
+
 \Hypertarget{gen_8c_a4be36c24ac07e27f922ecbb557f38491}\index{gen.c@{gen.c}!mutate@{mutate}}
 \index{mutate@{mutate}!gen.c@{gen.c}}
 \doxysubsubsection{\texorpdfstring{mutate()}{mutate()}}
 {\footnotesize\ttfamily \label{gen_8c_a4be36c24ac07e27f922ecbb557f38491} 
-void mutate (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{ind}{, }\item[{const \doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}}]{data}{, }\item[{size\+\_\+t}]{count}{, }\item[{unsigned int \texorpdfstring{$\ast$}{*}}]{seed}{}\end{DoxyParamCaption})}
+void mutate (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}}]{ind}{, }\item[{const \doxymbox{\hyperlink{structOptimizedData}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}}]{data}{, }\item[{size\+\_\+t}]{count}{, }\item[{unsigned int \texorpdfstring{$\ast$}{*}}]{seed}{}\end{DoxyParamCaption})}
 
 
 
@@ -252,7 +312,7 @@ Induit des perturbations génotypiques via l\textquotesingle{}ajout stratégique
 \index{precalc\_near@{precalc\_near}!gen.c@{gen.c}}
 \doxysubsubsection{\texorpdfstring{precalc\_near()}{precalc\_near()}}
 {\footnotesize\ttfamily \label{gen_8c_a6cec5a7122032798f0faa0b0ce053d6f} 
-\doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*} precalc\+\_\+near (\begin{DoxyParamCaption}\item[{Town \texorpdfstring{$\ast$}{*}restrict}]{towns}{, }\item[{size\+\_\+t}]{count}{}\end{DoxyParamCaption})}
+\doxymbox{\hyperlink{structOptimizedData}{Optimized\+Data}} \texorpdfstring{$\ast$}{*} precalc\+\_\+near (\begin{DoxyParamCaption}\item[{Town \texorpdfstring{$\ast$}{*}restrict}]{towns}{, }\item[{size\+\_\+t}]{count}{}\end{DoxyParamCaption})}
 
 
 
@@ -272,7 +332,7 @@ Pointeur vers le tableau de structures optimisées alloué dynamiquement.
 \index{quick\_sort\_population@{quick\_sort\_population}!gen.c@{gen.c}}
 \doxysubsubsection{\texorpdfstring{quick\_sort\_population()}{quick\_sort\_population()}}
 {\footnotesize\ttfamily \label{gen_8c_a2ef24c894c8474a841a2b8750bb6068a} 
-void quick\+\_\+sort\+\_\+population (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{pop}{, }\item[{int}]{left}{, }\item[{int}]{right}{}\end{DoxyParamCaption})}
+void quick\+\_\+sort\+\_\+population (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}}]{pop}{, }\item[{int}]{left}{, }\item[{int}]{right}{}\end{DoxyParamCaption})}
 
 
 
@@ -287,3 +347,32 @@ Trie par partitionnement récursif (Quicksort) la population d\textquotesingle{}
 {\em right} & Index de borne droite. \\
 \hline
 \end{DoxyParams}
+\Hypertarget{gen_8c_aab84f5d957572e618361d137320f5e41}\index{gen.c@{gen.c}!set\_habitants\_total@{set\_habitants\_total}}
+\index{set\_habitants\_total@{set\_habitants\_total}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{set\_habitants\_total()}{set\_habitants\_total()}}
+{\footnotesize\ttfamily \label{gen_8c_aab84f5d957572e618361d137320f5e41} 
+void set\+\_\+habitants\+\_\+total (\begin{DoxyParamCaption}\item[{long}]{total}{}\end{DoxyParamCaption})}
+
+\Hypertarget{gen_8c_ac90c6eca4081b04bd584fc9d4253c577}\index{gen.c@{gen.c}!summarize\_population@{summarize\_population}}
+\index{summarize\_population@{summarize\_population}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{summarize\_population()}{summarize\_population()}}
+{\footnotesize\ttfamily \label{gen_8c_ac90c6eca4081b04bd584fc9d4253c577} 
+\doxymbox{\hyperlink{structPopulationSummary}{Population\+Summary}} summarize\+\_\+population (\begin{DoxyParamCaption}\item[{const \doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}}]{pop}{, }\item[{int}]{pop\+\_\+size}{}\end{DoxyParamCaption})}
+
+\Hypertarget{gen_8c_ad03cce4b8e5f7953afbf3b5f1a6c8f9f}\index{gen.c@{gen.c}!town\_distance\_km@{town\_distance\_km}}
+\index{town\_distance\_km@{town\_distance\_km}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{town\_distance\_km()}{town\_distance\_km()}}
+{\footnotesize\ttfamily \label{gen_8c_ad03cce4b8e5f7953afbf3b5f1a6c8f9f} 
+float town\+\_\+distance\+\_\+km (\begin{DoxyParamCaption}\item[{const Town \texorpdfstring{$\ast$}{*}}]{a}{, }\item[{const Town \texorpdfstring{$\ast$}{*}}]{b}{}\end{DoxyParamCaption})}
+
+
+
+\label{doc-var-members}
+\Hypertarget{gen_8c_doc-var-members}
+\doxysubsection{Variable Documentation}
+\Hypertarget{gen_8c_abb2281c7be25b782014176fc87b76c2a}\index{gen.c@{gen.c}!g\_habitants\_total@{g\_habitants\_total}}
+\index{g\_habitants\_total@{g\_habitants\_total}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{g\_habitants\_total}{g\_habitants\_total}}
+{\footnotesize\ttfamily \label{gen_8c_abb2281c7be25b782014176fc87b76c2a} 
+long g\+\_\+habitants\+\_\+total = 65141355\hspace{0.3cm}{\ttfamily [static]}}
+

@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['neighbor_5fcount_0',['neighbor_count',['../struct_optimized_data.html#a113e84c82c78765bb135f98e5b3fac42',1,'OptimizedData']]],
-  ['neighbors_1',['neighbors',['../struct_optimized_data.html#a3df6b61c0c51f4f326fc6ecebae1a690',1,'OptimizedData']]]
+  ['neighbor_5fcount_0',['neighbor_count',['../structOptimizedData.html#a113e84c82c78765bb135f98e5b3fac42',1,'OptimizedData']]],
+  ['neighbors_1',['neighbors',['../structOptimizedData.html#a3df6b61c0c51f4f326fc6ecebae1a690',1,'OptimizedData']]],
+  ['nettoyer_2',['Nettoyer',['../index.html#autotoc_md33',1,'']]]
 ];

@@ -1,6 +1,11 @@
 var searchData=
 [
-  ['desert_5fpopulation_0',['desert_population',['../struct_individual.html#a47792e70f0b0341dce6733eb59ec074d',1,'Individual']]],
-  ['draw_5fbase_5finterface_1',['draw_base_interface',['../gui_8c.html#ac213784499f0754efbd8a1b750bfbb3c',1,'gui.c']]],
-  ['draw_5fhospitals_2',['draw_hospitals',['../gui_8c.html#a10b057b0d3e1a8a195deff97230f009c',1,'draw_hospitals(Town *communes, size_t count, Individual ind):&#160;gui.c'],['../gui_8h.html#a10b057b0d3e1a8a195deff97230f009c',1,'draw_hospitals(Town *communes, size_t count, Individual ind):&#160;gui.c']]]
+  ['en_20une_20exécution_20typique_0',['En une exécution typique',['../index.html#autotoc_md3',1,'']]],
+  ['et_20compilation_20linux_1',['Installation et compilation (Linux)',['../index.html#autotoc_md26',1,'']]],
+  ['exécution_20typique_2',['En une exécution typique',['../index.html#autotoc_md3',1,'']]],
+  ['exporté_20export_20c_3',['Fichier exporté (&lt;span class=&quot;tt&quot;&gt;export.c&lt;/span&gt;)',['../index.html#autotoc_md22',1,'']]],
+  ['export_20c_4',['Fichier exporté (&lt;span class=&quot;tt&quot;&gt;export.c&lt;/span&gt;)',['../index.html#autotoc_md22',1,'']]],
+  ['export_2ec_5',['export.c',['../export_8c.html',1,'']]],
+  ['export_2eh_6',['export.h',['../export_8h.html',1,'']]],
+  ['export_5fresultats_5fcsv_7',['export_resultats_csv',['../export_8c.html#a204325bdd184f41a396da856c7a12e1a',1,'export_resultats_csv(const char *path, const Town *towns, size_t count, const OptimizedData *precalc_data, const Individual *best):&#160;export.c'],['../export_8h.html#a204325bdd184f41a396da856c7a12e1a',1,'export_resultats_csv(const char *path, const Town *towns, size_t count, const OptimizedData *precalc_data, const Individual *best):&#160;export.c']]]
 ];

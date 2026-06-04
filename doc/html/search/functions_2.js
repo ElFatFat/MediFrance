@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['export_5fresultats_5fcsv_0',['export_resultats_csv',['../export_8c.html#a204325bdd184f41a396da856c7a12e1a',1,'export_resultats_csv(const char *path, const Town *towns, size_t count, const OptimizedData *precalc_data, const Individual *best):&#160;export.c'],['../export_8h.html#a204325bdd184f41a396da856c7a12e1a',1,'export_resultats_csv(const char *path, const Town *towns, size_t count, const OptimizedData *precalc_data, const Individual *best):&#160;export.c']]]
+  ['draw_5fbase_5finterface_0',['draw_base_interface',['../gui_8c.html#ac213784499f0754efbd8a1b750bfbb3c',1,'gui.c']]],
+  ['draw_5fhospitals_1',['draw_hospitals',['../gui_8c.html#a10b057b0d3e1a8a195deff97230f009c',1,'draw_hospitals(Town *communes, size_t count, Individual ind):&#160;gui.c'],['../gui_8h.html#a10b057b0d3e1a8a195deff97230f009c',1,'draw_hospitals(Town *communes, size_t count, Individual ind):&#160;gui.c']]]
 ];

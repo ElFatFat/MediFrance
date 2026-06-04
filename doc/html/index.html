@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.16.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MediFrance: MediFrance - geomatics and public health project for S2</title>
+<title>MediFrance: MediFrance</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -88,44 +88,292 @@ $(function(){initNavTree('index.html','',''); });
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">MediFrance - geomatics and public health project for S2 </div></div>
+  <div class="headertitle"><div class="title">MediFrance </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md__r_e_a_d_m_e"></a></p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md1"></a>
-Local setup (Linux only)</h1>
-<p>This project is designed to run on <b>Linux</b>.</p>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md2"></a>
-1) Prerequisites</h2>
+<div class="textblock"><p><a class="anchor" id="md_README"></a></p>
+<p>Projet de géomatique et santé publique (ESIEE, S2) : optimiser la répartition des hôpitaux en <b>France métropolitaine</b> (Corse et DOM-TOM exclus) à l’aide d’un <b>algorithme génétique</b>.</p>
+<p>L’objectif est de maximiser la population couverte dans un rayon de <b>10 km</b> autour de chaque hôpital, tout en limitant le nombre d’établissements (coût) et en favorisant les <b>CHRU</b> sur les grandes communes.</p>
+<hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md2"></a>
+Vue d’ensemble du flux</h1>
+<div class="fragment"><div class="line">flowchart LR</div>
+<div class="line">    subgraph entree [Entrées]</div>
+<div class="line">        CSV[&quot;communes-france-metrople-2025.csv&quot;]</div>
+<div class="line">    end</div>
+<div class="line"> </div>
+<div class="line">    subgraph c_prog [Programme C — build/medifrance]</div>
+<div class="line">        LOAD[Chargement communes]</div>
+<div class="line">        PRE[precalc_near — grille 10 km]</div>
+<div class="line">        GA[Algorithme génétique]</div>
+<div class="line">        AUD[audit_coverage]</div>
+<div class="line">        EXP[export_resultats_csv]</div>
+<div class="line">        GUI[Interface MLV optionnelle]</div>
+<div class="line">    end</div>
+<div class="line"> </div>
+<div class="line">    subgraph sortie [Sorties]</div>
+<div class="line">        RES[&quot;data/resultats_hopitaux.csv&quot;]</div>
+<div class="line">        PDF[&quot;report/*.pdf&quot;]</div>
+<div class="line">    end</div>
+<div class="line"> </div>
+<div class="line">    subgraph python [Python]</div>
+<div class="line">        PDFGEN[pdfgenerator.py]</div>
+<div class="line">    end</div>
+<div class="line"> </div>
+<div class="line">    CSV --&gt; LOAD --&gt; PRE --&gt; GA --&gt; AUD --&gt; EXP --&gt; RES</div>
+<div class="line">    GA --&gt; GUI</div>
+<div class="line">    RES --&gt; PDFGEN --&gt; PDF</div>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md3"></a>
+En une exécution typique</h2>
+<ol type="1">
+<li><b>Charger</b> ~34 000 communes (population, latitude, longitude).</li>
+<li><b>Précalculer</b> pour chaque commune la liste des voisins à ≤ 10 km (accélération massive de la fitness).</li>
+<li><b>Faire évoluer</b> une population de solutions (où placer les hôpitaux).</li>
+<li><b>Auditer</b> la meilleure solution (cohérence géographique).</li>
+<li><b>Exporter</b> un CSV commune par commune.</li>
+<li><em>(Optionnel)</em> Générer un <b>rapport PDF</b> département par département.</li>
+</ol>
+<hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md5"></a>
+Structure du dépôt</h1>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Chemin  </th><th class="markdownTableHeadNone">Rôle  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">main.c</span>  </td><td class="markdownTableBodyNone">Point d’entrée : chargement CSV, boucle GA, logs, export, GUI  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">main.h</span>  </td><td class="markdownTableBodyNone">Structure <span class="tt">Town</span> (commune)  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt"><a class="el" href="gen_8c.html" title="Moteur algorithmique de la simulation génétique et de la modélisation géospatiale.">modules/gen.c</a></span> / <span class="tt"><a class="el" href="gen_8h.html" title="Déclarations des types de données et prototypes pour l&#39;algorithme génétique spatialisé.">gen.h</a></span>  </td><td class="markdownTableBodyNone">Précalcul voisins, fitness, sélection, croisement, mutation, audit  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt"><a class="el" href="export_8c.html" title="Implémentation de la logique d&#39;écriture et d&#39;évaluation finale pour l&#39;export CSV.">modules/export.c</a></span>  </td><td class="markdownTableBodyNone">Écriture de <span class="tt">data/resultats_hopitaux.csv</span>  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt"><a class="el" href="gui_8c.html" title="Implémentation des fonctionnalités graphiques et projection géographique en pixels.">modules/gui.c</a></span>  </td><td class="markdownTableBodyNone">Carte MLV + courbe de fitness en temps réel  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">data/communes-france-metrople-2025.csv</span>  </td><td class="markdownTableBodyNone">Données d’entrée (métropole)  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">data/resultats_hopitaux.csv</span>  </td><td class="markdownTableBodyNone">Résultat du meilleur individu (généré)  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">scripts-pdf-generation/pdfgenerator.py</span>  </td><td class="markdownTableBodyNone">Rapport PDF à partir du CSV  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">assets/</span>  </td><td class="markdownTableBodyNone">Polices DejaVu et logos pour le PDF  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">report/</span>  </td><td class="markdownTableBodyNone">PDF et cartes générés  </td></tr>
+</table>
+<hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md7"></a>
+Modèle du problème</h1>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md8"></a>
+Une solution = un individu</h2>
+<p>Chaque <b>individu</b> du GA est un chromosome binaire de taille <span class="tt">N</span> (nombre de communes) :</p>
 <ul>
-<li><span class="tt">gcc</span></li>
-<li><span class="tt">make</span></li>
-<li><span class="tt">pkg-config</span></li>
-<li><span class="tt">libMLV</span> development files (<span class="tt">MLV/MLV_all.h</span>)</li>
-<li><span class="tt">cppcheck</span> (installed automatically by <span class="tt">setup.sh</span>)</li>
+<li><span class="tt">genes[i] = 1</span> → un hôpital est placé sur la commune <span class="tt">i</span></li>
+<li><span class="tt">genes[i] = 0</span> → pas d’hôpital sur cette commune</li>
+</ul>
+<p>On ne déplace pas des hôpitaux existants : on <b>choisit des communes</b> où ouvrir (ou maintenir) un établissement dans le modèle de simulation.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md9"></a>
+Couverture (règle des 10 km)</h2>
+<p>Une commune est <b>couverte</b> si :</p>
+<ul>
+<li>elle porte un hôpital (<span class="tt">gene = 1</span>), <b>ou</b></li>
+<li>elle figure dans la liste des <b>voisins</b> (distance ≤ 10 km) d’au moins un hôpital.</li>
+</ul>
+<p>La distance est calculée en kilomètres à partir des coordonnées GPS (approximation locale avec latitude moyenne pour la longitude).</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md10"></a>
+Fonction de fitness (à maximiser)</h2>
+<p>Pour chaque individu, après parcours de tous les hôpitaux et marquage des communes couvertes :</p>
+<div class="fragment"><div class="line">fitness = population_totale_métropole</div>
+<div class="line">        - population_en_désert</div>
+<div class="line">        - (5000 × nombre_d_hôpitaux)</div>
+<div class="line">        + (4000 × nombre_de_CHRU)</div>
+</div><!-- fragment --><table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Terme  </th><th class="markdownTableHeadNone">Signification  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">population_en_désert</span>  </td><td class="markdownTableBodyNone">Habitants des communes non couvertes  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">5000 × hôpitaux</span>  </td><td class="markdownTableBodyNone">Pénalité par établissement (évite la sur-densité)  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">4000 × CHRU</span>  </td><td class="markdownTableBodyNone">Bonus si l’hôpital est sur une commune &gt; 80 000 hab. (éligible CHRU)  </td></tr>
+</table>
+<p>Les <b>lits</b> (5,4 pour 1 000 habitants couverts par hôpital) sont calculés pour l’export et les logs, mais ne entrent pas directement dans la fitness.</p>
+<p>Plus la fitness est <b>élevée</b>, meilleure est la solution.</p>
+<hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md12"></a>
+Précalcul des voisins (<span class="tt">precalc_near</span>)</h1>
+<p>Évaluer la fitness pour ~34 000 communes × 200 individus × 1 000 générations serait prohibitif sans structure spatiale.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md13"></a>
+Grille spatiale</h2>
+<ol type="1">
+<li>La France est découpée en cellules de <b>0,1°</b> (~11 km).</li>
+<li>Chaque commune est indexée dans sa cellule <span class="tt">(ligne, colonne)</span>.</li>
+<li>Pour chaque commune, on inspecte une fenêtre <b>5×5</b> de cellules (<span class="tt"><a class="el" href="gen_8c.html#a85973c3c404e740ee4edcb31be7e8640">CELL_SEARCH_RADIUS</a> = 2</span>) et on ne garde que les communes à <b>≤ 10 km</b> (distance symétrique).</li>
+</ol>
+<p>Résultat stocké dans <span class="tt"><a class="el" href="structOptimizedData.html" title="Structure regroupant les données de voisinage précalculées à moins de 10km.">OptimizedData</a></span> :</p>
+<ul>
+<li><span class="tt">neighbors[]</span> — indices des communes voisines</li>
+<li><span class="tt">neighbor_count</span></li>
+<li><span class="tt">is_eligible_for_chru</span> — population locale &gt; 80 000</li>
+<li><span class="tt">max_covered_population</span> — population de la commune + voisins (utile à la mutation)</li>
+</ul>
+<hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md15"></a>
+Algorithme génétique (détail)</h1>
+<p>Paramètres par défaut dans <span class="tt">main.c</span> :</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Paramètre  </th><th class="markdownTableHeadNone">Valeur  </th><th class="markdownTableHeadNone">Rôle  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">POP_SIZE</span>  </td><td class="markdownTableBodyNone">200  </td><td class="markdownTableBodyNone">Taille de la population  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">GEN_MAX</span>  </td><td class="markdownTableBodyNone">1000  </td><td class="markdownTableBodyNone">Nombre de générations  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">ELITISM_COUNT</span>  </td><td class="markdownTableBodyNone">15  </td><td class="markdownTableBodyNone">Meilleurs conservés tels quels  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">TOURNAMENT_PROBABILITY</span>  </td><td class="markdownTableBodyNone">80 %  </td><td class="markdownTableBodyNone">Probabilité de sélection par tournoi  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">TOURNAMENT_SIZE</span>  </td><td class="markdownTableBodyNone">10  </td><td class="markdownTableBodyNone">Candidats tirés par parent  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">OpenMP  </td><td class="markdownTableBodyNone">jusqu’à 12 threads  </td><td class="markdownTableBodyNone">Fitness et reproduction parallèles  </td></tr>
+</table>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md16"></a>
+Initialisation</h2>
+<p>Pour chaque individu et chaque commune :</p>
+<ul>
+<li>Si la zone peut couvrir &gt; 30 000 hab. (<span class="tt">max_covered_population</span>) : <b>20 %</b> de chance d’y placer un hôpital au départ.</li>
+<li>Sinon : <b>0,2 %</b> de chance (<span class="tt">STARTING_HOSPITALS_PROBABILITY</span>).</li>
+</ul>
+<p>La population de départ est donc très dense en hôpitaux ; la sélection fait converger vers moins d’établissements mais mieux placés.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md17"></a>
+Boucle par génération (<span class="tt">main.c</span>)</h2>
+<div class="fragment"><div class="line">Pour gen = 0 .. GEN_MAX-1 :</div>
+<div class="line">  1. FITNESS   — calcul parallèle pour chaque individu (workspaces par thread)</div>
+<div class="line">  2. TRI       — quick_sort décroissant sur fitness</div>
+<div class="line">  3. ÉLITISME  — copie des 15 meilleurs vers next_population</div>
+<div class="line">  4. REPRO     — pour les 185 autres :</div>
+<div class="line">       - 80 % : deux parents choisis par tournoi (meilleur parmi 10 tirages dans la moitié supérieure)</div>
+<div class="line">       - 20 % : copie d’un individu aléatoire du top 20</div>
+<div class="line">       - crossover en 3 segments (deux pivots)</div>
+<div class="line">       - mutation</div>
+<div class="line">  5. SWAP      — next_population devient la population courante</div>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md18"></a>
+Croisement (<span class="tt">crossover</span>)</h2>
+<p>Deux pivots aléatoires découpent le chromosome en trois morceaux : segments alternés parent 1 / parent 2 / parent 1.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md19"></a>
+Mutation (<span class="tt">mutate</span>)</h2>
+<ul>
+<li><b>Ajouts</b> : 3 à 10 communes tirées au hasard ; on pose un hôpital si <span class="tt">max_covered_population ≥ 5000</span> (seuil = coût hôpital).</li>
+<li><b>Suppressions</b> (80 % de chance) : 3 à 10 fermetures d’hôpitaux existants tirées au hasard.</li>
+</ul>
+<p>La mutation est agressive pour explorer ; l’élitisme et la fitness stabilisent les bonnes configurations.</p>
+<hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md21"></a>
+Flux détaillé du programme C</h1>
+<div class="fragment"><div class="line">main()</div>
+<div class="line">│</div>
+<div class="line">├─ Charger CSV → tableau Town[] (x = longitude, y = latitude)</div>
+<div class="line">├─ set_habitants_total(somme des populations)</div>
+<div class="line">├─ Allouer workspaces OpenMP (buffer couverture par thread)</div>
+<div class="line">├─ precalc_near() → OptimizedData[]</div>
+<div class="line">├─ Allouer population + next_population (gènes par individu)</div>
+<div class="line">├─ Initialiser les gènes aléatoirement</div>
+<div class="line">│</div>
+<div class="line">├─ [optionnel] init_window() — sauf MEDIFRANCE_HEADLESS=1</div>
+<div class="line">│</div>
+<div class="line">├─ FOR gen in 0..GEN_MAX-1</div>
+<div class="line">│     ├─ fitness() × POP_SIZE  (parallèle)</div>
+<div class="line">│     ├─ quick_sort_population()</div>
+<div class="line">│     ├─ copie élite</div>
+<div class="line">│     ├─ crossover + mutate (parallèle)</div>
+<div class="line">│     ├─ swap buffers</div>
+<div class="line">│     └─ logs + fitness_graph (GUI)</div>
+<div class="line">│</div>
+<div class="line">├─ log_solution_details + bilan évolution</div>
+<div class="line">├─ audit_coverage() — vérifie déserts / couverture vs 10 km</div>
+<div class="line">├─ export_resultats_csv(&quot;data/resultats_hopitaux.csv&quot;)</div>
+<div class="line">└─ [optionnel] settings_menu() — carte + hôpitaux du meilleur individu</div>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md22"></a>
+Fichier exporté (<span class="tt">export.c</span>)</h2>
+<p>Une ligne par commune :</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Colonne  </th><th class="markdownTableHeadNone">Description  </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">nom_dep</span>  </td><td class="markdownTableBodyNone">Département  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">ville</span>  </td><td class="markdownTableBodyNone">Nom de la commune  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">population</span>  </td><td class="markdownTableBodyNone">Population  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">has_hospital</span>  </td><td class="markdownTableBodyNone">1 si gène = 1  </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><span class="tt">is_desert</span>  </td><td class="markdownTableBodyNone">1 si non couverte par le modèle  </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><span class="tt">nb_beds</span>  </td><td class="markdownTableBodyNone">Lits attribués à l’hôpital local (0 sinon), min. 10 si hôpital  </td></tr>
+</table>
+<hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md24"></a>
+Rapport PDF (Python)</h1>
+<p>Après l’exécution du binaire C :</p>
+<div class="fragment"><div class="line">pip install -r scripts-pdf-generation/requirements.txt</div>
+<div class="line">python3 scripts-pdf-generation/pdfgenerator.py</div>
+</div><!-- fragment --><p>Le script lit <span class="tt">data/resultats_hopitaux.csv</span>, fusionne les coordonnées depuis le CSV communes, et produit <span class="tt">report/couverture_hospitaliere_optimale_france.pdf</span> (statistiques et tableaux par département).</p>
+<p><b>Dépendances :</b> <span class="tt">pandas</span>, <span class="tt">fpdf2</span> (pas le paquet <span class="tt">fpdf</span> 1.x), éventuellement <span class="tt">matplotlib</span> si des cartes sont activées dans votre version du script.</p>
+<hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md26"></a>
+Installation et compilation (Linux)</h1>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md27"></a>
+Prérequis</h2>
+<ul>
+<li><span class="tt">gcc</span>, <span class="tt">make</span>, <span class="tt">pkg-config</span></li>
+<li><b>libMLV</b> (<span class="tt">MLV/MLV_all.h</span>) — interface graphique</li>
+<li><span class="tt">cppcheck</span> (via <span class="tt">setup.sh</span>)</li>
 </ul>
 <blockquote class="doxtable">
-<p>Note: <span class="tt">setup.sh</span> uses <span class="tt">apt-get</span>, so Debian/Ubuntu-based Linux is expected. </p>
+<p><span class="tt">setup.sh</span> utilise <span class="tt">apt-get</span> (Debian/Ubuntu/Fedora avec équivalents). </p>
 </blockquote>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md3"></a>
-2) Install quality checks (required)</h2>
-<p>Run the setup script from the project root:</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md28"></a>
+Qualité (pre-commit)</h2>
 <div class="fragment"><div class="line">chmod +x setup.sh</div>
 <div class="line">./setup.sh</div>
-</div><!-- fragment --><p>This installs the Git <span class="tt">pre-commit</span> hook automatically (<span class="tt">.git/hooks/pre-commit</span>) so each commit is checked before it is accepted.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md4"></a>
-Compile the program</h1>
-<p>From the project root:</p>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md29"></a>
+Compiler</h2>
 <div class="fragment"><div class="line">make</div>
-</div><!-- fragment --><p>This builds the executable at:</p>
-<div class="fragment"><div class="line">build/medifrance</div>
-</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md5"></a>
-Run the program</h1>
+<div class="line"># → build/medifrance</div>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md30"></a>
+Lancer</h2>
 <div class="fragment"><div class="line">./build/medifrance</div>
-</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md6"></a>
-Clean build artifacts</h1>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md31"></a>
+Mode headless (sans fenêtre MLV)</h2>
+<p>Utile sur serveur ou pour enchaîner avec le PDF :</p>
+<div class="fragment"><div class="line">MEDIFRANCE_HEADLESS=1 ./build/medifrance</div>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md32"></a>
+Logs</h2>
+<p>Par défaut, un résumé est affiché <b>toutes les 50 générations</b> (+ dernière génération, précalcul, audit, export).</p>
+<div class="fragment"><div class="line">MEDIFRANCE_LOG_EVERY=100 MEDIFRANCE_HEADLESS=1 ./build/medifrance</div>
+</div><!-- fragment --><p>Préfixes utiles : <span class="tt">[config]</span>, <span class="tt">[precalc]</span>, <span class="tt">[gen N]</span>, <span class="tt">[final]</span>, <span class="tt">[bilan]</span>, <span class="tt">[audit]</span>, <span class="tt">[export]</span>.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md33"></a>
+Nettoyer</h2>
 <div class="fragment"><div class="line">make clean</div>
-</div><!-- fragment --> </div></div><!-- PageDoc -->
+</div><!-- fragment --><hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md35"></a>
+Paramètres modifiables</h1>
+<p>Les constantes principales sont en tête de <span class="tt">main.c</span> (taille population, générations, tournoi, élitisme) et dans <span class="tt"><a class="el" href="gen_8c.html" title="Moteur algorithmique de la simulation génétique et de la modélisation géospatiale.">modules/gen.c</a></span> (rayon 10 km, coûts, mutation). Après modification : <span class="tt">make</span> puis relancer.</p>
+<hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md37"></a>
+Limites du modèle (à connaître)</h1>
+<ul>
+<li><b>Métropole uniquement</b> dans le CSV fourni.</li>
+<li>Un hôpital par <b>commune</b> simulée, pas la liste réelle des établissements existants.</li>
+<li>Couverture en <b>vol d’oiseau</b> 10 km, pas temps de trajet.</li>
+<li>Les voisins sont des <b>enveloppes</b> précalculées ; l’audit en fin de run vérifie la cohérence géographique.</li>
+<li>La fitness favorise la population couverte, pas l’équité fine entre départements (des écarts de lits par zone peuvent subsister).</li>
+</ul>
+<hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md39"></a>
+Licence</h1>
+<p>Voir [LICENSE](LICENSE). </p>
+</div></div><!-- PageDoc -->
 <a href="doxygen_crawl.html"></a>
 </div><!-- contents -->
 </div><!-- doc-content -->

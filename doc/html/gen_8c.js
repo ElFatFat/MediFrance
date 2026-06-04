@@ -1,10 +1,10 @@
 var gen_8c =
 [
     [ "BEDS_PER_1000", "gen_8c.html#a15ce3a8b7daeab5ddc01de61f783e2b1", null ],
+    [ "CELL_SEARCH_RADIUS", "gen_8c.html#a85973c3c404e740ee4edcb31be7e8640", null ],
     [ "CELL_SIZE", "gen_8c.html#a7a4127f14f16563da90eb3c836bc404f", null ],
     [ "CHRU_BONUS", "gen_8c.html#a84aa2bbc9443809ff3702c9567320730", null ],
     [ "CHRU_POP_THRESHOLD", "gen_8c.html#a39cc7ed0ecbb9517026f3f02b3fbf417", null ],
-    [ "HABITANTS_TOTAL", "gen_8c.html#af024f7c359925f78d2baf3761991f9f3", null ],
     [ "HOSPITAL_COST", "gen_8c.html#a6b2d35c814f5f73894a604470e0d7860", null ],
     [ "LAT_TO_RAD", "gen_8c.html#abdf9046863c3f5294cade34cfa29e0ae", null ],
     [ "LATITUDE_FACTOR", "gen_8c.html#ab787fbc51ab4cc26237c01039fec7ea7", null ],
@@ -15,10 +15,20 @@ var gen_8c =
     [ "MIN_DELETE_HOSPITALS", "gen_8c.html#a7f7066bf5b2e14879c76a10c388e80db", null ],
     [ "MIN_DISCOVER_HOSPITALS", "gen_8c.html#abbe6c37601b3fae7f7b5bea68380de2b", null ],
     [ "PROB_DELETE", "gen_8c.html#a57e1bdcc9cd0039e198507ae492cc65d", null ],
+    [ "audit_coverage", "gen_8c.html#ab6f718130844983b1e6be8e3c5f72646", null ],
     [ "copy_individual", "gen_8c.html#a9f35970a2e93d420619fefa6831f15f3", null ],
     [ "crossover", "gen_8c.html#a6f22b5042a9b07a7b4362cd5b9c2f089", null ],
     [ "fitness", "gen_8c.html#a2130763af2275811d57ca432ade18661", null ],
+    [ "get_habitants_total", "gen_8c.html#a66e67dcc0db3fc0078ea32cdbe009dca", null ],
+    [ "log_generation_timings", "gen_8c.html#ab652b4b63e1743d05c6de88b28c3d35a", null ],
+    [ "log_population_summary", "gen_8c.html#a9a24c34192d1b18c7e3d9bde3b62c017", null ],
+    [ "log_precalc_summary", "gen_8c.html#addb90137c4fabfba204e975c5d5ac4cf", null ],
+    [ "log_solution_details", "gen_8c.html#aca31a49357a6374f1ced9e65aa2e136d", null ],
     [ "mutate", "gen_8c.html#a4be36c24ac07e27f922ecbb557f38491", null ],
     [ "precalc_near", "gen_8c.html#a6cec5a7122032798f0faa0b0ce053d6f", null ],
-    [ "quick_sort_population", "gen_8c.html#a2ef24c894c8474a841a2b8750bb6068a", null ]
+    [ "quick_sort_population", "gen_8c.html#a2ef24c894c8474a841a2b8750bb6068a", null ],
+    [ "set_habitants_total", "gen_8c.html#aab84f5d957572e618361d137320f5e41", null ],
+    [ "summarize_population", "gen_8c.html#ac90c6eca4081b04bd584fc9d4253c577", null ],
+    [ "town_distance_km", "gen_8c.html#ad03cce4b8e5f7953afbf3b5f1a6c8f9f", null ],
+    [ "g_habitants_total", "gen_8c.html#abb2281c7be25b782014176fc87b76c2a", null ]
 ];

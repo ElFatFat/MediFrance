@@ -25,7 +25,40 @@
 var NAVTREE =
 [
   [ "MediFrance", "index.html", [
-    [ "MediFrance - geomatics and public health project for S2", "index.html", "index" ],
+    [ "Vue d’ensemble du flux", "index.html#autotoc_md2", [
+      [ "En une exécution typique", "index.html#autotoc_md3", null ]
+    ] ],
+    [ "Structure du dépôt", "index.html#autotoc_md5", null ],
+    [ "Modèle du problème", "index.html#autotoc_md7", [
+      [ "Une solution = un individu", "index.html#autotoc_md8", null ],
+      [ "Couverture (règle des 10 km)", "index.html#autotoc_md9", null ],
+      [ "Fonction de fitness (à maximiser)", "index.html#autotoc_md10", null ]
+    ] ],
+    [ "Précalcul des voisins (<span class=\"tt\">precalc_near</span>)", "index.html#autotoc_md12", [
+      [ "Grille spatiale", "index.html#autotoc_md13", null ]
+    ] ],
+    [ "Algorithme génétique (détail)", "index.html#autotoc_md15", [
+      [ "Initialisation", "index.html#autotoc_md16", null ],
+      [ "Boucle par génération (<span class=\"tt\">main.c</span>)", "index.html#autotoc_md17", null ],
+      [ "Croisement (<span class=\"tt\">crossover</span>)", "index.html#autotoc_md18", null ],
+      [ "Mutation (<span class=\"tt\">mutate</span>)", "index.html#autotoc_md19", null ]
+    ] ],
+    [ "Flux détaillé du programme C", "index.html#autotoc_md21", [
+      [ "Fichier exporté (<span class=\"tt\">export.c</span>)", "index.html#autotoc_md22", null ]
+    ] ],
+    [ "Rapport PDF (Python)", "index.html#autotoc_md24", null ],
+    [ "Installation et compilation (Linux)", "index.html#autotoc_md26", [
+      [ "Prérequis", "index.html#autotoc_md27", null ],
+      [ "Qualité (pre-commit)", "index.html#autotoc_md28", null ],
+      [ "Compiler", "index.html#autotoc_md29", null ],
+      [ "Lancer", "index.html#autotoc_md30", null ],
+      [ "Mode headless (sans fenêtre MLV)", "index.html#autotoc_md31", null ],
+      [ "Logs", "index.html#autotoc_md32", null ],
+      [ "Nettoyer", "index.html#autotoc_md33", null ]
+    ] ],
+    [ "Paramètres modifiables", "index.html#autotoc_md35", null ],
+    [ "Limites du modèle (à connaître)", "index.html#autotoc_md37", null ],
+    [ "Licence", "index.html#autotoc_md39", null ],
     [ "Data Structures", "annotated.html", [
       [ "Data Structures", "annotated.html", "annotated_dup" ],
       [ "Data Structure Index", "classes.html", null ],
@@ -39,6 +72,7 @@ var NAVTREE =
       [ "Globals", "globals.html", [
         [ "All", "globals.html", null ],
         [ "Functions", "globals_func.html", null ],
+        [ "Variables", "globals_vars.html", null ],
         [ "Macros", "globals_defs.html", null ]
       ] ]
     ] ]

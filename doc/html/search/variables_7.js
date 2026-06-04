@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['max_5fcovered_5fpopulation_0',['max_covered_population',['../struct_optimized_data.html#a99b89635d0b9e62494177c46d1a386a0',1,'OptimizedData']]]
+  ['indexarray_0',['indexArray',['../structCell.html#a16e71f914710520ecc424ac2c603b9f2',1,'Cell']]],
+  ['is_5feligible_5ffor_5fchru_1',['is_eligible_for_chru',['../structOptimizedData.html#ada10310d8445f3ef02eb49ce70ff0c04',1,'OptimizedData']]]
 ];

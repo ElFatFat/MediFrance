@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['hospitals_5fcount_0',['hospitals_count',['../struct_individual.html#a68329a2be701bdc684152eee500ef55a',1,'Individual']]]
+  ['g_5fhabitants_5ftotal_0',['g_habitants_total',['../gen_8c.html#abb2281c7be25b782014176fc87b76c2a',1,'gen.c']]],
+  ['genes_1',['genes',['../structIndividual.html#a6d7ade7dbd5c6e6e29ad96c195fe2bd0',1,'Individual']]]
 ];

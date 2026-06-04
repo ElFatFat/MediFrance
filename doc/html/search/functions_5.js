@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['mutate_0',['mutate',['../gen_8c.html#a4be36c24ac07e27f922ecbb557f38491',1,'mutate(Individual *ind, const OptimizedData *data, size_t count, unsigned int *seed):&#160;gen.c'],['../gen_8h.html#a4be36c24ac07e27f922ecbb557f38491',1,'mutate(Individual *ind, const OptimizedData *data, size_t count, unsigned int *seed):&#160;gen.c']]]
+  ['get_5fhabitants_5ftotal_0',['get_habitants_total',['../gen_8c.html#a66e67dcc0db3fc0078ea32cdbe009dca',1,'get_habitants_total(void):&#160;gen.c'],['../gen_8h.html#a66e67dcc0db3fc0078ea32cdbe009dca',1,'get_habitants_total(void):&#160;gen.c']]]
 ];

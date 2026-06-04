@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['settings_5fmenu_0',['settings_menu',['../gui_8c.html#a6b865d39c087059296832c442e4784c9',1,'settings_menu(Town *communes, size_t count, Individual ind):&#160;gui.c'],['../gui_8h.html#a6b865d39c087059296832c442e4784c9',1,'settings_menu(Town *communes, size_t count, Individual ind):&#160;gui.c']]]
+  ['precalc_5fnear_0',['precalc_near',['../gen_8c.html#a6cec5a7122032798f0faa0b0ce053d6f',1,'precalc_near(Town *restrict towns, size_t count):&#160;gen.c'],['../gen_8h.html#a6cec5a7122032798f0faa0b0ce053d6f',1,'precalc_near(Town *restrict towns, size_t count):&#160;gen.c']]]
 ];

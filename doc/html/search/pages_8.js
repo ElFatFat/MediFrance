@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['install_20quality_20checks_20required_0',['2) Install quality checks (required)',['../index.html#autotoc_md3',1,'']]]
+  ['headless_20sans_20fenêtre_20mlv_0',['Mode headless (sans fenêtre MLV)',['../index.html#autotoc_md31',1,'']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['beds_5fcount_0',['beds_count',['../struct_individual.html#a9922071a74f531cbb7235b6d3f2432bc',1,'Individual']]]
+  ['avg_5ffitness_0',['avg_fitness',['../structPopulationSummary.html#ab2729e50c2e4ae18a8ef7367a3d5895d',1,'PopulationSummary']]]
 ];

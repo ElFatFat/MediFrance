@@ -27,15 +27,66 @@
 #define ITERATIONS_PER_THREAD 2 // Nombre d'individus traités par chaque thread avant de synchroniser (pour limiter la contention sur les workspaces)
 
 
-#define PRINT_EVERY_X_GEN 1000
+#define PRINT_EVERY_X_GEN 50
 
 
+
+static void log_run_configuration(int num_threads, int log_every) {
+    printf("\n========== MediFrance — configuration ==========\n");
+    printf("[config] Communes CSV      : %s\n", CSV_PATH);
+    printf("[config] Population GA     : %d individus × %d générations\n", POP_SIZE, GEN_MAX);
+    printf("[config] Threads OpenMP    : %d (max %d)\n", num_threads, MAX_THREADS);
+    printf("[config] Élitisme            : %d | Tournoi %d%% (taille %d)\n",
+           ELITISM_COUNT, TOURNAMENT_PROBABILITY, TOURNAMENT_SIZE);
+    printf("[config] Rayon couverture    : %.0f km\n", COVERAGE_RADIUS_KM);
+    printf("[config] Coût / hôpital      : 5000 | Bonus CHRU : 4000\n");
+    printf("[config] Logs tous les       : %d génération(s) (MEDIFRANCE_LOG_EVERY)\n", log_every);
+    printf("================================================\n\n");
+}
+
+static void log_initial_population_stats(Individual* population, int pop_size, size_t gene_count) {
+    long long total_hospitals = 0;
+    int min_h = (int)gene_count;
+    int max_h = 0;
+
+    for (int i = 0; i < pop_size; i++) {
+        int h = 0;
+        for (size_t g = 0; g < gene_count; g++) {
+            if (population[i].genes[g]) {
+                h++;
+            }
+        }
+        total_hospitals += h;
+        if (h < min_h) {
+            min_h = h;
+        }
+        if (h > max_h) {
+            max_h = h;
+        }
+    }
+
+    printf("[init] Population initiale (gènes aléatoires, avant fitness) :\n");
+    printf("[init]   Hôpitaux / individu : min %d | moy %.1f | max %d\n",
+           min_h, (double)total_hospitals / (double)pop_size, max_h);
+}
 
 int main(void) {
     int available_threads = omp_get_num_procs();
     int num_threads = (MAX_THREADS < available_threads) ? MAX_THREADS : available_threads;
     omp_set_num_threads(num_threads);
-    printf("Running with %d threads (limit: %d, available: %d)\n", num_threads, MAX_THREADS, available_threads);
+
+    int log_every = PRINT_EVERY_X_GEN;
+    const char* log_env = getenv("MEDIFRANCE_LOG_EVERY");
+    if (log_env != NULL && log_env[0] != '\0') {
+        int parsed = atoi(log_env);
+        if (parsed > 0) {
+            log_every = parsed;
+        }
+    }
+
+    log_run_configuration(num_threads, log_every);
+    printf("[init] Threads : %d (processeurs disponibles : %d)\n",
+           num_threads, available_threads);
 
     const char* csv_path = CSV_PATH;
     FILE* file = fopen(csv_path, "r");
@@ -143,7 +194,8 @@ int main(void) {
         return 1;
     }
     double precalc_time = omp_get_wtime() - precalc_start_time;
-    printf("Time taken for precalculation: %.2f seconds\n", precalc_time);
+    printf("[init] Précalcul voisins terminé en %.2f s\n", precalc_time);
+    log_precalc_summary(precalc_data, count);
 
     Individual* population = malloc(POP_SIZE * sizeof(Individual));
     if (population == NULL) {
@@ -191,7 +243,6 @@ int main(void) {
             return 1;
         }
     }
-    // Initialize population genes outside the main loop
     for (int i = 0; i < POP_SIZE; i++) {
         for (size_t g = 0; g < count; g++) {
             if (precalc_data[g].max_covered_population > STARTING_HOSPITALS_THRESHOLD && (rand() % 100 < STARTING_HOSPITALS_THRESHOLD_PROBABILITY)) {
@@ -201,10 +252,15 @@ int main(void) {
             }
         }
     }
+    log_initial_population_stats(population, POP_SIZE, count);
 
     if (!headless) {
         init_window();
     }
+
+    double evolution_start = omp_get_wtime();
+    double initial_best_fitness = 0.0;
+    int initial_best_hospitals = 0;
 
     for (int gen = 0; gen < GEN_MAX; gen++) {
         // --- ÉTAPE 1 : FITNESS ---
@@ -270,12 +326,18 @@ int main(void) {
         population = next_population;
         next_population = temp_population;
 
-        // Affichage des chronos toutes les 10 générations (pour ne pas polluer le terminal)
-        if (gen % PRINT_EVERY_X_GEN == 0) {
-            printf("\n--- Gen %d ---\n", gen);
-            printf("Fitness: %.3fs | Tri: %.3fs | Repro: %.3fs | Total: %.3fs\n", 
-                    t2 - t1, t3 - t2, t4 - t3, t4 - t1);
-            printf("Meilleure Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d Lits_Total: %ld\n", population[0].fitness, population[0].desert_population, population[0].hospitals_count, population[0].chru_count, population[0].beds_count);
+        int is_last_gen = (gen == GEN_MAX - 1);
+        int should_log = (gen % log_every == 0) || is_last_gen;
+
+        if (gen == 0) {
+            initial_best_fitness = population[0].fitness;
+            initial_best_hospitals = population[0].hospitals_count;
+        }
+
+        if (should_log) {
+            PopulationSummary summary = summarize_population(population, POP_SIZE);
+            log_population_summary(&summary, gen, GEN_MAX);
+            log_generation_timings(gen, t2 - t1, t3 - t2, t4 - t3);
         }
         if (!headless) {
             fitness_graph(population[0].fitness, GEN_MAX, gen, MLV_COLOR_BLUE);
@@ -283,15 +345,26 @@ int main(void) {
         }
     }
 
+    double evolution_time = omp_get_wtime() - evolution_start;
+
     fitness(&population[0], towns, precalc_data, count, workspaces[0]);
-    printf(
-        "\n=== Résultat final ===\nFitness: %.0f | Désert: %ld hab. | Hôpitaux: %d | CHRU: %d | Lits: %ld\n",
-        population[0].fitness,
-        population[0].desert_population,
-        population[0].hospitals_count,
-        population[0].chru_count,
-        population[0].beds_count
-    );
+    log_solution_details(&population[0], total_population, "final");
+
+    printf("\n========== Bilan évolution ==========\n");
+    printf("[bilan] Durée évolution      : %.2f s (%.1f ms / génération)\n",
+           evolution_time, (evolution_time * 1000.0) / (double)GEN_MAX);
+    printf("[bilan] Fitness initiale (g0): %.0f (%d hôpitaux)\n",
+           initial_best_fitness, initial_best_hospitals);
+    printf("[bilan] Fitness finale       : %.0f (%d hôpitaux)\n",
+           population[0].fitness, population[0].hospitals_count);
+    printf("[bilan] Gain absolu          : %.0f\n",
+           population[0].fitness - initial_best_fitness);
+    if (initial_best_fitness != 0.0) {
+        printf("[bilan] Gain relatif         : %.2f %%\n",
+               100.0 * (population[0].fitness - initial_best_fitness) / initial_best_fitness);
+    }
+    printf("=====================================\n");
+
     audit_coverage(towns, count, precalc_data, &population[0]);
 
     if (export_resultats_csv("data/resultats_hopitaux.csv", towns, count, precalc_data, &population[0]) != 0) {

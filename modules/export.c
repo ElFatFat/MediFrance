@@ -98,10 +98,40 @@ int export_resultats_csv(const char* path,
         );
     }
 
+    int desert_towns = 0;
+    int hospital_towns = 0;
+    long desert_pop = 0;
+    long export_beds = 0;
+
+    for (size_t i = 0; i < count; i++) {
+        if (!covered[i]) {
+            desert_towns++;
+            desert_pop += towns[i].population;
+        }
+        if (best->genes[i]) {
+            hospital_towns++;
+        }
+        export_beds += beds_per_town[i];
+    }
+
     fclose(f);
     free(covered);
     free(beds_per_town);
 
-    printf("[export] CSV écrit : %s (%zu communes)\n", path, count);
+    long total_pop = 0;
+    for (size_t i = 0; i < count; i++) {
+        total_pop += towns[i].population;
+    }
+    double coverage_pct = total_pop > 0
+        ? 100.0 * (double)(total_pop - desert_pop) / (double)total_pop
+        : 0.0;
+
+    printf("\n[export] Fichier écrit : %s\n", path);
+    printf("[export]   Communes exportées  : %zu\n", count);
+    printf("[export]   Hôpitaux placés     : %d communes\n", hospital_towns);
+    printf("[export]   Déserts médicaux    : %d communes (%ld hab.)\n",
+           desert_towns, desert_pop);
+    printf("[export]   Couverture pop.     : %.2f %%\n", coverage_pct);
+    printf("[export]   Lits déclarés (somme): %ld\n", export_beds);
     return 0;
 }

@@ -29,6 +29,12 @@ typedef struct {
     unsigned char* coverage_buffer; // Tableau de 36000 octets
 } ThreadWorkspace;
 
+#define COVERAGE_RADIUS_KM 10.0f
+
+void set_habitants_total(long total);
+float town_distance_km(const Town* a, const Town* b);
+int audit_coverage(const Town* towns, size_t count, const OptimizedData* data, const Individual* ind);
+
 OptimizedData* precalc_near(Town* restrict towns, size_t count);
 void fitness(Individual* restrict ind, Town* restrict towns, OptimizedData* restrict data, size_t count, unsigned char* restrict coverage_buffer);
 void quick_sort_population(Individual* pop, int left, int right);

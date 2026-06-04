@@ -10,8 +10,8 @@
 
 #include <MLV/MLV_all.h>
 
-#define POP_SIZE 500
-#define GEN_MAX 10000
+#define POP_SIZE 200
+#define GEN_MAX 1000
 #define CSV_PATH "data/communes-france-metrople-2025.csv"
 
 #define STARTING_HOSPITALS_THRESHOLD 30000 //Choix arbitraire pour amorcer la population avec des hôpitaux sur les zones très peuplées
@@ -23,7 +23,7 @@
 #define RANDOM_PARENT_POOL_SIZE 20 //Taille du pool de parents aléatoires (dans le cas où on ne fait pas de tournoi)
 #define ELITISM_COUNT 15 //Nombre d'individus élitistes (qui sont copiés tels quels à la génération suivante sans mutation)
 
-#define MAX_THREADS 8 // Nombre maximum de threads à utiliser (pour limiter la mémoire utilisée par les workspaces)
+#define MAX_THREADS 12 // Nombre maximum de threads à utiliser (pour limiter la mémoire utilisée par les workspaces)
 #define ITERATIONS_PER_THREAD 2 // Nombre d'individus traités par chaque thread avant de synchroniser (pour limiter la contention sur les workspaces)
 
 
@@ -95,6 +95,18 @@ int main(void) {
 
     printf("Loaded %zu communes from %s\n", count, csv_path);
     printf("Time taken to load data: %.2f seconds\n", load_time);
+
+    long total_population = 0;
+    for (size_t i = 0; i < count; i++) {
+        total_population += towns[i].population;
+    }
+    set_habitants_total(total_population);
+    printf("Population totale (métropole): %ld\n", total_population);
+
+    const int headless = getenv("MEDIFRANCE_HEADLESS") != NULL;
+    if (headless) {
+        printf("Mode headless (MEDIFRANCE_HEADLESS) — pas d'affichage MLV\n");
+    }
 
     // Align workspaces array to 64 bytes to reduce false sharing
     unsigned char** workspaces = NULL;
@@ -190,7 +202,9 @@ int main(void) {
         }
     }
 
-    init_window();
+    if (!headless) {
+        init_window();
+    }
 
     for (int gen = 0; gen < GEN_MAX; gen++) {
         // --- ÉTAPE 1 : FITNESS ---
@@ -263,20 +277,33 @@ int main(void) {
                     t2 - t1, t3 - t2, t4 - t3, t4 - t1);
             printf("Meilleure Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d Lits_Total: %ld\n", population[0].fitness, population[0].desert_population, population[0].hospitals_count, population[0].chru_count, population[0].beds_count);
         }
-        fitness_graph(population[0].fitness, GEN_MAX, gen, MLV_COLOR_BLUE);
-    
-        fitness_graph(population[POP_SIZE-1].fitness, GEN_MAX, gen, MLV_COLOR_YELLOW);
+        if (!headless) {
+            fitness_graph(population[0].fitness, GEN_MAX, gen, MLV_COLOR_BLUE);
+            fitness_graph(population[POP_SIZE - 1].fitness, GEN_MAX, gen, MLV_COLOR_YELLOW);
+        }
     }
+
+    fitness(&population[0], towns, precalc_data, count, workspaces[0]);
+    printf(
+        "\n=== Résultat final ===\nFitness: %.0f | Désert: %ld hab. | Hôpitaux: %d | CHRU: %d | Lits: %ld\n",
+        population[0].fitness,
+        population[0].desert_population,
+        population[0].hospitals_count,
+        population[0].chru_count,
+        population[0].beds_count
+    );
+    audit_coverage(towns, count, precalc_data, &population[0]);
 
     if (export_resultats_csv("data/resultats_hopitaux.csv", towns, count, precalc_data, &population[0]) != 0) {
         fprintf(stderr, "Avertissement : export CSV échoué\n");
     }
-    MLV_clear_window(MLV_COLOR_BLACK);	
-    
-    create_cloud(towns, count);
 
-    settings_menu(towns, count, population[0]);
-    close_window();
+    if (!headless) {
+        MLV_clear_window(MLV_COLOR_BLACK);
+        create_cloud(towns, count);
+        settings_menu(towns, count, population[0]);
+        close_window();
+    }
     for(size_t i = 0; i < count; i++) {
         if(precalc_data[i].neighbors) free(precalc_data[i].neighbors);
     }

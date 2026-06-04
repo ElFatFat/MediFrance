@@ -1,0 +1,150 @@
+\doxysection{modules/\+gui.h File Reference}
+\hypertarget{gui_8h}{}\label{gui_8h}\index{modules/gui.h@{modules/gui.h}}
+
+
+Fonctions d\textquotesingle{}interface graphique et d\textquotesingle{}affichage cartographique via la Lib\+MLV.  
+
+
+{\ttfamily \+\#include "{}../\+main.\+h"{}}\newline
+{\ttfamily \+\#include "{}gen.\+h"{}}\newline
+{\ttfamily \+\#include $<$MLV/\+\+MLV\+\_\+all.\+h$>$}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{gui_8h_a6424ffe40c8fe6e94e4374461374ac98}{init\+\_\+window}} (void)
+\begin{DoxyCompactList}\small\item\em Initialise et configure la fenêtre principale de l\textquotesingle{}application. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gui_8h_aa0b970da4405389c144095b04eacd133}{close\+\_\+window}} (void)
+\begin{DoxyCompactList}\small\item\em Ferme proprement la fenêtre graphique et libère la mémoire MLV. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gui_8h_a76f677ab0ab66d892a31b345e979fb10}{render\+\_\+point}} (float x, float y)
+\begin{DoxyCompactList}\small\item\em Projette et affiche un point isolé sur la carte. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gui_8h_aaf5d41d9d3ba6dbf6dd9b652beb20ca3}{create\+\_\+cloud}} (Town \texorpdfstring{$\ast$}{*}communes, size\+\_\+t count)
+\begin{DoxyCompactList}\small\item\em Génère le nuage de points représentant la carte des communes de France. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gui_8h_a10b057b0d3e1a8a195deff97230f009c}{draw\+\_\+hospitals}} (Town \texorpdfstring{$\ast$}{*}communes, size\+\_\+t count, \doxymbox{\hyperlink{struct_individual}{Individual}} ind)
+\begin{DoxyCompactList}\small\item\em Dessine des cercles translucides représentant les hôpitaux actifs d\textquotesingle{}une solution. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gui_8h_a2de3b3ae5b85a8615e86cb4cc7f75b0c}{fitness\+\_\+graph}} (double \doxymbox{\hyperlink{gen_8c_a2130763af2275811d57ca432ade18661}{fitness}}, int nb\+\_\+gen, int index, MLV\+\_\+\+Color color)
+\begin{DoxyCompactList}\small\item\em Dessine un graphique représentant la progression temporelle de la fitness. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gui_8h_a6b865d39c087059296832c442e4784c9}{settings\+\_\+menu}} (Town \texorpdfstring{$\ast$}{*}communes, size\+\_\+t count, \doxymbox{\hyperlink{struct_individual}{Individual}} ind)
+\begin{DoxyCompactList}\small\item\em Gère l\textquotesingle{}affichage du menu des options et capture les interactions utilisateur. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Fonctions d\textquotesingle{}interface graphique et d\textquotesingle{}affichage cartographique via la Lib\+MLV. 
+
+
+
+\label{doc-func-members}
+\Hypertarget{gui_8h_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{gui_8h_aa0b970da4405389c144095b04eacd133}\index{gui.h@{gui.h}!close\_window@{close\_window}}
+\index{close\_window@{close\_window}!gui.h@{gui.h}}
+\doxysubsubsection{\texorpdfstring{close\_window()}{close\_window()}}
+{\footnotesize\ttfamily \label{gui_8h_aa0b970da4405389c144095b04eacd133} 
+void close\+\_\+window (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Ferme proprement la fenêtre graphique et libère la mémoire MLV. 
+
+\Hypertarget{gui_8h_aaf5d41d9d3ba6dbf6dd9b652beb20ca3}\index{gui.h@{gui.h}!create\_cloud@{create\_cloud}}
+\index{create\_cloud@{create\_cloud}!gui.h@{gui.h}}
+\doxysubsubsection{\texorpdfstring{create\_cloud()}{create\_cloud()}}
+{\footnotesize\ttfamily \label{gui_8h_aaf5d41d9d3ba6dbf6dd9b652beb20ca3} 
+void create\+\_\+cloud (\begin{DoxyParamCaption}\item[{Town \texorpdfstring{$\ast$}{*}}]{communes}{, }\item[{size\+\_\+t}]{count}{}\end{DoxyParamCaption})}
+
+
+
+Génère le nuage de points représentant la carte des communes de France. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em communes} & Tableau des structures communes à dessiner. \\
+\hline
+{\em count} & Nombre total de communes. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gui_8h_a10b057b0d3e1a8a195deff97230f009c}\index{gui.h@{gui.h}!draw\_hospitals@{draw\_hospitals}}
+\index{draw\_hospitals@{draw\_hospitals}!gui.h@{gui.h}}
+\doxysubsubsection{\texorpdfstring{draw\_hospitals()}{draw\_hospitals()}}
+{\footnotesize\ttfamily \label{gui_8h_a10b057b0d3e1a8a195deff97230f009c} 
+void draw\+\_\+hospitals (\begin{DoxyParamCaption}\item[{Town \texorpdfstring{$\ast$}{*}}]{communes}{, }\item[{size\+\_\+t}]{count}{, }\item[{\doxymbox{\hyperlink{struct_individual}{Individual}}}]{ind}{}\end{DoxyParamCaption})}
+
+
+
+Dessine des cercles translucides représentant les hôpitaux actifs d\textquotesingle{}une solution. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em communes} & Tableau des communes. \\
+\hline
+{\em count} & Nombre total de communes. \\
+\hline
+{\em ind} & L\textquotesingle{}individu contenant les gènes d\textquotesingle{}activation des hôpitaux. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gui_8h_a2de3b3ae5b85a8615e86cb4cc7f75b0c}\index{gui.h@{gui.h}!fitness\_graph@{fitness\_graph}}
+\index{fitness\_graph@{fitness\_graph}!gui.h@{gui.h}}
+\doxysubsubsection{\texorpdfstring{fitness\_graph()}{fitness\_graph()}}
+{\footnotesize\ttfamily \label{gui_8h_a2de3b3ae5b85a8615e86cb4cc7f75b0c} 
+void fitness\+\_\+graph (\begin{DoxyParamCaption}\item[{double}]{fitness}{, }\item[{int}]{nb\+\_\+gen}{, }\item[{int}]{index}{, }\item[{MLV\+\_\+\+Color}]{color}{}\end{DoxyParamCaption})}
+
+
+
+Dessine un graphique représentant la progression temporelle de la fitness. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \doxylink{gen_8c_a2130763af2275811d57ca432ade18661}{fitness}} & Valeur de fitness calculée. \\
+\hline
+{\em nb\+\_\+gen} & Nombre total attendu de générations (pour l\textquotesingle{}échelle X). \\
+\hline
+{\em index} & Index de la génération courante. \\
+\hline
+{\em color} & Couleur associée à la courbe. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gui_8h_a6424ffe40c8fe6e94e4374461374ac98}\index{gui.h@{gui.h}!init\_window@{init\_window}}
+\index{init\_window@{init\_window}!gui.h@{gui.h}}
+\doxysubsubsection{\texorpdfstring{init\_window()}{init\_window()}}
+{\footnotesize\ttfamily \label{gui_8h_a6424ffe40c8fe6e94e4374461374ac98} 
+void init\+\_\+window (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Initialise et configure la fenêtre principale de l\textquotesingle{}application. 
+
+\Hypertarget{gui_8h_a76f677ab0ab66d892a31b345e979fb10}\index{gui.h@{gui.h}!render\_point@{render\_point}}
+\index{render\_point@{render\_point}!gui.h@{gui.h}}
+\doxysubsubsection{\texorpdfstring{render\_point()}{render\_point()}}
+{\footnotesize\ttfamily \label{gui_8h_a76f677ab0ab66d892a31b345e979fb10} 
+void render\+\_\+point (\begin{DoxyParamCaption}\item[{float}]{x}{, }\item[{float}]{y}{}\end{DoxyParamCaption})}
+
+
+
+Projette et affiche un point isolé sur la carte. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Coordonnée longitude (X) \\
+\hline
+{\em y} & Coordonnée latitude (Y) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gui_8h_a6b865d39c087059296832c442e4784c9}\index{gui.h@{gui.h}!settings\_menu@{settings\_menu}}
+\index{settings\_menu@{settings\_menu}!gui.h@{gui.h}}
+\doxysubsubsection{\texorpdfstring{settings\_menu()}{settings\_menu()}}
+{\footnotesize\ttfamily \label{gui_8h_a6b865d39c087059296832c442e4784c9} 
+void settings\+\_\+menu (\begin{DoxyParamCaption}\item[{Town \texorpdfstring{$\ast$}{*}}]{communes}{, }\item[{size\+\_\+t}]{count}{, }\item[{\doxymbox{\hyperlink{struct_individual}{Individual}}}]{ind}{}\end{DoxyParamCaption})}
+
+
+
+Gère l\textquotesingle{}affichage du menu des options et capture les interactions utilisateur. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em communes} & Tableau des communes. \\
+\hline
+{\em count} & Nombre total de communes. \\
+\hline
+{\em ind} & Individu initial/\+actuel à manipuler graphiquement. \\
+\hline
+\end{DoxyParams}

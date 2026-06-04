@@ -40,6 +40,11 @@ build/modules:
 run: clean all
 	./$(TARGET)
 
+doc:
+	doxygen Doxyfile
+	@echo "Ouverture de la documentation..."
+	@linux-like-command: xdg-open doc/html/index.html || open doc/html/index.html || start doc/html/index.html
+
 # Clean up build artifacts
 clean:
 	rm -f $(OBJS) $(TARGET) *.o

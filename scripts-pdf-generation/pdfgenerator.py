@@ -16,7 +16,7 @@ from matplotlib.patches import Circle
 # ---------------------------------------------------------------------------
 # Constante de version (incrémentée pour forcer la régénération)
 # ---------------------------------------------------------------------------
-MAP_GENERATION_VERSION = 4
+MAP_GENERATION_VERSION = 5
 
 # ---------------------------------------------------------------------------
 # Chemins
@@ -195,7 +195,6 @@ def generate_report(df_data):
     temp_df["is_chru"]       = (temp_df["has_hospital"] == 1) & (temp_df["population"] > 80000)
     temp_df["pop_in_desert"] = temp_df["population"] * temp_df["is_desert"]
 
-    # Chargement du cache
     saved_hashes = {}
     if os.path.exists(HASH_FILE):
         try:
@@ -205,7 +204,6 @@ def generate_report(df_data):
             saved_hashes = {}
     new_hashes = {}
 
-    # Groupement par département
     dept_groups = {name: group for name, group in temp_df.groupby("nom_dep")}
 
     stats = temp_df.groupby("nom_dep").agg(
@@ -219,31 +217,33 @@ def generate_report(df_data):
 
     pdf = HospitalOrganizationReport()
     pdf._load_fonts()
-    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.compress = True
+    pdf.set_auto_page_break(auto=True, margin=10)
 
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(7, 5))
 
     for _, row in stats.iterrows():
         pdf.add_page()
         dept_name = row["nom_dep"]
         bed_rate  = (row["total_beds"] / row["total_pop"]) * 1000 if row["total_pop"] > 0 else 0
 
-        pdf.set_font("Main", "B", 14)
-        pdf.set_fill_color(240, 240, 240)
-        pdf.cell(0, 10, f"Département {dept_name}", border=1, fill=True,
+        # --- BILAN CHIFFRÉ ---
+        pdf.set_font("Main", "B", 12)
+        pdf.set_fill_color(200, 220, 255)
+        pdf.cell(0, 8, f"Département {dept_name}", border=1, fill=True,
                  new_x="LMARGIN", new_y="NEXT", align="L")
-        pdf.ln(2)
+        pdf.ln(1)
 
-        pdf.set_font("Main", "B", 11)
-        with pdf.table(col_widths=(65, 115), text_align="LEFT", borders_layout="NONE",
-                       cell_fill_color=255, cell_fill_mode="ALL") as summary_table:
+        pdf.set_font("Main", "", 9)
+        with pdf.table(col_widths=(60, 120), text_align="LEFT", borders_layout="MINIMAL",
+                       cell_fill_color=245, cell_fill_mode="ALL") as summary_table:
             r1 = summary_table.row()
             r1.cell("Infrastructure :")
             r1.cell(f"{int(row['total_hosp'])} hôpitaux (dont {int(row['total_chru'])} CHRU)")
 
             r2 = summary_table.row()
             r2.cell("Déserts médicaux :")
-            r2.cell(f"{int(row['total_desert_towns'])} villes ({int(row['total_desert_pop']):,} habitants)")
+            r2.cell(f"{int(row['total_desert_towns'])} communes ({int(row['total_desert_pop']):,} hab.)")
 
             r3 = summary_table.row()
             r3.cell("Capacité totale :")
@@ -251,14 +251,14 @@ def generate_report(df_data):
 
             r4 = summary_table.row()
             r4.cell("Taux d'équipement :")
-            r4.cell(f"{bed_rate:.2f} lits pour 1 000 habitants")
+            r4.cell(f"{bed_rate:.2f} lits/1000 hab.")
 
-        pdf.ln(4)
+        pdf.ln(2)
 
+        # --- CARTE ---
         dept_df = dept_groups.get(dept_name)
         map_path = os.path.join(MAPS_DIR, f"map_{dept_name}.png")
 
-        # Calcul du hash avec la version
         df_fingerprint = dept_df[['ville', 'has_hospital', 'is_desert', 'nb_beds']].to_string()
         versioned_fingerprint = f"{MAP_GENERATION_VERSION}:{df_fingerprint}"
         current_hash = hashlib.md5(versioned_fingerprint.encode('utf-8')).hexdigest()
@@ -270,35 +270,46 @@ def generate_report(df_data):
             map_success = generate_map_for_dept(ax, dept_df, dept_name, map_path)
 
         if map_success:
-            pdf.image(map_path, x=27.5, w=155)
-            pdf.ln(2)
+            pdf.image(map_path, x=20, w=170)
         else:
-            pdf.set_font("Main", "I", 10)
-            pdf.cell(0, 8, "(Erreur d'affichage cartographique)", new_x="LMARGIN", new_y="NEXT")
-            pdf.ln(4)
+            pdf.set_font("Main", "I", 9)
+            pdf.cell(0, 5, "(Erreur d'affichage cartographique)", new_x="LMARGIN", new_y="NEXT")
 
-        pdf.set_font("Main", "B", 10)
-        pdf.cell(0, 8, "Implantation détaillée des hôpitaux :", new_x="LMARGIN", new_y="NEXT")
+        pdf.ln(3)
 
+               # --- LISTE DES HÔPITAUX (nouvelle page) ---
         town_list = dept_df[dept_df["has_hospital"] == 1].sort_values("ville")
 
         if not town_list.empty:
-            pdf.set_font("Main", "", 10)
-            with pdf.table(col_widths=(80, 50, 50), text_align="LEFT") as table:
-                header = table.row()
-                header.cell("Ville")
-                header.cell("Type d'hôpital")
-                header.cell("Nombre de lits")
-                for _, town in town_list.iterrows():
-                    r = table.row()
-                    r.cell(str(town["ville"]))
-                    r.cell("CHRU" if town["is_chru"] else "Hôpital")
-                    r.cell(str(int(town["nb_beds"])))
-        else:
-            pdf.set_font("Main", "I", 10)
-            pdf.cell(0, 8, "Aucun hôpital dans ce département.", new_x="LMARGIN", new_y="NEXT")
+            pdf.add_page()  # Nouvelle page
+            pdf.set_font("Main", "B", 9)
+            pdf.cell(0, 6, "Implantation des hôpitaux :", new_x="LMARGIN", new_y="NEXT")
+            pdf.ln(1)
 
-        pdf.ln(10)
+            # En-tête du tableau
+            pdf.set_font("Main", "B", 8)
+            pdf.set_fill_color(200, 220, 255)
+            pdf.cell(70, 7, "Ville", border=1, fill=True, new_x="RIGHT")
+            pdf.cell(50, 7, "Type", border=1, fill=True, new_x="RIGHT")
+            pdf.cell(50, 7, "Lits", border=1, fill=True, new_x="LMARGIN", new_y="NEXT")
+
+            # Lignes du tableau
+            pdf.set_font("Main", "", 8)
+            for _, town in town_list.iterrows():
+                if town["is_chru"]:
+                    # Couleur CHRU : violet
+                    pdf.set_fill_color(220, 150, 255)
+                else:
+                    # Couleur Hôpital : bleu clair
+                    pdf.set_fill_color(150, 200, 255)
+
+                pdf.cell(70, 7, str(town["ville"]), border=1, fill=True, new_x="RIGHT")
+                pdf.cell(50, 7, "CHRU" if town["is_chru"] else "Hôp.", border=1, fill=True, new_x="RIGHT")
+                pdf.cell(50, 7, str(int(town["nb_beds"])), border=1, fill=True, new_x="LMARGIN", new_y="NEXT")
+        else:
+            pdf.add_page()  # Nouvelle page
+            pdf.set_font("Main", "I", 8)
+            pdf.cell(0, 5, "Aucun hôpital dans ce département.", new_x="LMARGIN", new_y="NEXT")
 
     plt.close(fig)
 

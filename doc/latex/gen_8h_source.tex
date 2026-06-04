@@ -1,0 +1,51 @@
+\doxysection{gen.\+h}
+\hypertarget{gen_8h_source}{}\label{gen_8h_source}\index{modules/gen.h@{modules/gen.h}}
+\doxymbox{\hyperlink{gen_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ GEN\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ GEN\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}../main.h"{}}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00015\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00016\ \ \ \ \ \textcolor{keywordtype}{int}*\ \doxymbox{\hyperlink{struct_optimized_data_a3df6b61c0c51f4f326fc6ecebae1a690}{neighbors}};\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00017\ \ \ \ \ \textcolor{keywordtype}{int}\ \doxymbox{\hyperlink{struct_optimized_data_a113e84c82c78765bb135f98e5b3fac42}{neighbor\_count}};\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00018\ \ \ \ \ \textcolor{keywordtype}{int}\ \doxymbox{\hyperlink{struct_optimized_data_ada10310d8445f3ef02eb49ce70ff0c04}{is\_eligible\_for\_chru}};\ \ }
+\DoxyCodeLine{00019\ \ \ \ \ \textcolor{keywordtype}{int}\ \doxymbox{\hyperlink{struct_optimized_data_a99b89635d0b9e62494177c46d1a386a0}{max\_covered\_population}};}
+\DoxyCodeLine{00020\ \}\ \doxymbox{\hyperlink{struct_optimized_data}{OptimizedData}};}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00026\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00027\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}*\ \doxymbox{\hyperlink{struct_individual_a6d7ade7dbd5c6e6e29ad96c195fe2bd0}{genes}};\ \ \ \ \ }
+\DoxyCodeLine{00028\ \ \ \ \ \textcolor{keywordtype}{double}\ \doxymbox{\hyperlink{struct_individual_aa836a17c3f643f8b5d9032161c8a07ae}{fitness}};\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keywordtype}{int}\ \doxymbox{\hyperlink{struct_individual_a68329a2be701bdc684152eee500ef55a}{hospitals\_count}};\ \ \ \ \ \ }
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keywordtype}{int}\ \doxymbox{\hyperlink{struct_individual_aaf9f8d059c46d14d37ccf0b94c069a7b}{chru\_count}};\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00031\ \ \ \ \ \textcolor{keywordtype}{long}\ \doxymbox{\hyperlink{struct_individual_a47792e70f0b0341dce6733eb59ec074d}{desert\_population}};\ \ \ }
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keywordtype}{long}\ \doxymbox{\hyperlink{struct_individual_a9922071a74f531cbb7235b6d3f2432bc}{beds\_count}};\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00033\ \}\ \doxymbox{\hyperlink{struct_individual}{Individual}};}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00039\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keywordtype}{int}*\ \doxymbox{\hyperlink{struct_cell_a16e71f914710520ecc424ac2c603b9f2}{indexArray}};\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{keywordtype}{int}\ \doxymbox{\hyperlink{struct_cell_a2bc4cfd1683c796ac4280d31fe6cec05}{count}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keywordtype}{int}\ \doxymbox{\hyperlink{struct_cell_a13afbf7c2a81d591cc414e8cc6965ad4}{capacity}};\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00043\ \}\ \doxymbox{\hyperlink{struct_cell}{Cell}};}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00049\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}*\ \doxymbox{\hyperlink{struct_thread_workspace_aab4b7f0f4d000b6f55305001132dc12c}{coverage\_buffer}};\ }
+\DoxyCodeLine{00051\ \}\ \doxymbox{\hyperlink{struct_thread_workspace}{ThreadWorkspace}};}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00059\ \doxymbox{\hyperlink{struct_optimized_data}{OptimizedData}}*\ \doxymbox{\hyperlink{gen_8h_a6cec5a7122032798f0faa0b0ce053d6f}{precalc\_near}}(Town*\ restrict\ towns,\ \textcolor{keywordtype}{size\_t}\ count);}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00069\ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{gen_8h_a2130763af2275811d57ca432ade18661}{fitness}}(\doxymbox{\hyperlink{struct_individual}{Individual}}*\ restrict\ ind,\ Town*\ restrict\ towns,\ \doxymbox{\hyperlink{struct_optimized_data}{OptimizedData}}*\ restrict\ data,\ \textcolor{keywordtype}{size\_t}\ count,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}*\ restrict\ coverage\_buffer);}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00077\ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{gen_8h_a2ef24c894c8474a841a2b8750bb6068a}{quick\_sort\_population}}(\doxymbox{\hyperlink{struct_individual}{Individual}}*\ pop,\ \textcolor{keywordtype}{int}\ left,\ \textcolor{keywordtype}{int}\ right);}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00085\ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{gen_8h_a9f35970a2e93d420619fefa6831f15f3}{copy\_individual}}(\doxymbox{\hyperlink{struct_individual}{Individual}}*\ dest,\ \textcolor{keyword}{const}\ \doxymbox{\hyperlink{struct_individual}{Individual}}*\ src,\ \textcolor{keywordtype}{size\_t}\ count);}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00094\ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{gen_8h_a4be36c24ac07e27f922ecbb557f38491}{mutate}}(\doxymbox{\hyperlink{struct_individual}{Individual}}*\ ind,\ \textcolor{keyword}{const}\ \doxymbox{\hyperlink{struct_optimized_data}{OptimizedData}}*\ data,\ \textcolor{keywordtype}{size\_t}\ count,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}*\ seed);}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00104\ \textcolor{keywordtype}{void}\ \doxymbox{\hyperlink{gen_8h_a6f22b5042a9b07a7b4362cd5b9c2f089}{crossover}}(\doxymbox{\hyperlink{struct_individual}{Individual}}*\ enfant,\ \textcolor{keyword}{const}\ \doxymbox{\hyperlink{struct_individual}{Individual}}*\ p1,\ \textcolor{keyword}{const}\ \doxymbox{\hyperlink{struct_individual}{Individual}}*\ p2,\ \textcolor{keywordtype}{size\_t}\ count,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}*\ seed);}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

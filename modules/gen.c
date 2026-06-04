@@ -1,3 +1,8 @@
+/**
+ * @file gen.c
+ * @brief Moteur algorithmique de la simulation génétique et de la modélisation géospatiale.
+ */
+
 #include "gen.h"
 #include <math.h>
 #include <stdio.h>
@@ -8,7 +13,6 @@
 #define CELL_SIZE 0.1f
 /* 0.1° ≈ 11 km ; à ~48°N, 10 km en longitude ≈ 0.13° → il faut ±2 cellules */
 #define CELL_SEARCH_RADIUS 2
-#define COVERAGE_RADIUS_SQ (COVERAGE_RADIUS_KM * COVERAGE_RADIUS_KM)
 
 static long g_habitants_total = 65141355;
 
@@ -19,12 +23,13 @@ static long g_habitants_total = 65141355;
 #define LATITUDE_FACTOR 111.32f
 #define BEDS_PER_1000 5.4f
 
-#define PROB_DELETE 80
-#define MAX_DISCOVER_HOSPITALS 10
-#define MIN_DISCOVER_HOSPITALS 3
-#define MAX_DELETE_HOSPITALS 10
-#define MIN_DELETE_HOSPITALS 3
-#define MAX_TRY 150
+#define PROB_DELETE 80 // 80% de chances de supprimer un bâtiment lors de la mutation intelligente
+#define MAX_DISCOVER_HOSPITALS 10 // Nombre maximum d'hôpitaux à découvrir lors de la mutation intelligente
+#define MIN_DISCOVER_HOSPITALS 3 // Nombre minimum d'hôpitaux à découvrir lors de la mutation intelligente
+#define MAX_DELETE_HOSPITALS 10 // Nombre maximum d'hôpitaux à supprimer lors de la mutation intelligente
+#define MIN_DELETE_HOSPITALS 3 // Nombre minimum d'hôpitaux à supprimer lors de la mutation intelligente
+#define MAX_NEIGHBORS 200 // Nombre maximal de voisins autorisés par ville pour limiter les allocations
+#define MAX_TRY 150 // Tentatives max de recherche de gènes actifs lors de l'élagage
 
 void set_habitants_total(long total) {
     g_habitants_total = total;
@@ -151,6 +156,7 @@ float town_distance_km(const Town* a, const Town* b) {
 }
 
 OptimizedData* precalc_near(Town* restrict towns, size_t count) {
+    // On trouve les bornes et on crée la grille
     float minX = towns[0].x;
     float maxX = minX;
     float minY = towns[0].y;
@@ -182,6 +188,7 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
         }
     }
 
+    // Remplissage de la grille
     for (int i = 0; i < (int)count; i++) {
         int c = (int)((towns[i].x - minX) / CELL_SIZE);
         int r = (int)((towns[i].y - minY) / CELL_SIZE);
@@ -215,6 +222,7 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
         cell->indexArray[cell->count++] = i;
     }
 
+    // Allocation des OptimizedData
     OptimizedData* data = malloc(count * sizeof(OptimizedData));
     if (data == NULL) {
         perror("Erreur d'allocation des données optimisées");
@@ -240,23 +248,7 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
         if (c < 0) c = 0;
         else if (c >= cols) c = cols - 1;
 
-        int cap = 64;
-        int* tempNeighbors = malloc((size_t)cap * sizeof(int));
-        if (tempNeighbors == NULL) {
-            perror("Erreur d'allocation tampon voisins");
-            for (int k = 0; k < i; k++) {
-                free(data[k].neighbors);
-            }
-            free(data);
-            for (int rr = 0; rr < rows; rr++) {
-                if (grid[rr]->indexArray) {
-                    free(grid[rr]->indexArray);
-                }
-                free(grid[rr]);
-            }
-            free(grid);
-            return NULL;
-        }
+        int tempNeighbors[MAX_NEIGHBORS];
         int foundCount = 0;
 
         for (int dr = -CELL_SEARCH_RADIUS; dr <= CELL_SEARCH_RADIUS; dr++) {
@@ -274,28 +266,7 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
                     }
 
                     float dist = town_distance_km(&towns[i], &towns[j]);
-                    if (dist <= COVERAGE_RADIUS_KM) {
-                        if (foundCount >= cap) {
-                            cap *= 2;
-                            int* grown = realloc(tempNeighbors, (size_t)cap * sizeof(int));
-                            if (grown == NULL) {
-                                perror("Erreur realloc tampon voisins");
-                                free(tempNeighbors);
-                                for (int n = 0; n < i; n++) {
-                                    free(data[n].neighbors);
-                                }
-                                free(data);
-                                for (int rr = 0; rr < rows; rr++) {
-                                    if (grid[rr]->indexArray) {
-                                        free(grid[rr]->indexArray);
-                                    }
-                                    free(grid[rr]);
-                                }
-                                free(grid);
-                                return NULL;
-                            }
-                            tempNeighbors = grown;
-                        }
+                    if (dist <= COVERAGE_RADIUS_KM && foundCount < MAX_NEIGHBORS) {
                         tempNeighbors[foundCount++] = j;
                     }
                 }
@@ -307,7 +278,6 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
             data[i].neighbors = malloc((size_t)foundCount * sizeof(int));
             if (data[i].neighbors == NULL) {
                 perror("Erreur d'allocation voisins");
-                free(tempNeighbors);
                 for (int n = 0; n < i; n++) {
                     free(data[n].neighbors);
                 }
@@ -323,7 +293,6 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
             }
             memcpy(data[i].neighbors, tempNeighbors, (size_t)foundCount * sizeof(int));
         }
-        free(tempNeighbors);
 
         data[i].max_covered_population = towns[i].population;
         for (int v = 0; v < data[i].neighbor_count; v++) {
@@ -331,6 +300,7 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
         }
     }
 
+    // Libération de la mémoire de la grille intermédiaire
     for (int i = 0; i < rows; i++) {
         if (grid[i]->indexArray) {
             free(grid[i]->indexArray);
@@ -368,6 +338,7 @@ void fitness(Individual* restrict ind, Town* restrict towns, OptimizedData* rest
             hospitals_bed_count += towns[i].population;
         }
 
+#pragma omp simd
         for (int v = 0; v < data[i].neighbor_count; v++) {
             int neighbor_index = data[i].neighbors[v];
             if (!coverage_buffer[neighbor_index]) {
@@ -381,6 +352,8 @@ void fitness(Individual* restrict ind, Town* restrict towns, OptimizedData* rest
     }
 
     ind->desert_population = g_habitants_total - covered_population;
+
+    // Équation d'évaluation de l'individu
     ind->fitness = (double)g_habitants_total
         - (double)ind->desert_population
         - (HOSPITAL_COST * ind->hospitals_count)
@@ -501,6 +474,7 @@ void copy_individual(Individual* dest, const Individual* src, size_t count) {
 }
 
 void mutate(Individual* ind, const OptimizedData* data, size_t count, unsigned int* seed) {
+    // 1. AJOUT MASSIF
     int nb_ajouts = (rand_r(seed) % (MAX_DISCOVER_HOSPITALS - MIN_DISCOVER_HOSPITALS + 1)) + MIN_DISCOVER_HOSPITALS;
     for (int m = 0; m < nb_ajouts; m++) {
         int r = (int)(rand_r(seed) % (unsigned int)count);
@@ -509,6 +483,7 @@ void mutate(Individual* ind, const OptimizedData* data, size_t count, unsigned i
         }
     }
 
+    // 2. ÉLAGAGE MASSIF (on autorise à fermer les CHRU doublons)
     if (rand_r(seed) % 100 < PROB_DELETE) {
         int retryAttempts = 0;
         int closeCount = 0;
@@ -530,6 +505,7 @@ void crossover(Individual* enfant, const Individual* p1, const Individual* p2, s
     int pivot1 = (int)(rand_r(seed) % (unsigned int)(count / 2));
     int pivot2 = pivot1 + (int)(rand_r(seed) % (unsigned int)(count / 2));
 
+    // Copie par zones (Two-point crossover)
     memcpy(enfant->genes, p1->genes, (size_t)pivot1);
     memcpy(enfant->genes + pivot1, p2->genes + pivot1, (size_t)(pivot2 - pivot1));
     memcpy(enfant->genes + pivot2, p1->genes + pivot2, count - (size_t)pivot2);

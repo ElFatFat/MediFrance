@@ -1,0 +1,289 @@
+\doxysection{modules/\+gen.c File Reference}
+\hypertarget{gen_8c}{}\label{gen_8c}\index{modules/gen.c@{modules/gen.c}}
+
+
+Moteur algorithmique de la simulation génétique et de la modélisation géospatiale.  
+
+
+{\ttfamily \+\#include "{}gen.\+h"{}}\newline
+{\ttfamily \+\#include $<$math.\+h$>$}\newline
+{\ttfamily \+\#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \+\#include $<$string.\+h$>$}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_a7a4127f14f16563da90eb3c836bc404f}{CELL\+\_\+\+SIZE}}~0.\+1
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_af024f7c359925f78d2baf3761991f9f3}{HABITANTS\+\_\+\+TOTAL}}~65141355
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_a6b2d35c814f5f73894a604470e0d7860}{HOSPITAL\+\_\+\+COST}}~5000.\+0
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_a84aa2bbc9443809ff3702c9567320730}{CHRU\+\_\+\+BONUS}}~4000.\+0
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_a39cc7ed0ecbb9517026f3f02b3fbf417}{CHRU\+\_\+\+POP\+\_\+\+THRESHOLD}}~80000
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_abdf9046863c3f5294cade34cfa29e0ae}{LAT\+\_\+\+TO\+\_\+\+RAD}}~0.\+0174533
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_ab787fbc51ab4cc26237c01039fec7ea7}{LATITUDE\+\_\+\+FACTOR}}~111.\+32
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_a15ce3a8b7daeab5ddc01de61f783e2b1}{BEDS\+\_\+\+PER\+\_\+1000}}~5.\+4
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_a57e1bdcc9cd0039e198507ae492cc65d}{PROB\+\_\+\+DELETE}}~80
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_a68b3dd3f924b7946c9193463b22fa850}{MAX\+\_\+\+DISCOVER\+\_\+\+HOSPITALS}}~10
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_abbe6c37601b3fae7f7b5bea68380de2b}{MIN\+\_\+\+DISCOVER\+\_\+\+HOSPITALS}}~3
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_ad872eb7468119cbb74c97e138a042512}{MAX\+\_\+\+DELETE\+\_\+\+HOSPITALS}}~10
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_a7f7066bf5b2e14879c76a10c388e80db}{MIN\+\_\+\+DELETE\+\_\+\+HOSPITALS}}~3
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_a2b1d39159e4114f433745f15a201c93c}{MAX\+\_\+\+NEIGHBORS}}~200
+\item 
+\+\#define \doxymbox{\hyperlink{gen_8c_a1475d3e77f4b258dd3be12d8b2814c4b}{MAX\+\_\+\+TRY}}~150
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*} \doxymbox{\hyperlink{gen_8c_a6cec5a7122032798f0faa0b0ce053d6f}{precalc\+\_\+near}} (Town \texorpdfstring{$\ast$}{*}restrict towns, size\+\_\+t count)
+\begin{DoxyCompactList}\small\item\em Effectue la sectorisation spatiale par grille de hachage et liste les communes à \texorpdfstring{$<$}{<} 10km. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gen_8c_a2130763af2275811d57ca432ade18661}{fitness}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}restrict ind, Town \texorpdfstring{$\ast$}{*}restrict towns, \doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}restrict data, size\+\_\+t count, unsigned char \texorpdfstring{$\ast$}{*}restrict coverage\+\_\+buffer)
+\begin{DoxyCompactList}\small\item\em Calcule la valeur de fitness globale et les statistiques d\textquotesingle{}un individu. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gen_8c_a2ef24c894c8474a841a2b8750bb6068a}{quick\+\_\+sort\+\_\+population}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}pop, int left, int right)
+\begin{DoxyCompactList}\small\item\em Trie par partitionnement récursif (Quicksort) la population d\textquotesingle{}individus par ordre décroissant. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gen_8c_a9f35970a2e93d420619fefa6831f15f3}{copy\+\_\+individual}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}dest, const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}src, size\+\_\+t count)
+\begin{DoxyCompactList}\small\item\em Réalise une copie complète bloc à bloc des attributs et des gènes d\textquotesingle{}un individu source vers une destination. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gen_8c_a4be36c24ac07e27f922ecbb557f38491}{mutate}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}ind, const \doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}data, size\+\_\+t count, unsigned int \texorpdfstring{$\ast$}{*}seed)
+\begin{DoxyCompactList}\small\item\em Induit des perturbations génotypiques via l\textquotesingle{}ajout stratégique et l\textquotesingle{}élagage aléatoire d\textquotesingle{}hôpitaux. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gen_8c_a6f22b5042a9b07a7b4362cd5b9c2f089}{crossover}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}enfant, const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}p1, const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}p2, size\+\_\+t count, unsigned int \texorpdfstring{$\ast$}{*}seed)
+\begin{DoxyCompactList}\small\item\em Produit un descendant hybride par combinaison croisée en deux points à partir de deux parents distincts. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Moteur algorithmique de la simulation génétique et de la modélisation géospatiale. 
+
+
+
+\label{doc-define-members}
+\Hypertarget{gen_8c_doc-define-members}
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{gen_8c_a15ce3a8b7daeab5ddc01de61f783e2b1}\index{gen.c@{gen.c}!BEDS\_PER\_1000@{BEDS\_PER\_1000}}
+\index{BEDS\_PER\_1000@{BEDS\_PER\_1000}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{BEDS\_PER\_1000}{BEDS\_PER\_1000}}
+{\footnotesize\ttfamily \label{gen_8c_a15ce3a8b7daeab5ddc01de61f783e2b1} 
+\+\#define BEDS\+\_\+\+PER\+\_\+1000~5.\+4}
+
+\Hypertarget{gen_8c_a7a4127f14f16563da90eb3c836bc404f}\index{gen.c@{gen.c}!CELL\_SIZE@{CELL\_SIZE}}
+\index{CELL\_SIZE@{CELL\_SIZE}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{CELL\_SIZE}{CELL\_SIZE}}
+{\footnotesize\ttfamily \label{gen_8c_a7a4127f14f16563da90eb3c836bc404f} 
+\+\#define CELL\+\_\+\+SIZE~0.\+1}
+
+\Hypertarget{gen_8c_a84aa2bbc9443809ff3702c9567320730}\index{gen.c@{gen.c}!CHRU\_BONUS@{CHRU\_BONUS}}
+\index{CHRU\_BONUS@{CHRU\_BONUS}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{CHRU\_BONUS}{CHRU\_BONUS}}
+{\footnotesize\ttfamily \label{gen_8c_a84aa2bbc9443809ff3702c9567320730} 
+\+\#define CHRU\+\_\+\+BONUS~4000.\+0}
+
+\Hypertarget{gen_8c_a39cc7ed0ecbb9517026f3f02b3fbf417}\index{gen.c@{gen.c}!CHRU\_POP\_THRESHOLD@{CHRU\_POP\_THRESHOLD}}
+\index{CHRU\_POP\_THRESHOLD@{CHRU\_POP\_THRESHOLD}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{CHRU\_POP\_THRESHOLD}{CHRU\_POP\_THRESHOLD}}
+{\footnotesize\ttfamily \label{gen_8c_a39cc7ed0ecbb9517026f3f02b3fbf417} 
+\+\#define CHRU\+\_\+\+POP\+\_\+\+THRESHOLD~80000}
+
+\Hypertarget{gen_8c_af024f7c359925f78d2baf3761991f9f3}\index{gen.c@{gen.c}!HABITANTS\_TOTAL@{HABITANTS\_TOTAL}}
+\index{HABITANTS\_TOTAL@{HABITANTS\_TOTAL}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{HABITANTS\_TOTAL}{HABITANTS\_TOTAL}}
+{\footnotesize\ttfamily \label{gen_8c_af024f7c359925f78d2baf3761991f9f3} 
+\+\#define HABITANTS\+\_\+\+TOTAL~65141355}
+
+\Hypertarget{gen_8c_a6b2d35c814f5f73894a604470e0d7860}\index{gen.c@{gen.c}!HOSPITAL\_COST@{HOSPITAL\_COST}}
+\index{HOSPITAL\_COST@{HOSPITAL\_COST}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{HOSPITAL\_COST}{HOSPITAL\_COST}}
+{\footnotesize\ttfamily \label{gen_8c_a6b2d35c814f5f73894a604470e0d7860} 
+\+\#define HOSPITAL\+\_\+\+COST~5000.\+0}
+
+\Hypertarget{gen_8c_abdf9046863c3f5294cade34cfa29e0ae}\index{gen.c@{gen.c}!LAT\_TO\_RAD@{LAT\_TO\_RAD}}
+\index{LAT\_TO\_RAD@{LAT\_TO\_RAD}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{LAT\_TO\_RAD}{LAT\_TO\_RAD}}
+{\footnotesize\ttfamily \label{gen_8c_abdf9046863c3f5294cade34cfa29e0ae} 
+\+\#define LAT\+\_\+\+TO\+\_\+\+RAD~0.\+0174533}
+
+\Hypertarget{gen_8c_ab787fbc51ab4cc26237c01039fec7ea7}\index{gen.c@{gen.c}!LATITUDE\_FACTOR@{LATITUDE\_FACTOR}}
+\index{LATITUDE\_FACTOR@{LATITUDE\_FACTOR}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{LATITUDE\_FACTOR}{LATITUDE\_FACTOR}}
+{\footnotesize\ttfamily \label{gen_8c_ab787fbc51ab4cc26237c01039fec7ea7} 
+\+\#define LATITUDE\+\_\+\+FACTOR~111.\+32}
+
+\Hypertarget{gen_8c_ad872eb7468119cbb74c97e138a042512}\index{gen.c@{gen.c}!MAX\_DELETE\_HOSPITALS@{MAX\_DELETE\_HOSPITALS}}
+\index{MAX\_DELETE\_HOSPITALS@{MAX\_DELETE\_HOSPITALS}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{MAX\_DELETE\_HOSPITALS}{MAX\_DELETE\_HOSPITALS}}
+{\footnotesize\ttfamily \label{gen_8c_ad872eb7468119cbb74c97e138a042512} 
+\+\#define MAX\+\_\+\+DELETE\+\_\+\+HOSPITALS~10}
+
+\Hypertarget{gen_8c_a68b3dd3f924b7946c9193463b22fa850}\index{gen.c@{gen.c}!MAX\_DISCOVER\_HOSPITALS@{MAX\_DISCOVER\_HOSPITALS}}
+\index{MAX\_DISCOVER\_HOSPITALS@{MAX\_DISCOVER\_HOSPITALS}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{MAX\_DISCOVER\_HOSPITALS}{MAX\_DISCOVER\_HOSPITALS}}
+{\footnotesize\ttfamily \label{gen_8c_a68b3dd3f924b7946c9193463b22fa850} 
+\+\#define MAX\+\_\+\+DISCOVER\+\_\+\+HOSPITALS~10}
+
+\Hypertarget{gen_8c_a2b1d39159e4114f433745f15a201c93c}\index{gen.c@{gen.c}!MAX\_NEIGHBORS@{MAX\_NEIGHBORS}}
+\index{MAX\_NEIGHBORS@{MAX\_NEIGHBORS}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{MAX\_NEIGHBORS}{MAX\_NEIGHBORS}}
+{\footnotesize\ttfamily \label{gen_8c_a2b1d39159e4114f433745f15a201c93c} 
+\+\#define MAX\+\_\+\+NEIGHBORS~200}
+
+\Hypertarget{gen_8c_a1475d3e77f4b258dd3be12d8b2814c4b}\index{gen.c@{gen.c}!MAX\_TRY@{MAX\_TRY}}
+\index{MAX\_TRY@{MAX\_TRY}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{MAX\_TRY}{MAX\_TRY}}
+{\footnotesize\ttfamily \label{gen_8c_a1475d3e77f4b258dd3be12d8b2814c4b} 
+\+\#define MAX\+\_\+\+TRY~150}
+
+\Hypertarget{gen_8c_a7f7066bf5b2e14879c76a10c388e80db}\index{gen.c@{gen.c}!MIN\_DELETE\_HOSPITALS@{MIN\_DELETE\_HOSPITALS}}
+\index{MIN\_DELETE\_HOSPITALS@{MIN\_DELETE\_HOSPITALS}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{MIN\_DELETE\_HOSPITALS}{MIN\_DELETE\_HOSPITALS}}
+{\footnotesize\ttfamily \label{gen_8c_a7f7066bf5b2e14879c76a10c388e80db} 
+\+\#define MIN\+\_\+\+DELETE\+\_\+\+HOSPITALS~3}
+
+\Hypertarget{gen_8c_abbe6c37601b3fae7f7b5bea68380de2b}\index{gen.c@{gen.c}!MIN\_DISCOVER\_HOSPITALS@{MIN\_DISCOVER\_HOSPITALS}}
+\index{MIN\_DISCOVER\_HOSPITALS@{MIN\_DISCOVER\_HOSPITALS}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{MIN\_DISCOVER\_HOSPITALS}{MIN\_DISCOVER\_HOSPITALS}}
+{\footnotesize\ttfamily \label{gen_8c_abbe6c37601b3fae7f7b5bea68380de2b} 
+\+\#define MIN\+\_\+\+DISCOVER\+\_\+\+HOSPITALS~3}
+
+\Hypertarget{gen_8c_a57e1bdcc9cd0039e198507ae492cc65d}\index{gen.c@{gen.c}!PROB\_DELETE@{PROB\_DELETE}}
+\index{PROB\_DELETE@{PROB\_DELETE}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{PROB\_DELETE}{PROB\_DELETE}}
+{\footnotesize\ttfamily \label{gen_8c_a57e1bdcc9cd0039e198507ae492cc65d} 
+\+\#define PROB\+\_\+\+DELETE~80}
+
+
+
+\label{doc-func-members}
+\Hypertarget{gen_8c_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{gen_8c_a9f35970a2e93d420619fefa6831f15f3}\index{gen.c@{gen.c}!copy\_individual@{copy\_individual}}
+\index{copy\_individual@{copy\_individual}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{copy\_individual()}{copy\_individual()}}
+{\footnotesize\ttfamily \label{gen_8c_a9f35970a2e93d420619fefa6831f15f3} 
+void copy\+\_\+individual (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{dest}{, }\item[{const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{src}{, }\item[{size\+\_\+t}]{count}{}\end{DoxyParamCaption})}
+
+
+
+Réalise une copie complète bloc à bloc des attributs et des gènes d\textquotesingle{}un individu source vers une destination. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em dest} & Pointeur de l\textquotesingle{}individu récepteur. \\
+\hline
+{\em src} & Pointeur de l\textquotesingle{}individu émetteur. \\
+\hline
+{\em count} & Nombre total de gènes (NB\+\_\+\+COMMUNES). \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gen_8c_a6f22b5042a9b07a7b4362cd5b9c2f089}\index{gen.c@{gen.c}!crossover@{crossover}}
+\index{crossover@{crossover}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{crossover()}{crossover()}}
+{\footnotesize\ttfamily \label{gen_8c_a6f22b5042a9b07a7b4362cd5b9c2f089} 
+void crossover (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{enfant}{, }\item[{const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{p1}{, }\item[{const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{p2}{, }\item[{size\+\_\+t}]{count}{, }\item[{unsigned int \texorpdfstring{$\ast$}{*}}]{seed}{}\end{DoxyParamCaption})}
+
+
+
+Produit un descendant hybride par combinaison croisée en deux points à partir de deux parents distincts. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em enfant} & Pointeur vers la structure destinée à recueillir le génome enfant. \\
+\hline
+{\em p1} & Pointeur vers le premier parent. \\
+\hline
+{\em p2} & Pointeur vers le second parent. \\
+\hline
+{\em count} & Nombre d\textquotesingle{}éléments génotypiques à croiser. \\
+\hline
+{\em seed} & Pointeur vers la graine pseudo-\/aléatoire. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gen_8c_a2130763af2275811d57ca432ade18661}\index{gen.c@{gen.c}!fitness@{fitness}}
+\index{fitness@{fitness}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{fitness()}{fitness()}}
+{\footnotesize\ttfamily \label{gen_8c_a2130763af2275811d57ca432ade18661} 
+void fitness (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}restrict}]{ind}{, }\item[{Town \texorpdfstring{$\ast$}{*}restrict}]{towns}{, }\item[{\doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}restrict}]{data}{, }\item[{size\+\_\+t}]{count}{, }\item[{unsigned char \texorpdfstring{$\ast$}{*}restrict}]{coverage\+\_\+buffer}{}\end{DoxyParamCaption})}
+
+
+
+Calcule la valeur de fitness globale et les statistiques d\textquotesingle{}un individu. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ind} & Pointeur vers l\textquotesingle{}individu à évaluer. \\
+\hline
+{\em towns} & Tableau de référence des communes. \\
+\hline
+{\em data} & Structures précalculées de voisinage. \\
+\hline
+{\em count} & Nombre total de communes. \\
+\hline
+{\em coverage\+\_\+buffer} & Zone tampon intermédiaire pour éviter le double-\/comptage. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gen_8c_a4be36c24ac07e27f922ecbb557f38491}\index{gen.c@{gen.c}!mutate@{mutate}}
+\index{mutate@{mutate}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{mutate()}{mutate()}}
+{\footnotesize\ttfamily \label{gen_8c_a4be36c24ac07e27f922ecbb557f38491} 
+void mutate (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{ind}{, }\item[{const \doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}}]{data}{, }\item[{size\+\_\+t}]{count}{, }\item[{unsigned int \texorpdfstring{$\ast$}{*}}]{seed}{}\end{DoxyParamCaption})}
+
+
+
+Induit des perturbations génotypiques via l\textquotesingle{}ajout stratégique et l\textquotesingle{}élagage aléatoire d\textquotesingle{}hôpitaux. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ind} & L\textquotesingle{}individu sujet à mutation. \\
+\hline
+{\em data} & Informations de voisinage géospatial. \\
+\hline
+{\em count} & Taille du chromosome. \\
+\hline
+{\em seed} & Pointeur vers la graine du générateur de nombres pseudo-\/aléatoires ({\ttfamily rand\+\_\+r}). \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gen_8c_a6cec5a7122032798f0faa0b0ce053d6f}\index{gen.c@{gen.c}!precalc\_near@{precalc\_near}}
+\index{precalc\_near@{precalc\_near}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{precalc\_near()}{precalc\_near()}}
+{\footnotesize\ttfamily \label{gen_8c_a6cec5a7122032798f0faa0b0ce053d6f} 
+\doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*} precalc\+\_\+near (\begin{DoxyParamCaption}\item[{Town \texorpdfstring{$\ast$}{*}restrict}]{towns}{, }\item[{size\+\_\+t}]{count}{}\end{DoxyParamCaption})}
+
+
+
+Effectue la sectorisation spatiale par grille de hachage et liste les communes à \texorpdfstring{$<$}{<} 10km. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em towns} & Tableau brut de toutes les communes. \\
+\hline
+{\em count} & Quantité globale de communes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Pointeur vers le tableau de structures optimisées alloué dynamiquement. 
+\end{DoxyReturn}
+\Hypertarget{gen_8c_a2ef24c894c8474a841a2b8750bb6068a}\index{gen.c@{gen.c}!quick\_sort\_population@{quick\_sort\_population}}
+\index{quick\_sort\_population@{quick\_sort\_population}!gen.c@{gen.c}}
+\doxysubsubsection{\texorpdfstring{quick\_sort\_population()}{quick\_sort\_population()}}
+{\footnotesize\ttfamily \label{gen_8c_a2ef24c894c8474a841a2b8750bb6068a} 
+void quick\+\_\+sort\+\_\+population (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{pop}{, }\item[{int}]{left}{, }\item[{int}]{right}{}\end{DoxyParamCaption})}
+
+
+
+Trie par partitionnement récursif (Quicksort) la population d\textquotesingle{}individus par ordre décroissant. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pop} & Pointeur vers le tableau d\textquotesingle{}individus. \\
+\hline
+{\em left} & Index de borne gauche. \\
+\hline
+{\em right} & Index de borne droite. \\
+\hline
+\end{DoxyParams}

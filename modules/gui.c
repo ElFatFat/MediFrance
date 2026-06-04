@@ -1,3 +1,8 @@
+/**
+ * @file gui.c
+ * @brief Implémentation des fonctionnalités graphiques et projection géographique en pixels.
+ */
+
 #include "gui.h"
 #include "gen.h"
 
@@ -69,6 +74,10 @@ void fitness_graph(double fitness, int nb_gen, int index, MLV_Color color) {
     MLV_actualise_window();
 }
 
+/**
+ * @brief Dessine la grille de l'interface de contrôle et ses libellés textuels.
+ * @internal Fonction utilitaire locale au fichier gui.c.
+ */
 void draw_base_interface() {
     MLV_clear_window(MLV_COLOR_BLACK);
     

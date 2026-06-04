@@ -1,0 +1,169 @@
+\doxysection{modules/\+gen.h File Reference}
+\hypertarget{gen_8h}{}\label{gen_8h}\index{modules/gen.h@{modules/gen.h}}
+
+
+Déclarations des types de données et prototypes pour l\textquotesingle{}algorithme génétique spatialisé.  
+
+
+{\ttfamily \+\#include "{}../\+main.\+h"{}}\newline
+\doxysubsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}}
+\begin{DoxyCompactList}\small\item\em Structure regroupant les données de voisinage précalculées à moins de 10km. \end{DoxyCompactList}\item 
+struct \doxymbox{\hyperlink{struct_individual}{Individual}}
+\begin{DoxyCompactList}\small\item\em Représente un chromosome ou solution potentielle de notre population. \end{DoxyCompactList}\item 
+struct \doxymbox{\hyperlink{struct_cell}{Cell}}
+\begin{DoxyCompactList}\small\item\em Cellule dynamique utilisée pour la sectorisation de la grille de hachage spatial. \end{DoxyCompactList}\item 
+struct \doxymbox{\hyperlink{struct_thread_workspace}{Thread\+Workspace}}
+\begin{DoxyCompactList}\small\item\em Espace mémoire local pour assurer l\textquotesingle{}exécution Thread-\/\+Safe et l\textquotesingle{}isolation des tampons de couverture. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*} \doxymbox{\hyperlink{gen_8h_a6cec5a7122032798f0faa0b0ce053d6f}{precalc\+\_\+near}} (Town \texorpdfstring{$\ast$}{*}restrict towns, size\+\_\+t count)
+\begin{DoxyCompactList}\small\item\em Effectue la sectorisation spatiale par grille de hachage et liste les communes à \texorpdfstring{$<$}{<} 10km. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gen_8h_a2130763af2275811d57ca432ade18661}{fitness}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}restrict ind, Town \texorpdfstring{$\ast$}{*}restrict towns, \doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}restrict data, size\+\_\+t count, unsigned char \texorpdfstring{$\ast$}{*}restrict coverage\+\_\+buffer)
+\begin{DoxyCompactList}\small\item\em Calcule la valeur de fitness globale et les statistiques d\textquotesingle{}un individu. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gen_8h_a2ef24c894c8474a841a2b8750bb6068a}{quick\+\_\+sort\+\_\+population}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}pop, int left, int right)
+\begin{DoxyCompactList}\small\item\em Trie par partitionnement récursif (Quicksort) la population d\textquotesingle{}individus par ordre décroissant. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gen_8h_a9f35970a2e93d420619fefa6831f15f3}{copy\+\_\+individual}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}dest, const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}src, size\+\_\+t count)
+\begin{DoxyCompactList}\small\item\em Réalise une copie complète bloc à bloc des attributs et des gènes d\textquotesingle{}un individu source vers une destination. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gen_8h_a4be36c24ac07e27f922ecbb557f38491}{mutate}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}ind, const \doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}data, size\+\_\+t count, unsigned int \texorpdfstring{$\ast$}{*}seed)
+\begin{DoxyCompactList}\small\item\em Induit des perturbations génotypiques via l\textquotesingle{}ajout stratégique et l\textquotesingle{}élagage aléatoire d\textquotesingle{}hôpitaux. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gen_8h_a6f22b5042a9b07a7b4362cd5b9c2f089}{crossover}} (\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}enfant, const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}p1, const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}p2, size\+\_\+t count, unsigned int \texorpdfstring{$\ast$}{*}seed)
+\begin{DoxyCompactList}\small\item\em Produit un descendant hybride par combinaison croisée en deux points à partir de deux parents distincts. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Déclarations des types de données et prototypes pour l\textquotesingle{}algorithme génétique spatialisé. 
+
+
+
+\label{doc-func-members}
+\Hypertarget{gen_8h_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{gen_8h_a9f35970a2e93d420619fefa6831f15f3}\index{gen.h@{gen.h}!copy\_individual@{copy\_individual}}
+\index{copy\_individual@{copy\_individual}!gen.h@{gen.h}}
+\doxysubsubsection{\texorpdfstring{copy\_individual()}{copy\_individual()}}
+{\footnotesize\ttfamily \label{gen_8h_a9f35970a2e93d420619fefa6831f15f3} 
+void copy\+\_\+individual (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{dest}{, }\item[{const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{src}{, }\item[{size\+\_\+t}]{count}{}\end{DoxyParamCaption})}
+
+
+
+Réalise une copie complète bloc à bloc des attributs et des gènes d\textquotesingle{}un individu source vers une destination. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em dest} & Pointeur de l\textquotesingle{}individu récepteur. \\
+\hline
+{\em src} & Pointeur de l\textquotesingle{}individu émetteur. \\
+\hline
+{\em count} & Nombre total de gènes (NB\+\_\+\+COMMUNES). \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gen_8h_a6f22b5042a9b07a7b4362cd5b9c2f089}\index{gen.h@{gen.h}!crossover@{crossover}}
+\index{crossover@{crossover}!gen.h@{gen.h}}
+\doxysubsubsection{\texorpdfstring{crossover()}{crossover()}}
+{\footnotesize\ttfamily \label{gen_8h_a6f22b5042a9b07a7b4362cd5b9c2f089} 
+void crossover (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{enfant}{, }\item[{const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{p1}{, }\item[{const \doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{p2}{, }\item[{size\+\_\+t}]{count}{, }\item[{unsigned int \texorpdfstring{$\ast$}{*}}]{seed}{}\end{DoxyParamCaption})}
+
+
+
+Produit un descendant hybride par combinaison croisée en deux points à partir de deux parents distincts. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em enfant} & Pointeur vers la structure destinée à recueillir le génome enfant. \\
+\hline
+{\em p1} & Pointeur vers le premier parent. \\
+\hline
+{\em p2} & Pointeur vers le second parent. \\
+\hline
+{\em count} & Nombre d\textquotesingle{}éléments génotypiques à croiser. \\
+\hline
+{\em seed} & Pointeur vers la graine pseudo-\/aléatoire. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gen_8h_a2130763af2275811d57ca432ade18661}\index{gen.h@{gen.h}!fitness@{fitness}}
+\index{fitness@{fitness}!gen.h@{gen.h}}
+\doxysubsubsection{\texorpdfstring{fitness()}{fitness()}}
+{\footnotesize\ttfamily \label{gen_8h_a2130763af2275811d57ca432ade18661} 
+void fitness (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}restrict}]{ind}{, }\item[{Town \texorpdfstring{$\ast$}{*}restrict}]{towns}{, }\item[{\doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}restrict}]{data}{, }\item[{size\+\_\+t}]{count}{, }\item[{unsigned char \texorpdfstring{$\ast$}{*}restrict}]{coverage\+\_\+buffer}{}\end{DoxyParamCaption})}
+
+
+
+Calcule la valeur de fitness globale et les statistiques d\textquotesingle{}un individu. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ind} & Pointeur vers l\textquotesingle{}individu à évaluer. \\
+\hline
+{\em towns} & Tableau de référence des communes. \\
+\hline
+{\em data} & Structures précalculées de voisinage. \\
+\hline
+{\em count} & Nombre total de communes. \\
+\hline
+{\em coverage\+\_\+buffer} & Zone tampon intermédiaire pour éviter le double-\/comptage. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gen_8h_a4be36c24ac07e27f922ecbb557f38491}\index{gen.h@{gen.h}!mutate@{mutate}}
+\index{mutate@{mutate}!gen.h@{gen.h}}
+\doxysubsubsection{\texorpdfstring{mutate()}{mutate()}}
+{\footnotesize\ttfamily \label{gen_8h_a4be36c24ac07e27f922ecbb557f38491} 
+void mutate (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{ind}{, }\item[{const \doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}}]{data}{, }\item[{size\+\_\+t}]{count}{, }\item[{unsigned int \texorpdfstring{$\ast$}{*}}]{seed}{}\end{DoxyParamCaption})}
+
+
+
+Induit des perturbations génotypiques via l\textquotesingle{}ajout stratégique et l\textquotesingle{}élagage aléatoire d\textquotesingle{}hôpitaux. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ind} & L\textquotesingle{}individu sujet à mutation. \\
+\hline
+{\em data} & Informations de voisinage géospatial. \\
+\hline
+{\em count} & Taille du chromosome. \\
+\hline
+{\em seed} & Pointeur vers la graine du générateur de nombres pseudo-\/aléatoires ({\ttfamily rand\+\_\+r}). \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gen_8h_a6cec5a7122032798f0faa0b0ce053d6f}\index{gen.h@{gen.h}!precalc\_near@{precalc\_near}}
+\index{precalc\_near@{precalc\_near}!gen.h@{gen.h}}
+\doxysubsubsection{\texorpdfstring{precalc\_near()}{precalc\_near()}}
+{\footnotesize\ttfamily \label{gen_8h_a6cec5a7122032798f0faa0b0ce053d6f} 
+\doxymbox{\hyperlink{struct_optimized_data}{Optimized\+Data}} \texorpdfstring{$\ast$}{*} precalc\+\_\+near (\begin{DoxyParamCaption}\item[{Town \texorpdfstring{$\ast$}{*}restrict}]{towns}{, }\item[{size\+\_\+t}]{count}{}\end{DoxyParamCaption})}
+
+
+
+Effectue la sectorisation spatiale par grille de hachage et liste les communes à \texorpdfstring{$<$}{<} 10km. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em towns} & Tableau brut de toutes les communes. \\
+\hline
+{\em count} & Quantité globale de communes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Pointeur vers le tableau de structures optimisées alloué dynamiquement. 
+\end{DoxyReturn}
+\Hypertarget{gen_8h_a2ef24c894c8474a841a2b8750bb6068a}\index{gen.h@{gen.h}!quick\_sort\_population@{quick\_sort\_population}}
+\index{quick\_sort\_population@{quick\_sort\_population}!gen.h@{gen.h}}
+\doxysubsubsection{\texorpdfstring{quick\_sort\_population()}{quick\_sort\_population()}}
+{\footnotesize\ttfamily \label{gen_8h_a2ef24c894c8474a841a2b8750bb6068a} 
+void quick\+\_\+sort\+\_\+population (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{struct_individual}{Individual}} \texorpdfstring{$\ast$}{*}}]{pop}{, }\item[{int}]{left}{, }\item[{int}]{right}{}\end{DoxyParamCaption})}
+
+
+
+Trie par partitionnement récursif (Quicksort) la population d\textquotesingle{}individus par ordre décroissant. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pop} & Pointeur vers le tableau d\textquotesingle{}individus. \\
+\hline
+{\em left} & Index de borne gauche. \\
+\hline
+{\em right} & Index de borne droite. \\
+\hline
+\end{DoxyParams}

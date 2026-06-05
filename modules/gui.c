@@ -72,20 +72,25 @@ void draw_hospitals(Town *communes, size_t count, Individual ind, const Optimize
     }
 }
 
-// Affiche les statistiques du meilleur individu dans le panneau de droite
+// Affiche les statistiques du meilleur individu dans le panneau de droite.
+// Le bloc occupe l'espace libéré par la suppression de la 3e boîte (~y 320 -> 560).
 void draw_stats(Individual ind) {
     char buffer[128];
-    int ty = 460;
+    const int tx = 870;
+    const int line = 40; // interligne (bloc plus aéré)
+    int ty = 320;
 
-    MLV_draw_text(870, ty, "--- RESULTAT ---", MLV_COLOR_WHITE); ty += 26;
+    MLV_draw_text(tx, ty, "--- RESULTAT ---", MLV_COLOR_WHITE); ty += line + 8;
     snprintf(buffer, sizeof(buffer), "Fitness  : %.0f", ind.fitness);
-    MLV_draw_text(870, ty, buffer, MLV_COLOR_WHITE); ty += 22;
+    MLV_draw_text(tx, ty, buffer, MLV_COLOR_WHITE); ty += line;
     snprintf(buffer, sizeof(buffer), "Hopitaux : %d", ind.hospitals_count);
-    MLV_draw_text(870, ty, buffer, MLV_COLOR_WHITE); ty += 22;
+    MLV_draw_text(tx, ty, buffer, MLV_COLOR_WHITE); ty += line;
     snprintf(buffer, sizeof(buffer), "CHRU     : %d", ind.chru_count);
-    MLV_draw_text(870, ty, buffer, MLV_COLOR_WHITE); ty += 22;
+    MLV_draw_text(tx, ty, buffer, MLV_COLOR_WHITE); ty += line;
     snprintf(buffer, sizeof(buffer), "Lits     : %ld", ind.beds_count);
-    MLV_draw_text(870, ty, buffer, MLV_COLOR_WHITE);
+    MLV_draw_text(tx, ty, buffer, MLV_COLOR_WHITE); ty += line;
+    snprintf(buffer, sizeof(buffer), "Desert   : %ld", ind.desert_population);
+    MLV_draw_text(tx, ty, buffer, MLV_COLOR_WHITE);
 }
 
 // Convertit un indice de génération en coordonnée X dans la zone de courbe
@@ -183,16 +188,6 @@ void draw_base_interface() {
     );
     //MLV_create_input_box(870,260,200,40,MLV_COLOR_BLACK,MLV_COLOR_BLACK,MLV_COLOR_WHITE,"");
 
-    //MLV_draw_text(870, 360, "Nombre d'elites : ", MLV_COLOR_WHITE);
-    MLV_draw_text_box(
-        870, 360, 100, 60, 
-        "elites", 
-        2, 
-        MLV_COLOR_WHITE, MLV_COLOR_WHITE, hospital_color, 
-        MLV_TEXT_CENTER, MLV_HORIZONTAL_CENTER, MLV_VERTICAL_CENTER
-    );
-    //MLV_create_input_box(870,400,200,40,MLV_COLOR_BLACK,MLV_COLOR_BLACK,MLV_COLOR_WHITE,"");
-
     MLV_draw_all_input_boxes();
 
     MLV_draw_text_box(
@@ -244,15 +239,6 @@ void settings_menu(Town *communes, size_t count, GAResult* res, const GAContext*
                 MLV_COLOR_BLACK, MLV_COLOR_BLACK, MLV_COLOR_WHITE, " ", &text);
             generationsParam = atoi(text);
             printf("Generations saisie : %d\n", generationsParam);
-            free(text);
-            text = NULL;
-        }
-
-        if (event == MLV_MOUSE_BUTTON && x >= 870 && x <= 970 && y >= 360 && y <= 420) {
-            MLV_wait_input_box(980, 360, 200, 60,
-                MLV_COLOR_BLACK, MLV_COLOR_BLACK, MLV_COLOR_WHITE, " ", &text);
-            elitesParam = atoi(text);
-            printf("Elites saisie : %d\n", elitesParam);
             free(text);
             text = NULL;
         }

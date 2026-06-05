@@ -77,7 +77,6 @@ def open_explorer(file_path):
 # ---------------------------------------------------------------------------
 # Génération de la carte départementale (Lambert 93 - projection équivalente)
 # ---------------------------------------------------------------------------
-# Création du transformateur une fois pour toutes (optimisation)
 TRANSFORMER = pyproj.Transformer.from_crs("EPSG:4326", "EPSG:2154", always_xy=True)
 
 def project(lon, lat):
@@ -152,7 +151,7 @@ def generate_map_for_dept(ax, df_dept, dept_name, output_path):
     return True
 
 # ---------------------------------------------------------------------------
-# Classe PDF (inchangée)
+# Classe PDF
 # ---------------------------------------------------------------------------
 class HospitalOrganizationReport(FPDF):
     def _load_fonts(self):
@@ -220,11 +219,63 @@ def generate_report(df_data):
     pdf.compress = True
     pdf.set_auto_page_break(auto=True, margin=10)
 
+    # --- CRÉATION DU SOMMAIRE (TABLE DES MATIÈRES) ---
+    dept_links = {row["nom_dep"]: pdf.add_link() for _, row in stats.iterrows()}
+
+    # Calculer à l'avance le numéro de page de départ de chaque département.
+    current_page = 2  # page 1 = sommaire
+    for _, row in stats.iterrows():
+        dept_name = row["nom_dep"]
+        dept_df = dept_groups[dept_name]
+        pdf.set_link(dept_links[dept_name], page=current_page)
+        if dept_df[dept_df["has_hospital"] == 1].empty:
+            current_page += 1
+        else:
+            current_page += 2
+
+    pdf.add_page()
+    pdf.set_font("Main", "B", 14)
+    pdf.cell(0, 10, "Sommaire des Départements", align="C", new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(4)
+
+    pdf.set_auto_page_break(False)
+    pdf.set_font("Main", "", 9)
+    pdf.set_text_color(0, 51, 153)
+
+    row_height = 6
+    page_height = pdf.h - pdf.t_margin - pdf.b_margin - 24
+    depts = len(stats)
+    cols = 4
+    while cols <= 6 and math.ceil(depts / cols) * row_height > page_height:
+        cols += 1
+
+    col_width = (pdf.w - 2 * pdf.l_margin) / cols
+    col = 0
+    for _, row in stats.iterrows():
+        dept_name = row["nom_dep"]
+        if col < cols - 1:
+            pdf.cell(col_width, row_height, dept_name, link=dept_links[dept_name], new_x="RIGHT", new_y="TOP")
+            col += 1
+        else:
+            pdf.cell(col_width, row_height, dept_name, link=dept_links[dept_name], new_x="LMARGIN", new_y="NEXT")
+            col = 0
+
+    if col != 0:
+        pdf.ln(row_height)
+
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_auto_page_break(True, margin=10)
+    # ------------------------------------------------
+
     fig, ax = plt.subplots(figsize=(7, 5))
 
     for _, row in stats.iterrows():
         pdf.add_page()
         dept_name = row["nom_dep"]
+
+        # 3. On ancre le lien cliquable en haut de cette page
+        pdf.set_link(dept_links[dept_name], y=pdf.get_y(), page=pdf.page_no())
+
         bed_rate  = (row["total_beds"] / row["total_pop"]) * 1000 if row["total_pop"] > 0 else 0
 
         # --- BILAN CHIFFRÉ ---
@@ -277,7 +328,7 @@ def generate_report(df_data):
 
         pdf.ln(3)
 
-               # --- LISTE DES HÔPITAUX (nouvelle page) ---
+        # --- LISTE DES HÔPITAUX (nouvelle page) ---
         town_list = dept_df[dept_df["has_hospital"] == 1].sort_values("ville")
 
         if not town_list.empty:
@@ -286,26 +337,30 @@ def generate_report(df_data):
             pdf.cell(0, 6, "Implantation des hôpitaux :", new_x="LMARGIN", new_y="NEXT")
             pdf.ln(1)
 
+            table_start_y = pdf.get_y()
+            available_height = pdf.h - pdf.b_margin - table_start_y
+            num_rows = len(town_list) + 1  # en-tête + lignes de données
+            row_height = max(4, min(7, math.floor(available_height / num_rows)))
+            row_font_size = 8 if row_height >= 7 else 7 if row_height >= 6 else 6
+
             # En-tête du tableau
-            pdf.set_font("Main", "B", 8)
+            pdf.set_font("Main", "B", row_font_size)
             pdf.set_fill_color(200, 220, 255)
-            pdf.cell(70, 7, "Ville", border=1, fill=True, new_x="RIGHT")
-            pdf.cell(50, 7, "Type", border=1, fill=True, new_x="RIGHT")
-            pdf.cell(50, 7, "Lits", border=1, fill=True, new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(70, row_height, "Ville", border=1, fill=True, new_x="RIGHT")
+            pdf.cell(50, row_height, "Type", border=1, fill=True, new_x="RIGHT")
+            pdf.cell(50, row_height, "Lits", border=1, fill=True, new_x="LMARGIN", new_y="NEXT")
 
             # Lignes du tableau
-            pdf.set_font("Main", "", 8)
+            pdf.set_font("Main", "", row_font_size)
             for _, town in town_list.iterrows():
                 if town["is_chru"]:
-                    # Couleur CHRU : violet
                     pdf.set_fill_color(220, 150, 255)
                 else:
-                    # Couleur Hôpital : bleu clair
                     pdf.set_fill_color(150, 200, 255)
 
-                pdf.cell(70, 7, str(town["ville"]), border=1, fill=True, new_x="RIGHT")
-                pdf.cell(50, 7, "CHRU" if town["is_chru"] else "Hôp.", border=1, fill=True, new_x="RIGHT")
-                pdf.cell(50, 7, str(int(town["nb_beds"])), border=1, fill=True, new_x="LMARGIN", new_y="NEXT")
+                pdf.cell(70, row_height, str(town["ville"]), border=1, fill=True, new_x="RIGHT")
+                pdf.cell(50, row_height, "CHRU" if town["is_chru"] else "Hôp.", border=1, fill=True, new_x="RIGHT")
+                pdf.cell(50, row_height, str(int(town["nb_beds"])), border=1, fill=True, new_x="LMARGIN", new_y="NEXT")
         else:
             pdf.add_page()  # Nouvelle page
             pdf.set_font("Main", "I", 8)

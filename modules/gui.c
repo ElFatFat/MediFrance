@@ -34,6 +34,7 @@ void render_hospital(float x, float y) {
 
 void create_cloud(Town *communes, size_t count) {
     printf("Affichage de la carte...\n");
+    MLV_Color city_color = MLV_rgba(80, 24, 151, 255);
     for (size_t i = 0; i < count; i++) {
         float x = communes[i].x; 
         float y = communes[i].y; 
@@ -42,7 +43,7 @@ void create_cloud(Town *communes, size_t count) {
         int screen_y = (int)((51.5 - y) * 60);
 
         if (screen_x >= 0 && screen_x < WINDOW_WIDTH && screen_y >= 0 && screen_y < WINDOW_HEIGHT) {
-            MLV_draw_point(screen_x, screen_y, MLV_COLOR_RED);
+            MLV_draw_point(screen_x, screen_y, city_color);
         }
     }
     printf("Carte affichée...\n");
@@ -50,8 +51,10 @@ void create_cloud(Town *communes, size_t count) {
 }
 
 void draw_hospitals(Town *communes, size_t count, Individual ind, const OptimizedData* data) {
-    MLV_Color hospital_color = MLV_rgba(0, 255, 0, 128); // Hôpital classique : vert
-    MLV_Color chru_color = MLV_rgba(0, 0, 255, 128);     // Ville éligible CHRU : bleu
+    //MLV_Color hospital_color = MLV_rgba(0, 255, 0, 128); // Hôpital classique : vert
+    //MLV_Color chru_color = MLV_rgba(0, 0, 255, 128);     // Ville éligible CHRU : bleu
+    MLV_Color hospital_color = MLV_rgba(244, 63, 94, 128); // Hôpital classique : vert
+    MLV_Color chru_color = MLV_rgba(253, 224, 71, 255); 
     for (size_t i = 0; i < count; i++) {
         if(ind.genes[i] == 1) {
             float x = communes[i].x;
@@ -62,7 +65,7 @@ void draw_hospitals(Town *communes, size_t count, Individual ind, const Optimize
 
             if (screen_x >= -6 && screen_x < WINDOW_WIDTH + 6 && screen_y >= -6 && screen_y < WINDOW_HEIGHT + 6) {
                 MLV_Color color = data[i].is_eligible_for_chru ? chru_color : hospital_color;
-                int radius = data[i].is_eligible_for_chru ? 6 : 3; // CHRU plus gros que les hôpitaux normaux
+                int radius = data[i].is_eligible_for_chru ? 6 : 4; // CHRU plus gros que les hôpitaux normaux
                 MLV_draw_filled_circle(screen_x, screen_y, radius, color);
             }
         }
@@ -154,7 +157,7 @@ void draw_fitness_curve(const double* best_history, const double* worst_history,
 }
 
 void draw_base_interface() {
-
+    MLV_Color hospital_color = MLV_rgba(80, 48, 151, 255);
     MLV_clear_window(MLV_COLOR_BLACK);
     
     MLV_draw_line(850, 0, 850, 720, MLV_COLOR_WHITE);
@@ -165,7 +168,7 @@ void draw_base_interface() {
         870, 80, 100, 60, 
         "population", 
         2, 
-        MLV_COLOR_WHITE, MLV_COLOR_WHITE, MLV_COLOR_GREEN, 
+        MLV_COLOR_WHITE, MLV_COLOR_WHITE, hospital_color, 
         MLV_TEXT_CENTER, MLV_HORIZONTAL_CENTER, MLV_VERTICAL_CENTER
     );
     //MLV_create_input_box(870,120,200,40,MLV_COLOR_BLACK,MLV_COLOR_BLACK,MLV_COLOR_WHITE,"");
@@ -175,7 +178,7 @@ void draw_base_interface() {
         870, 220, 100, 60, 
         "générations", 
         2, 
-        MLV_COLOR_WHITE, MLV_COLOR_WHITE, MLV_COLOR_GREEN, 
+        MLV_COLOR_WHITE, MLV_COLOR_WHITE, hospital_color, 
         MLV_TEXT_CENTER, MLV_HORIZONTAL_CENTER, MLV_VERTICAL_CENTER
     );
     //MLV_create_input_box(870,260,200,40,MLV_COLOR_BLACK,MLV_COLOR_BLACK,MLV_COLOR_WHITE,"");
@@ -185,7 +188,7 @@ void draw_base_interface() {
         870, 360, 100, 60, 
         "elites", 
         2, 
-        MLV_COLOR_WHITE, MLV_COLOR_WHITE, MLV_COLOR_GREEN, 
+        MLV_COLOR_WHITE, MLV_COLOR_WHITE, hospital_color, 
         MLV_TEXT_CENTER, MLV_HORIZONTAL_CENTER, MLV_VERTICAL_CENTER
     );
     //MLV_create_input_box(870,400,200,40,MLV_COLOR_BLACK,MLV_COLOR_BLACK,MLV_COLOR_WHITE,"");
@@ -196,7 +199,7 @@ void draw_base_interface() {
         960, 600, 200, 60, 
         "LAUNCH ALGO", 
         2, 
-        MLV_COLOR_WHITE, MLV_COLOR_WHITE, MLV_COLOR_GREEN, 
+        MLV_COLOR_WHITE, MLV_COLOR_WHITE, hospital_color, 
         MLV_TEXT_CENTER, MLV_HORIZONTAL_CENTER, MLV_VERTICAL_CENTER
     );
 }

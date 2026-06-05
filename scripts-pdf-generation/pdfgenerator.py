@@ -16,7 +16,7 @@ from matplotlib.patches import Circle
 # ---------------------------------------------------------------------------
 # Constante de version (incrémentée pour forcer la régénération)
 # ---------------------------------------------------------------------------
-MAP_GENERATION_VERSION = 5
+MAP_GENERATION_VERSION = 7
 
 # ---------------------------------------------------------------------------
 # Chemins

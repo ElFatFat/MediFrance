@@ -1,17 +1,28 @@
+/**
+ * @file export.c
+ * @brief Implémentation de la logique d'écriture et d'évaluation finale pour l'export CSV.
+ */
+
 #include "export.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* -----------------------------------------------------------------------
- * Constante — doit rester identique à BEDS_PER_1000 dans gen.c
- * ----------------------------------------------------------------------- */
+/**
+ * @brief Constante — doit rester identique à BEDS_PER_1000 dans gen.c
+ */
 #define BEDS_PER_1000 5.4f
 
-/* -----------------------------------------------------------------------
- * Helper : population couverte par un seul hôpital placé en towns[i],
+/**
+ * @brief Helper : population couverte par un seul hôpital placé en towns[i],
  * en évitant le double-comptage entre voisins qui se recoupent.
- * ----------------------------------------------------------------------- */
+ *
+ * @param i      Index de la commune hébergeant l'hôpital.
+ * @param towns  Tableau complet de toutes les communes.
+ * @param data   Données optimisées contenant la liste des voisins.
+ * @param count  Nombre total de communes.
+ * @return       La population cumulée nette couverte par cet hôpital.
+ */
 static long covered_pop_for_hospital(int i,
                                      const Town* towns,
                                      const OptimizedData* data,
@@ -34,9 +45,6 @@ static long covered_pop_for_hospital(int i,
     return total;
 }
 
-/* -----------------------------------------------------------------------
- * Fonction principale
- * ----------------------------------------------------------------------- */
 int export_resultats_csv(const char* path,
                          const Town* towns,
                          size_t count,
@@ -86,7 +94,7 @@ int export_resultats_csv(const char* path,
     for (size_t i = 0; i < count; i++) {
         int has_hospital = best->genes[i] ? 1 : 0;
         int is_desert    = covered[i]     ? 0 : 1;
-        int nb_beds      = beds_per_town[i]; /* 0 si pas d'hôpital ici */
+        int nb_beds      = beds_per_town[i];
 
         fprintf(f, "%s,%s,%d,%d,%d,%d,%f,%f\n",
             towns[i].department_name,
@@ -100,10 +108,40 @@ int export_resultats_csv(const char* path,
         );
     }
 
+    int desert_towns = 0;
+    int hospital_towns = 0;
+    long desert_pop = 0;
+    long export_beds = 0;
+
+    for (size_t i = 0; i < count; i++) {
+        if (!covered[i]) {
+            desert_towns++;
+            desert_pop += towns[i].population;
+        }
+        if (best->genes[i]) {
+            hospital_towns++;
+        }
+        export_beds += beds_per_town[i];
+    }
+
     fclose(f);
     free(covered);
     free(beds_per_town);
 
-    printf("[export] CSV écrit : %s (%zu communes)\n", path, count);
+    long total_pop = 0;
+    for (size_t i = 0; i < count; i++) {
+        total_pop += towns[i].population;
+    }
+    double coverage_pct = total_pop > 0
+        ? 100.0 * (double)(total_pop - desert_pop) / (double)total_pop
+        : 0.0;
+
+    printf("\n[export] Fichier écrit : %s\n", path);
+    printf("[export]   Communes exportées  : %zu\n", count);
+    printf("[export]   Hôpitaux placés     : %d communes\n", hospital_towns);
+    printf("[export]   Déserts médicaux    : %d communes (%ld hab.)\n",
+           desert_towns, desert_pop);
+    printf("[export]   Couverture pop.     : %.2f %%\n", coverage_pct);
+    printf("[export]   Lits déclarés (somme): %ld\n", export_beds);
     return 0;
 }

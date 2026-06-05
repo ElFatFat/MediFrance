@@ -1,0 +1,166 @@
+\doxysection{modules/\+gui.c File Reference}
+\hypertarget{gui_8c}{}\label{gui_8c}\index{modules/gui.c@{modules/gui.c}}
+
+
+Implémentation des fonctionnalités graphiques et projection géographique en pixels.  
+
+
+{\ttfamily \+\#include "{}gui.\+h"{}}\newline
+{\ttfamily \+\#include "{}gen.\+h"{}}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\+\#define \doxymbox{\hyperlink{gui_8c_a498d9f026138406895e9a34b504ac6a6}{WINDOW\+\_\+\+WIDTH}}~1280
+\item 
+\+\#define \doxymbox{\hyperlink{gui_8c_a5473cf64fa979b48335079c99532e243}{WINDOW\+\_\+\+HEIGHT}}~720
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{gui_8c_a6424ffe40c8fe6e94e4374461374ac98}{init\+\_\+window}} (void)
+\begin{DoxyCompactList}\small\item\em Initialise et configure la fenêtre principale de l\textquotesingle{}application. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gui_8c_aaf5d41d9d3ba6dbf6dd9b652beb20ca3}{create\+\_\+cloud}} (Town \texorpdfstring{$\ast$}{*}communes, size\+\_\+t count)
+\begin{DoxyCompactList}\small\item\em Génère le nuage de points représentant la carte des communes de France. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gui_8c_a10b057b0d3e1a8a195deff97230f009c}{draw\+\_\+hospitals}} (Town \texorpdfstring{$\ast$}{*}communes, size\+\_\+t count, \doxymbox{\hyperlink{structIndividual}{Individual}} ind)
+\begin{DoxyCompactList}\small\item\em Dessine des cercles translucides représentant les hôpitaux actifs d\textquotesingle{}une solution. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gui_8c_a2de3b3ae5b85a8615e86cb4cc7f75b0c}{fitness\+\_\+graph}} (double \doxymbox{\hyperlink{gen_8c_a2130763af2275811d57ca432ade18661}{fitness}}, int nb\+\_\+gen, int index, MLV\+\_\+\+Color color)
+\begin{DoxyCompactList}\small\item\em Dessine un graphique représentant la progression temporelle de la fitness. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gui_8c_ac213784499f0754efbd8a1b750bfbb3c}{draw\+\_\+base\+\_\+interface}} ()
+\begin{DoxyCompactList}\small\item\em Dessine la grille de l\textquotesingle{}interface de contrôle et ses libellés textuels. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gui_8c_a6b865d39c087059296832c442e4784c9}{settings\+\_\+menu}} (Town \texorpdfstring{$\ast$}{*}communes, size\+\_\+t count, \doxymbox{\hyperlink{structIndividual}{Individual}} ind)
+\begin{DoxyCompactList}\small\item\em Gère l\textquotesingle{}affichage du menu des options et capture les interactions utilisateur. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{gui_8c_aa0b970da4405389c144095b04eacd133}{close\+\_\+window}} (void)
+\begin{DoxyCompactList}\small\item\em Ferme proprement la fenêtre graphique et libère la mémoire MLV. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Implémentation des fonctionnalités graphiques et projection géographique en pixels. 
+
+
+
+\label{doc-define-members}
+\Hypertarget{gui_8c_doc-define-members}
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{gui_8c_a5473cf64fa979b48335079c99532e243}\index{gui.c@{gui.c}!WINDOW\_HEIGHT@{WINDOW\_HEIGHT}}
+\index{WINDOW\_HEIGHT@{WINDOW\_HEIGHT}!gui.c@{gui.c}}
+\doxysubsubsection{\texorpdfstring{WINDOW\_HEIGHT}{WINDOW\_HEIGHT}}
+{\footnotesize\ttfamily \label{gui_8c_a5473cf64fa979b48335079c99532e243} 
+\+\#define WINDOW\+\_\+\+HEIGHT~720}
+
+\Hypertarget{gui_8c_a498d9f026138406895e9a34b504ac6a6}\index{gui.c@{gui.c}!WINDOW\_WIDTH@{WINDOW\_WIDTH}}
+\index{WINDOW\_WIDTH@{WINDOW\_WIDTH}!gui.c@{gui.c}}
+\doxysubsubsection{\texorpdfstring{WINDOW\_WIDTH}{WINDOW\_WIDTH}}
+{\footnotesize\ttfamily \label{gui_8c_a498d9f026138406895e9a34b504ac6a6} 
+\+\#define WINDOW\+\_\+\+WIDTH~1280}
+
+
+
+\label{doc-func-members}
+\Hypertarget{gui_8c_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{gui_8c_aa0b970da4405389c144095b04eacd133}\index{gui.c@{gui.c}!close\_window@{close\_window}}
+\index{close\_window@{close\_window}!gui.c@{gui.c}}
+\doxysubsubsection{\texorpdfstring{close\_window()}{close\_window()}}
+{\footnotesize\ttfamily \label{gui_8c_aa0b970da4405389c144095b04eacd133} 
+void close\+\_\+window (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Ferme proprement la fenêtre graphique et libère la mémoire MLV. 
+
+\Hypertarget{gui_8c_aaf5d41d9d3ba6dbf6dd9b652beb20ca3}\index{gui.c@{gui.c}!create\_cloud@{create\_cloud}}
+\index{create\_cloud@{create\_cloud}!gui.c@{gui.c}}
+\doxysubsubsection{\texorpdfstring{create\_cloud()}{create\_cloud()}}
+{\footnotesize\ttfamily \label{gui_8c_aaf5d41d9d3ba6dbf6dd9b652beb20ca3} 
+void create\+\_\+cloud (\begin{DoxyParamCaption}\item[{Town \texorpdfstring{$\ast$}{*}}]{communes}{, }\item[{size\+\_\+t}]{count}{}\end{DoxyParamCaption})}
+
+
+
+Génère le nuage de points représentant la carte des communes de France. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em communes} & Tableau des structures communes à dessiner. \\
+\hline
+{\em count} & Nombre total de communes. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gui_8c_ac213784499f0754efbd8a1b750bfbb3c}\index{gui.c@{gui.c}!draw\_base\_interface@{draw\_base\_interface}}
+\index{draw\_base\_interface@{draw\_base\_interface}!gui.c@{gui.c}}
+\doxysubsubsection{\texorpdfstring{draw\_base\_interface()}{draw\_base\_interface()}}
+{\footnotesize\ttfamily \label{gui_8c_ac213784499f0754efbd8a1b750bfbb3c} 
+void draw\+\_\+base\+\_\+interface (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Dessine la grille de l\textquotesingle{}interface de contrôle et ses libellés textuels. 
+
+\Hypertarget{gui_8c_a10b057b0d3e1a8a195deff97230f009c}\index{gui.c@{gui.c}!draw\_hospitals@{draw\_hospitals}}
+\index{draw\_hospitals@{draw\_hospitals}!gui.c@{gui.c}}
+\doxysubsubsection{\texorpdfstring{draw\_hospitals()}{draw\_hospitals()}}
+{\footnotesize\ttfamily \label{gui_8c_a10b057b0d3e1a8a195deff97230f009c} 
+void draw\+\_\+hospitals (\begin{DoxyParamCaption}\item[{Town \texorpdfstring{$\ast$}{*}}]{communes}{, }\item[{size\+\_\+t}]{count}{, }\item[{\doxymbox{\hyperlink{structIndividual}{Individual}}}]{ind}{}\end{DoxyParamCaption})}
+
+
+
+Dessine des cercles translucides représentant les hôpitaux actifs d\textquotesingle{}une solution. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em communes} & Tableau des communes. \\
+\hline
+{\em count} & Nombre total de communes. \\
+\hline
+{\em ind} & L\textquotesingle{}individu contenant les gènes d\textquotesingle{}activation des hôpitaux. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gui_8c_a2de3b3ae5b85a8615e86cb4cc7f75b0c}\index{gui.c@{gui.c}!fitness\_graph@{fitness\_graph}}
+\index{fitness\_graph@{fitness\_graph}!gui.c@{gui.c}}
+\doxysubsubsection{\texorpdfstring{fitness\_graph()}{fitness\_graph()}}
+{\footnotesize\ttfamily \label{gui_8c_a2de3b3ae5b85a8615e86cb4cc7f75b0c} 
+void fitness\+\_\+graph (\begin{DoxyParamCaption}\item[{double}]{fitness}{, }\item[{int}]{nb\+\_\+gen}{, }\item[{int}]{index}{, }\item[{MLV\+\_\+\+Color}]{color}{}\end{DoxyParamCaption})}
+
+
+
+Dessine un graphique représentant la progression temporelle de la fitness. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \doxylink{gen_8c_a2130763af2275811d57ca432ade18661}{fitness}} & Valeur de fitness calculée. \\
+\hline
+{\em nb\+\_\+gen} & Nombre total attendu de générations (pour l\textquotesingle{}échelle X). \\
+\hline
+{\em index} & Index de la génération courante. \\
+\hline
+{\em color} & Couleur associée à la courbe. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{gui_8c_a6424ffe40c8fe6e94e4374461374ac98}\index{gui.c@{gui.c}!init\_window@{init\_window}}
+\index{init\_window@{init\_window}!gui.c@{gui.c}}
+\doxysubsubsection{\texorpdfstring{init\_window()}{init\_window()}}
+{\footnotesize\ttfamily \label{gui_8c_a6424ffe40c8fe6e94e4374461374ac98} 
+void init\+\_\+window (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Initialise et configure la fenêtre principale de l\textquotesingle{}application. 
+
+\Hypertarget{gui_8c_a6b865d39c087059296832c442e4784c9}\index{gui.c@{gui.c}!settings\_menu@{settings\_menu}}
+\index{settings\_menu@{settings\_menu}!gui.c@{gui.c}}
+\doxysubsubsection{\texorpdfstring{settings\_menu()}{settings\_menu()}}
+{\footnotesize\ttfamily \label{gui_8c_a6b865d39c087059296832c442e4784c9} 
+void settings\+\_\+menu (\begin{DoxyParamCaption}\item[{Town \texorpdfstring{$\ast$}{*}}]{communes}{, }\item[{size\+\_\+t}]{count}{, }\item[{\doxymbox{\hyperlink{structIndividual}{Individual}}}]{ind}{}\end{DoxyParamCaption})}
+
+
+
+Gère l\textquotesingle{}affichage du menu des options et capture les interactions utilisateur. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em communes} & Tableau des communes. \\
+\hline
+{\em count} & Nombre total de communes. \\
+\hline
+{\em ind} & Individu initial/\+actuel à manipuler graphiquement. \\
+\hline
+\end{DoxyParams}

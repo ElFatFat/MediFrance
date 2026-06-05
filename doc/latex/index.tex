@@ -1,0 +1,321 @@
+\chapter{Medi\+France }
+\hypertarget{index}{}\label{index}\index{MediFrance@{MediFrance}}
+\label{index_md_README}%
+\Hypertarget{index_md_README}%
+
+
+Projet de géomatique et santé publique (ESIEE, S2) :\+ optimiser la répartition des hôpitaux en {\bfseries{France métropolitaine}} (Corse et DOM-\/\+TOM exclus) à l’aide d’un {\bfseries{algorithme génétique}}.
+
+L’objectif est de maximiser la population couverte dans un rayon de {\bfseries{10 km}} autour de chaque hôpital, tout en limitant le nombre d’établissements (coût) et en favorisant les {\bfseries{CHRU}} sur les grandes communes.
+
+\DoxyHorRuler{0}
+\hypertarget{index_autotoc_md2}{}\doxysection{\texorpdfstring{Vue d’ensemble du flux}{Vue d’ensemble du flux}}\label{index_autotoc_md2}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{flowchart\ LR}
+\DoxyCodeLine{\ \ \ \ subgraph\ entree\ [Entrées]}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ CSV["{}communes-\/france-\/metrople-\/2025.csv"{}]}
+\DoxyCodeLine{\ \ \ \ end}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ subgraph\ c\_prog\ [Programme\ C\ —\ build/medifrance]}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ LOAD[Chargement\ communes]}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ PRE[precalc\_near\ —\ grille\ 10\ km]}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ GA[Algorithme\ génétique]}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ AUD[audit\_coverage]}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ EXP[export\_resultats\_csv]}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ GUI[Interface\ MLV\ optionnelle]}
+\DoxyCodeLine{\ \ \ \ end}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ subgraph\ sortie\ [Sorties]}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ RES["{}data/resultats\_hopitaux.csv"{}]}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ PDF["{}report/*.pdf"{}]}
+\DoxyCodeLine{\ \ \ \ end}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ subgraph\ python\ [Python]}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ PDFGEN[pdfgenerator.py]}
+\DoxyCodeLine{\ \ \ \ end}
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ CSV\ -\/-\/>\ LOAD\ -\/-\/>\ PRE\ -\/-\/>\ GA\ -\/-\/>\ AUD\ -\/-\/>\ EXP\ -\/-\/>\ RES}
+\DoxyCodeLine{\ \ \ \ GA\ -\/-\/>\ GUI}
+\DoxyCodeLine{\ \ \ \ RES\ -\/-\/>\ PDFGEN\ -\/-\/>\ PDF}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md3}{}\doxysubsection{\texorpdfstring{En une exécution typique}{En une exécution typique}}\label{index_autotoc_md3}
+
+\begin{DoxyEnumerate}
+\item {\bfseries{Charger}} \texorpdfstring{$\sim$}{\string~}34 000 communes (population, latitude, longitude).
+\item {\bfseries{Précalculer}} pour chaque commune la liste des voisins à ≤ 10 km (accélération massive de la fitness).
+\item {\bfseries{Faire évoluer}} une population de solutions (où placer les hôpitaux).
+\item {\bfseries{Auditer}} la meilleure solution (cohérence géographique).
+\item {\bfseries{Exporter}} un CSV commune par commune.
+\item {\itshape (Optionnel)} Générer un {\bfseries{rapport PDF}} département par département.
+\end{DoxyEnumerate}
+
+\DoxyHorRuler{0}
+\hypertarget{index_autotoc_md5}{}\doxysection{\texorpdfstring{Structure du dépôt}{Structure du dépôt}}\label{index_autotoc_md5}
+
+\begin{DoxyTable}{2}{}{}{1}
+\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Chemin  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Rôle  \\
+{\ttfamily main.\+c}  &Point d’entrée :\+ chargement CSV, boucle GA, logs, export, GUI  \\
+{\ttfamily main.\+h}  &Structure {\ttfamily Town} (commune)  \\
+{\ttfamily \doxylink{gen_8c}{modules/\+gen.\+c}} /\+ {\ttfamily \doxylink{gen_8h}{gen.\+h}}  &Précalcul voisins, fitness, sélection, croisement, mutation, audit  \\
+{\ttfamily \doxylink{export_8c}{modules/\+export.\+c}}  &Écriture de {\ttfamily data/\+resultats\+\_\+hopitaux.\+csv}  \\
+{\ttfamily \doxylink{gui_8c}{modules/\+gui.\+c}}  &Carte MLV + courbe de fitness en temps réel  \\
+{\ttfamily data/\+communes-\/france-\/metrople-\/2025.\+csv}  &Données d’entrée (métropole)  \\
+{\ttfamily data/\+resultats\+\_\+hopitaux.\+csv}  &Résultat du meilleur individu (généré)  \\
+{\ttfamily scripts-\/pdf-\/generation/\+pdfgenerator.\+py}  &Rapport PDF à partir du CSV  \\
+{\ttfamily assets/\+}  &Polices Deja\+Vu et logos pour le PDF  \\
+{\ttfamily report/\+}  &PDF et cartes générés  \\
+\end{DoxyTable}
+
+
+\DoxyHorRuler{0}
+\hypertarget{index_autotoc_md7}{}\doxysection{\texorpdfstring{Modèle du problème}{Modèle du problème}}\label{index_autotoc_md7}
+\hypertarget{index_autotoc_md8}{}\doxysubsection{\texorpdfstring{Une solution = un individu}{Une solution = un individu}}\label{index_autotoc_md8}
+Chaque {\bfseries{individu}} du GA est un chromosome binaire de taille {\ttfamily N} (nombre de communes) :\+
+
+
+\begin{DoxyItemize}
+\item {\ttfamily genes\+[i]\+ = 1} → un hôpital est placé sur la commune {\ttfamily i}
+\item {\ttfamily genes\+[i]\+ = 0} → pas d’hôpital sur cette commune
+\end{DoxyItemize}
+
+On ne déplace pas des hôpitaux existants :\+ on {\bfseries{choisit des communes}} où ouvrir (ou maintenir) un établissement dans le modèle de simulation.\hypertarget{index_autotoc_md9}{}\doxysubsection{\texorpdfstring{Couverture (règle des 10 km)}{Couverture (règle des 10 km)}}\label{index_autotoc_md9}
+Une commune est {\bfseries{couverte}} si :\+
+
+
+\begin{DoxyItemize}
+\item elle porte un hôpital ({\ttfamily gene = 1}), {\bfseries{ou}}
+\item elle figure dans la liste des {\bfseries{voisins}} (distance ≤ 10 km) d’au moins un hôpital.
+\end{DoxyItemize}
+
+La distance est calculée en kilomètres à partir des coordonnées GPS (approximation locale avec latitude moyenne pour la longitude).\hypertarget{index_autotoc_md10}{}\doxysubsection{\texorpdfstring{Fonction de fitness (à maximiser)}{Fonction de fitness (à maximiser)}}\label{index_autotoc_md10}
+Pour chaque individu, après parcours de tous les hôpitaux et marquage des communes couvertes :\+
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{fitness\ =\ population\_totale\_métropole}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ -\/\ population\_en\_désert}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ -\/\ (5000\ ×\ nombre\_d\_hôpitaux)}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ +\ (4000\ ×\ nombre\_de\_CHRU)}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyTable}{2}{}{}{1}
+\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Terme  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Signification  \\
+{\ttfamily population\+\_\+en\+\_\+désert}  &Habitants des communes non couvertes  \\
+{\ttfamily 5000 × hôpitaux}  &Pénalité par établissement (évite la sur-\/densité)  \\
+{\ttfamily 4000 × CHRU}  &Bonus si l’hôpital est sur une commune \texorpdfstring{$>$}{>} 80 000 hab. (éligible CHRU)  \\
+\end{DoxyTable}
+
+
+Les {\bfseries{lits}} (5,4 pour 1 000 habitants couverts par hôpital) sont calculés pour l’export et les logs, mais ne entrent pas directement dans la fitness.
+
+Plus la fitness est {\bfseries{élevée}}, meilleure est la solution.
+
+\DoxyHorRuler{0}
+\hypertarget{index_autotoc_md12}{}\doxysection{\texorpdfstring{Précalcul des voisins ({\ttfamily precalc\+\_\+near})}{Précalcul des voisins ({\ttfamily precalc\+\_\+near})}}\label{index_autotoc_md12}
+Évaluer la fitness pour \texorpdfstring{$\sim$}{\string~}34 000 communes × 200 individus × 1 000 générations serait prohibitif sans structure spatiale.\hypertarget{index_autotoc_md13}{}\doxysubsection{\texorpdfstring{Grille spatiale}{Grille spatiale}}\label{index_autotoc_md13}
+
+\begin{DoxyEnumerate}
+\item La France est découpée en cellules de {\bfseries{0,1°}} (\texorpdfstring{$\sim$}{\string~}11 km).
+\item Chaque commune est indexée dans sa cellule {\ttfamily (ligne, colonne)}.
+\item Pour chaque commune, on inspecte une fenêtre {\bfseries{5×5}} de cellules ({\ttfamily \doxylink{gen_8c_a85973c3c404e740ee4edcb31be7e8640}{CELL\+\_\+\+SEARCH\+\_\+\+RADIUS} = 2}) et on ne garde que les communes à {\bfseries{≤ 10 km}} (distance symétrique).
+\end{DoxyEnumerate}
+
+Résultat stocké dans {\ttfamily \doxylink{structOptimizedData}{Optimized\+Data}} :\+
+
+
+\begin{DoxyItemize}
+\item {\ttfamily neighbors\+[]\+} — indices des communes voisines
+\item {\ttfamily neighbor\+\_\+count}
+\item {\ttfamily is\+\_\+eligible\+\_\+for\+\_\+chru} — population locale \texorpdfstring{$>$}{>} 80 000
+\item {\ttfamily max\+\_\+covered\+\_\+population} — population de la commune + voisins (utile à la mutation)
+\end{DoxyItemize}
+
+\DoxyHorRuler{0}
+\hypertarget{index_autotoc_md15}{}\doxysection{\texorpdfstring{Algorithme génétique (détail)}{Algorithme génétique (détail)}}\label{index_autotoc_md15}
+Paramètres par défaut dans {\ttfamily main.\+c} :\+
+
+
+\begin{DoxyTable}{3}{}{}{1}
+\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Paramètre  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Valeur  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Rôle  \\
+{\ttfamily POP\+\_\+\+SIZE}  &200  &Taille de la population  \\
+{\ttfamily GEN\+\_\+\+MAX}  &1000  &Nombre de générations  \\
+{\ttfamily ELITISM\+\_\+\+COUNT}  &15  &Meilleurs conservés tels quels  \\
+{\ttfamily TOURNAMENT\+\_\+\+PROBABILITY}  &80 \%  &Probabilité de sélection par tournoi  \\
+{\ttfamily TOURNAMENT\+\_\+\+SIZE}  &10  &Candidats tirés par parent  \\
+Open\+MP  &jusqu’à 12 threads  &Fitness et reproduction parallèles  \\
+\end{DoxyTable}
+\hypertarget{index_autotoc_md16}{}\doxysubsection{\texorpdfstring{Initialisation}{Initialisation}}\label{index_autotoc_md16}
+Pour chaque individu et chaque commune :\+
+
+
+\begin{DoxyItemize}
+\item Si la zone peut couvrir \texorpdfstring{$>$}{>} 30 000 hab. ({\ttfamily max\+\_\+covered\+\_\+population}) :\+ {\bfseries{20 \%}} de chance d’y placer un hôpital au départ.
+\item Sinon :\+ {\bfseries{0,2 \%}} de chance ({\ttfamily STARTING\+\_\+\+HOSPITALS\+\_\+\+PROBABILITY}).
+\end{DoxyItemize}
+
+La population de départ est donc très dense en hôpitaux ; la sélection fait converger vers moins d’établissements mais mieux placés.\hypertarget{index_autotoc_md17}{}\doxysubsection{\texorpdfstring{Boucle par génération ({\ttfamily main.\+c})}{Boucle par génération ({\ttfamily main.\+c})}}\label{index_autotoc_md17}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Pour\ gen\ =\ 0\ ..\ GEN\_MAX-\/1\ :}
+\DoxyCodeLine{\ \ 1.\ FITNESS\ \ \ —\ calcul\ parallèle\ pour\ chaque\ individu\ (workspaces\ par\ thread)}
+\DoxyCodeLine{\ \ 2.\ TRI\ \ \ \ \ \ \ —\ quick\_sort\ décroissant\ sur\ fitness}
+\DoxyCodeLine{\ \ 3.\ ÉLITISME\ \ —\ copie\ des\ 15\ meilleurs\ vers\ next\_population}
+\DoxyCodeLine{\ \ 4.\ REPRO\ \ \ \ \ —\ pour\ les\ 185\ autres\ :}
+\DoxyCodeLine{\ \ \ \ \ \ \ -\/\ 80\ \%\ :\ deux\ parents\ choisis\ par\ tournoi\ (meilleur\ parmi\ 10\ tirages\ dans\ la\ moitié\ supérieure)}
+\DoxyCodeLine{\ \ \ \ \ \ \ -\/\ 20\ \%\ :\ copie\ d’un\ individu\ aléatoire\ du\ top\ 20}
+\DoxyCodeLine{\ \ \ \ \ \ \ -\/\ crossover\ en\ 3\ segments\ (deux\ pivots)}
+\DoxyCodeLine{\ \ \ \ \ \ \ -\/\ mutation}
+\DoxyCodeLine{\ \ 5.\ SWAP\ \ \ \ \ \ —\ next\_population\ devient\ la\ population\ courante}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md18}{}\doxysubsection{\texorpdfstring{Croisement ({\ttfamily crossover})}{Croisement ({\ttfamily crossover})}}\label{index_autotoc_md18}
+Deux pivots aléatoires découpent le chromosome en trois morceaux :\+ segments alternés parent 1 /\+ parent 2 /\+ parent 1.\hypertarget{index_autotoc_md19}{}\doxysubsection{\texorpdfstring{Mutation ({\ttfamily mutate})}{Mutation ({\ttfamily mutate})}}\label{index_autotoc_md19}
+
+\begin{DoxyItemize}
+\item {\bfseries{Ajouts}} :\+ 3 à 10 communes tirées au hasard ; on pose un hôpital si {\ttfamily max\+\_\+covered\+\_\+population ≥ 5000} (seuil = coût hôpital).
+\item {\bfseries{Suppressions}} (80 \% de chance) :\+ 3 à 10 fermetures d’hôpitaux existants tirées au hasard.
+\end{DoxyItemize}
+
+La mutation est agressive pour explorer ; l’élitisme et la fitness stabilisent les bonnes configurations.
+
+\DoxyHorRuler{0}
+\hypertarget{index_autotoc_md21}{}\doxysection{\texorpdfstring{Flux détaillé du programme C}{Flux détaillé du programme C}}\label{index_autotoc_md21}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{main()}
+\DoxyCodeLine{│}
+\DoxyCodeLine{├─\ Charger\ CSV\ →\ tableau\ Town[]\ (x\ =\ longitude,\ y\ =\ latitude)}
+\DoxyCodeLine{├─\ set\_habitants\_total(somme\ des\ populations)}
+\DoxyCodeLine{├─\ Allouer\ workspaces\ OpenMP\ (buffer\ couverture\ par\ thread)}
+\DoxyCodeLine{├─\ precalc\_near()\ →\ OptimizedData[]}
+\DoxyCodeLine{├─\ Allouer\ population\ +\ next\_population\ (gènes\ par\ individu)}
+\DoxyCodeLine{├─\ Initialiser\ les\ gènes\ aléatoirement}
+\DoxyCodeLine{│}
+\DoxyCodeLine{├─\ [optionnel]\ init\_window()\ —\ sauf\ MEDIFRANCE\_HEADLESS=1}
+\DoxyCodeLine{│}
+\DoxyCodeLine{├─\ FOR\ gen\ in\ 0..GEN\_MAX-\/1}
+\DoxyCodeLine{│\ \ \ \ \ ├─\ fitness()\ ×\ POP\_SIZE\ \ (parallèle)}
+\DoxyCodeLine{│\ \ \ \ \ ├─\ quick\_sort\_population()}
+\DoxyCodeLine{│\ \ \ \ \ ├─\ copie\ élite}
+\DoxyCodeLine{│\ \ \ \ \ ├─\ crossover\ +\ mutate\ (parallèle)}
+\DoxyCodeLine{│\ \ \ \ \ ├─\ swap\ buffers}
+\DoxyCodeLine{│\ \ \ \ \ └─\ logs\ +\ fitness\_graph\ (GUI)}
+\DoxyCodeLine{│}
+\DoxyCodeLine{├─\ log\_solution\_details\ +\ bilan\ évolution}
+\DoxyCodeLine{├─\ audit\_coverage()\ —\ vérifie\ déserts\ /\ couverture\ vs\ 10\ km}
+\DoxyCodeLine{├─\ export\_resultats\_csv("{}data/resultats\_hopitaux.csv"{})}
+\DoxyCodeLine{└─\ [optionnel]\ settings\_menu()\ —\ carte\ +\ hôpitaux\ du\ meilleur\ individu}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md22}{}\doxysubsection{\texorpdfstring{Fichier exporté ({\ttfamily export.\+c})}{Fichier exporté ({\ttfamily export.\+c})}}\label{index_autotoc_md22}
+Une ligne par commune :\+
+
+
+\begin{DoxyTable}{2}{}{}{1}
+\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Colonne  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Description  \\
+{\ttfamily nom\+\_\+dep}  &Département  \\
+{\ttfamily ville}  &Nom de la commune  \\
+{\ttfamily population}  &Population  \\
+{\ttfamily has\+\_\+hospital}  &1 si gène = 1  \\
+{\ttfamily is\+\_\+desert}  &1 si non couverte par le modèle  \\
+{\ttfamily nb\+\_\+beds}  &Lits attribués à l’hôpital local (0 sinon), min. 10 si hôpital  \\
+\end{DoxyTable}
+
+
+\DoxyHorRuler{0}
+\hypertarget{index_autotoc_md24}{}\doxysection{\texorpdfstring{Rapport PDF (Python)}{Rapport PDF (Python)}}\label{index_autotoc_md24}
+Après l’exécution du binaire C :\+
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{pip\ install\ -\/r\ scripts-\/pdf-\/generation/requirements.txt}
+\DoxyCodeLine{python3\ scripts-\/pdf-\/generation/pdfgenerator.py}
+
+\end{DoxyCode}
+
+
+Le script lit {\ttfamily data/\+resultats\+\_\+hopitaux.\+csv}, fusionne les coordonnées depuis le CSV communes, et produit {\ttfamily report/\+couverture\+\_\+hospitaliere\+\_\+optimale\+\_\+france.\+pdf} (statistiques et tableaux par département).
+
+{\bfseries{Dépendances :\+}} {\ttfamily pandas}, {\ttfamily fpdf2} (pas le paquet {\ttfamily fpdf} 1.\+x), éventuellement {\ttfamily matplotlib} si des cartes sont activées dans votre version du script.
+
+\DoxyHorRuler{0}
+\hypertarget{index_autotoc_md26}{}\doxysection{\texorpdfstring{Installation et compilation (Linux)}{Installation et compilation (Linux)}}\label{index_autotoc_md26}
+\hypertarget{index_autotoc_md27}{}\doxysubsection{\texorpdfstring{Prérequis}{Prérequis}}\label{index_autotoc_md27}
+
+\begin{DoxyItemize}
+\item {\ttfamily gcc}, {\ttfamily make}, {\ttfamily pkg-\/config}
+\item {\bfseries{lib\+MLV}} ({\ttfamily MLV/\+\+MLV\+\_\+all.\+h}) — interface graphique
+\item {\ttfamily cppcheck} (via {\ttfamily setup.\+sh})
+\end{DoxyItemize}
+
+\begin{quote}
+{\ttfamily setup.\+sh} utilise {\ttfamily apt-\/get} (Debian/\+\+Ubuntu/\+\+Fedora avec équivalents). \end{quote}
+\hypertarget{index_autotoc_md28}{}\doxysubsection{\texorpdfstring{Qualité (pre-\/commit)}{Qualité (pre-\/commit)}}\label{index_autotoc_md28}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{chmod\ +x\ setup.sh}
+\DoxyCodeLine{./setup.sh}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md29}{}\doxysubsection{\texorpdfstring{Compiler}{Compiler}}\label{index_autotoc_md29}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{make}
+\DoxyCodeLine{\#\ →\ build/medifrance}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md30}{}\doxysubsection{\texorpdfstring{Lancer}{Lancer}}\label{index_autotoc_md30}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{./build/medifrance}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md31}{}\doxysubsection{\texorpdfstring{Mode headless (sans fenêtre MLV)}{Mode headless (sans fenêtre MLV)}}\label{index_autotoc_md31}
+Utile sur serveur ou pour enchaîner avec le PDF :\+
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{MEDIFRANCE\_HEADLESS=1\ ./build/medifrance}
+
+\end{DoxyCode}
+\hypertarget{index_autotoc_md32}{}\doxysubsection{\texorpdfstring{Logs}{Logs}}\label{index_autotoc_md32}
+Par défaut, un résumé est affiché {\bfseries{toutes les 50 générations}} (+ dernière génération, précalcul, audit, export).
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{MEDIFRANCE\_LOG\_EVERY=100\ MEDIFRANCE\_HEADLESS=1\ ./build/medifrance}
+
+\end{DoxyCode}
+
+
+Préfixes utiles :\+ {\ttfamily \+[config]\+}, {\ttfamily \+[precalc]\+}, {\ttfamily \+[gen N]\+}, {\ttfamily \+[final]\+}, {\ttfamily \+[bilan]\+}, {\ttfamily \+[audit]\+}, {\ttfamily \+[export]\+}.\hypertarget{index_autotoc_md33}{}\doxysubsection{\texorpdfstring{Nettoyer}{Nettoyer}}\label{index_autotoc_md33}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{make\ clean}
+
+\end{DoxyCode}
+
+
+\DoxyHorRuler{0}
+\hypertarget{index_autotoc_md35}{}\doxysection{\texorpdfstring{Paramètres modifiables}{Paramètres modifiables}}\label{index_autotoc_md35}
+Les constantes principales sont en tête de {\ttfamily main.\+c} (taille population, générations, tournoi, élitisme) et dans {\ttfamily \doxylink{gen_8c}{modules/\+gen.\+c}} (rayon 10 km, coûts, mutation). Après modification :\+ {\ttfamily make} puis relancer.
+
+\DoxyHorRuler{0}
+\hypertarget{index_autotoc_md37}{}\doxysection{\texorpdfstring{Limites du modèle (à connaître)}{Limites du modèle (à connaître)}}\label{index_autotoc_md37}
+
+\begin{DoxyItemize}
+\item {\bfseries{Métropole uniquement}} dans le CSV fourni.
+\item Un hôpital par {\bfseries{commune}} simulée, pas la liste réelle des établissements existants.
+\item Couverture en {\bfseries{vol d’oiseau}} 10 km, pas temps de trajet.
+\item Les voisins sont des {\bfseries{enveloppes}} précalculées ; l’audit en fin de run vérifie la cohérence géographique.
+\item La fitness favorise la population couverte, pas l’équité fine entre départements (des écarts de lits par zone peuvent subsister).
+\end{DoxyItemize}
+
+\DoxyHorRuler{0}
+\hypertarget{index_autotoc_md39}{}\doxysection{\texorpdfstring{Licence}{Licence}}\label{index_autotoc_md39}
+Voir \+[LICENSE]\+(LICENSE). 

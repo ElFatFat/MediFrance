@@ -89,20 +89,22 @@ int export_resultats_csv(const char* path,
     }
 
     /* En-tête : colonnes attendues par le script Python */
-    fprintf(f, "nom_dep,ville,population,has_hospital,is_desert,nb_beds\n");
+    fprintf(f, "nom_dep,ville,population,has_hospital,is_desert,nb_beds,latitude,longitude\n");
 
     for (size_t i = 0; i < count; i++) {
         int has_hospital = best->genes[i] ? 1 : 0;
         int is_desert    = covered[i]     ? 0 : 1;
         int nb_beds      = beds_per_town[i];
 
-        fprintf(f, "%s,%s,%d,%d,%d,%d\n",
+        fprintf(f, "%s,%s,%d,%d,%d,%d,%f,%f\n",
             towns[i].department_name,
             towns[i].name,
             towns[i].population,
             has_hospital,
             is_desert,
-            nb_beds
+            nb_beds,
+            towns[i].y,
+            towns[i].x
         );
     }
 

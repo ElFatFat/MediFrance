@@ -16,7 +16,7 @@ from matplotlib.patches import Circle
 # ---------------------------------------------------------------------------
 # Constante de version (incrémentée pour forcer la régénération)
 # ---------------------------------------------------------------------------
-MAP_GENERATION_VERSION = 7
+MAP_GENERATION_VERSION = 8
 
 # ---------------------------------------------------------------------------
 # Chemins
@@ -98,13 +98,19 @@ def generate_map_for_dept(ax, df_dept, dept_name, output_path):
     # Rayon de 10 km = 10 000 mètres
     radius_m = 10000.0
 
+    
+    color_city = '#501897'
+    color_hosp = '#F43F5E'
+    color_chru = '#FDE047'
+    color_desert = '#1F2937'
+
     # Communes normales
     regular = df_dept[(df_dept['has_hospital'] == 0) & (df_dept['is_desert'] == 0)]
-    ax.scatter(regular['x'], regular['y'], c='#555555', s=8, alpha=0.6, label='Communes', zorder=2)
+    ax.scatter(regular['x'], regular['y'], c=color_city, s=8, alpha=0.6, label='Communes', zorder=2)
 
     # Déserts médicaux
     deserts = df_dept[df_dept['is_desert'] == 1]
-    ax.scatter(deserts['x'], deserts['y'], c='#FF3333', s=14, alpha=0.8, label='Communes en désert médical', zorder=3)
+    ax.scatter(deserts['x'], deserts['y'], c=color_desert, s=14, alpha=0.9, label='Communes en désert médical', zorder=3)
 
     # Hôpitaux et cercles
     hospitals = df_dept[df_dept['has_hospital'] == 1]
@@ -112,9 +118,12 @@ def generate_map_for_dept(ax, df_dept, dept_name, output_path):
         xc, yc = h['x'], h['y']
         beds = h['nb_beds']
         is_chru = h['is_chru']
-        circle_color = 'purple' if is_chru else 'dodgerblue'
-
-        circle = Circle((xc, yc), radius_m, color=circle_color, alpha=0.20, zorder=4)
+        
+        # Attribution de la couleur selon le type
+        circle_color = color_chru if is_chru else color_hosp
+        
+        # Le fond du cercle garde une transparence (alpha) pour voir la carte au travers
+        circle = Circle((xc, yc), radius_m, color=circle_color, alpha=0.25, zorder=4)
         ax.add_patch(circle)
 
         marker_size = max(40, beds / 4)
@@ -136,9 +145,9 @@ def generate_map_for_dept(ax, df_dept, dept_name, output_path):
     # Ajuster l'aspect ratio pour éviter toute déformation
     ax.set_aspect('equal')
 
-    # Légende (éléments factices)
-    ax.scatter([], [], c='dodgerblue', marker='o', edgecolor='black', s=50, label='Hôpital')
-    ax.scatter([], [], c='purple', marker='*', edgecolor='black', s=70, label='CHRU')
+    # Légende (éléments factices avec les nouvelles couleurs)
+    ax.scatter([], [], c=color_hosp, marker='o', edgecolor='black', s=50, label='Hôpital')
+    ax.scatter([], [], c=color_chru, marker='*', edgecolor='black', s=70, label='CHRU')
     ax.scatter([], [], c='none', edgecolor='black', label='Rayon de couverture hospitalière (10km)')
 
     ax.set_title(f"Couverture Spatiale — Département {dept_name}", fontsize=12, pad=15, fontweight='bold')
@@ -353,10 +362,11 @@ def generate_report(df_data):
             # Lignes du tableau
             pdf.set_font("Main", "", row_font_size)
             for _, town in town_list.iterrows():
+                # --- NOUVELLES COULEURS RGB EXACTES DANS LE PDF ---
                 if town["is_chru"]:
-                    pdf.set_fill_color(220, 150, 255)
+                    pdf.set_fill_color(253, 224, 71)  # Jaune CHRU
                 else:
-                    pdf.set_fill_color(150, 200, 255)
+                    pdf.set_fill_color(244, 63, 94)   # Rose Hôpital
 
                 pdf.cell(70, row_height, str(town["ville"]), border=1, fill=True, new_x="RIGHT")
                 pdf.cell(50, row_height, "CHRU" if town["is_chru"] else "Hôp.", border=1, fill=True, new_x="RIGHT")

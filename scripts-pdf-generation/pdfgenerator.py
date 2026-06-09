@@ -16,7 +16,7 @@ from matplotlib.patches import Circle
 # ---------------------------------------------------------------------------
 # Constantes & Chemins
 # ---------------------------------------------------------------------------
-MAP_GENERATION_VERSION = 11 # A incrémenter si changement(s) graphique(s) au niveau des cartes ou mise à jour des données.
+MAP_GENERATION_VERSION = 12 # A incrémenter si changement(s) graphique(s) au niveau des cartes ou mise à jour des données.
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSET_DIR  = os.path.join(SCRIPT_DIR, "..", "assets")
@@ -75,12 +75,12 @@ def plot_base_cities(ax, df_dept):
     regular = df_dept[(df_dept['has_hospital'] == 0) & (df_dept['is_desert'] == 0)]
     deserts = df_dept[df_dept['is_desert'] == 1]
     
-    ax.scatter(regular['x'], regular['y'], c='#501897', s=8, alpha=0.6, label="Commune", zorder=2)
-    ax.scatter(deserts['x'], deserts['y'], c='#1F2937', s=14, alpha=0.9, label="Commune en désert médical", zorder=3)
+    ax.scatter(regular['x'], regular['y'], c='#555555', s=8, alpha=0.6, label="Commune", zorder=2)
+    ax.scatter(deserts['x'], deserts['y'], c='#FF3333', s=14, alpha=0.9, label="Commune en désert médical", zorder=3)
 
 def plot_hospitals(ax, hospitals):
     for _, h in hospitals.iterrows():
-        c = '#FDE047' if h['is_chru'] else '#F43F5E'
+        c = 'purple' if h['is_chru'] else 'dodgerblue'
         m = '*' if h['is_chru'] else 'o'
         s = max(40, h['nb_beds'] / 4)
         ax.add_patch(Circle((h['x'], h['y']), 10000.0, color=c, alpha=0.25, zorder=4))
@@ -116,9 +116,9 @@ def configure_map_layout(ax, df_dept):
     ax.axis('off')
 
 def finalize_and_save_map(ax, dept_name, output_path):
-    ax.scatter([], [], c='#F43F5E', marker='o', edgecolor='black', s=50, label="Hôpital")
-    ax.scatter([], [], c='#FDE047', marker='*', edgecolor='black', s=70, label="CHRU")
-    ax.scatter([], [], c='#F43F5E', alpha=0.25, s=150, label="Rayon de couverture hospitalière (10 km)")
+    ax.scatter([], [], c='dodgerblue', marker='o', edgecolor='black', s=50, label="Hôpital")
+    ax.scatter([], [], c='purple', marker='*', edgecolor='black', s=70, label="CHRU")
+    ax.scatter([], [], c='none', edgecolor='black', label="Rayon de couverture hospitalière (10 km)")
     
     ax.set_title(f"Couverture Spatiale — {dept_name}", fontsize=12, pad=15, fontweight='bold')
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.10), fontsize=8, framealpha=0.95, ncol=2)
@@ -248,7 +248,7 @@ def print_hospital_rows(pdf, town_list, rh, fs):
     
     pdf.set_font("Main", "", fs)
     for _, t in town_list.iterrows():
-        pdf.set_fill_color(253, 224, 71) if t["is_chru"] else pdf.set_fill_color(244, 63, 94)
+        pdf.set_fill_color(220, 150, 255) if t["is_chru"] else pdf.set_fill_color(150, 200, 255)
         pdf.cell(70, rh, str(t["ville"]), border=1, fill=True, new_x="RIGHT")
         pdf.cell(50, rh, "CHRU" if t["is_chru"] else "Hôp.", border=1, fill=True, new_x="RIGHT")
         pdf.cell(50, rh, str(int(t["nb_beds"])), border=1, fill=True, new_x="LMARGIN", new_y="NEXT")

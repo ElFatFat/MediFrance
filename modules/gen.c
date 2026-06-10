@@ -4,11 +4,12 @@
  */
 
 #include "gen.h"
+#include "gui.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <omp.h>
 
 #define CELL_SIZE 0.1f
 /* 0.1° ≈ 11 km ; à ~48°N, 10 km en longitude ≈ 0.13° → il faut ±2 cellules */
@@ -23,13 +24,26 @@ static long g_habitants_total = 65141355;
 #define LATITUDE_FACTOR 111.32f
 #define BEDS_PER_1000 5.4f
 
-#define PROB_DELETE 80 // 80% de chances de supprimer un bâtiment lors de la mutation intelligente
-#define MAX_DISCOVER_HOSPITALS 10 // Nombre maximum d'hôpitaux à découvrir lors de la mutation intelligente
-#define MIN_DISCOVER_HOSPITALS 3 // Nombre minimum d'hôpitaux à découvrir lors de la mutation intelligente
-#define MAX_DELETE_HOSPITALS 10 // Nombre maximum d'hôpitaux à supprimer lors de la mutation intelligente
-#define MIN_DELETE_HOSPITALS 3 // Nombre minimum d'hôpitaux à supprimer lors de la mutation intelligente
-#define MAX_NEIGHBORS 200 // Nombre maximal de voisins autorisés par ville pour limiter les allocations
-#define MAX_TRY 150 // Tentatives max de recherche de gènes actifs lors de l'élagage
+#define PROB_DELETE 80
+#define MAX_DISCOVER_HOSPITALS 10
+#define MIN_DISCOVER_HOSPITALS 3
+#define MAX_DELETE_HOSPITALS 10
+#define MIN_DELETE_HOSPITALS 3
+#define MAX_NEIGHBORS 200
+#define MAX_TRY 150
+
+#define DEFAULT_POP_SIZE 200
+#define DEFAULT_GEN_MAX 1000
+#define DEFAULT_ELITISM_COUNT 15
+#define STARTING_HOSPITALS_THRESHOLD 30000
+#define STARTING_HOSPITALS_THRESHOLD_PROBABILITY 20
+#define STARTING_HOSPITALS_PROBABILITY 2
+#define SEED_OFFSET 12345
+#define TOURNAMENT_PROBABILITY 80
+#define TOURNAMENT_SIZE 10
+#define RANDOM_PARENT_POOL_SIZE 20
+#define ITERATIONS_PER_THREAD 2
+#define DEFAULT_LOG_EVERY 50
 
 void set_habitants_total(long total) {
     g_habitants_total = total;
@@ -148,7 +162,6 @@ void log_solution_details(const Individual* ind, long total_pop, const char* lab
 }
 
 float town_distance_km(const Town* a, const Town* b) {
-    /* Latitude moyenne : distance symétrique (évite les trous de couverture) */
     float lat_rad = ((a->y + b->y) * 0.5f) * LAT_TO_RAD;
     float dx = (a->x - b->x) * LATITUDE_FACTOR * cosf(lat_rad);
     float dy = (a->y - b->y) * LATITUDE_FACTOR;
@@ -156,7 +169,6 @@ float town_distance_km(const Town* a, const Town* b) {
 }
 
 OptimizedData* precalc_near(Town* restrict towns, size_t count) {
-    // On trouve les bornes et on crée la grille
     float minX = towns[0].x;
     float maxX = minX;
     float minY = towns[0].y;
@@ -188,7 +200,6 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
         }
     }
 
-    // Remplissage de la grille
     for (int i = 0; i < (int)count; i++) {
         int c = (int)((towns[i].x - minX) / CELL_SIZE);
         int r = (int)((towns[i].y - minY) / CELL_SIZE);
@@ -222,7 +233,6 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
         cell->indexArray[cell->count++] = i;
     }
 
-    // Allocation des OptimizedData
     OptimizedData* data = malloc(count * sizeof(OptimizedData));
     if (data == NULL) {
         perror("Erreur d'allocation des données optimisées");
@@ -300,7 +310,6 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
         }
     }
 
-    // Libération de la mémoire de la grille intermédiaire
     for (int i = 0; i < rows; i++) {
         if (grid[i]->indexArray) {
             free(grid[i]->indexArray);
@@ -352,8 +361,6 @@ void fitness(Individual* restrict ind, Town* restrict towns, OptimizedData* rest
     }
 
     ind->desert_population = g_habitants_total - covered_population;
-
-    // Équation d'évaluation de l'individu
     ind->fitness = (double)g_habitants_total
         - (double)ind->desert_population
         - (HOSPITAL_COST * ind->hospitals_count)
@@ -474,7 +481,6 @@ void copy_individual(Individual* dest, const Individual* src, size_t count) {
 }
 
 void mutate(Individual* ind, const OptimizedData* data, size_t count, unsigned int* seed) {
-    // 1. AJOUT MASSIF
     int nb_ajouts = (rand_r(seed) % (MAX_DISCOVER_HOSPITALS - MIN_DISCOVER_HOSPITALS + 1)) + MIN_DISCOVER_HOSPITALS;
     for (int m = 0; m < nb_ajouts; m++) {
         int r = (int)(rand_r(seed) % (unsigned int)count);
@@ -483,7 +489,6 @@ void mutate(Individual* ind, const OptimizedData* data, size_t count, unsigned i
         }
     }
 
-    // 2. ÉLAGAGE MASSIF (on autorise à fermer les CHRU doublons)
     if (rand_r(seed) % 100 < PROB_DELETE) {
         int retryAttempts = 0;
         int closeCount = 0;
@@ -505,8 +510,227 @@ void crossover(Individual* enfant, const Individual* p1, const Individual* p2, s
     int pivot1 = (int)(rand_r(seed) % (unsigned int)(count / 2));
     int pivot2 = pivot1 + (int)(rand_r(seed) % (unsigned int)(count / 2));
 
-    // Copie par zones (Two-point crossover)
     memcpy(enfant->genes, p1->genes, (size_t)pivot1);
     memcpy(enfant->genes + pivot1, p2->genes + pivot1, (size_t)(pivot2 - pivot1));
     memcpy(enfant->genes + pivot2, p1->genes + pivot2, count - (size_t)pivot2);
+}
+
+static void log_initial_population_stats(Individual* population, int pop_size, size_t gene_count) {
+    long long total_hospitals = 0;
+    int min_h = (int)gene_count;
+    int max_h = 0;
+
+    for (int i = 0; i < pop_size; i++) {
+        int h = 0;
+        for (size_t g = 0; g < gene_count; g++) {
+            if (population[i].genes[g]) {
+                h++;
+            }
+        }
+        total_hospitals += h;
+        if (h < min_h) {
+            min_h = h;
+        }
+        if (h > max_h) {
+            max_h = h;
+        }
+    }
+
+    printf("[init] Population initiale (gènes aléatoires, avant fitness) :\n");
+    printf("[init]   Hôpitaux / individu : min %d | moy %.1f | max %d\n",
+           min_h, (double)total_hospitals / (double)pop_size, max_h);
+}
+
+GAResult run_genetic_algorithm(const GAContext* ctx, int pop_size, int gen_max, int elitism_count) {
+    Town* towns = ctx->towns;
+    size_t count = ctx->count;
+    OptimizedData* precalc_data = ctx->precalc_data;
+    unsigned char** workspaces = ctx->workspaces;
+
+    GAResult result = {0};
+    result.best.genes = NULL;
+
+    if (pop_size < 2) pop_size = DEFAULT_POP_SIZE;
+    if (gen_max < 1) gen_max = DEFAULT_GEN_MAX;
+    if (elitism_count < 1) elitism_count = DEFAULT_ELITISM_COUNT;
+    if (elitism_count > pop_size / 2) elitism_count = pop_size / 2;
+    int log_every = ctx->log_every > 0 ? ctx->log_every : DEFAULT_LOG_EVERY;
+
+    double* best_history = malloc((size_t)gen_max * sizeof(double));
+    double* worst_history = malloc((size_t)gen_max * sizeof(double));
+    if (best_history == NULL || worst_history == NULL) {
+        free(best_history);
+        free(worst_history);
+        return result;
+    }
+
+    printf("Lancement de l'algorithme genetique (population=%d, generations=%d, elites=%d)\n",
+           pop_size, gen_max, elitism_count);
+
+    Individual* population = malloc((size_t)pop_size * sizeof(Individual));
+    Individual* next_population = malloc((size_t)pop_size * sizeof(Individual));
+    if (population == NULL || next_population == NULL) {
+        perror("Echec d'allocation des tableaux de population");
+        free(population);
+        free(next_population);
+        free(best_history);
+        free(worst_history);
+        return result;
+    }
+
+    int allocated = 0;
+    for (int i = 0; i < pop_size; i++) {
+        population[i].genes = calloc(count, sizeof(unsigned char));
+        next_population[i].genes = calloc(count, sizeof(unsigned char));
+        if (population[i].genes == NULL || next_population[i].genes == NULL) {
+            perror("Echec d'allocation des genes");
+            free(population[i].genes);
+            free(next_population[i].genes);
+            break;
+        }
+        allocated++;
+    }
+    if (allocated < pop_size) {
+        for (int j = 0; j < allocated; j++) {
+            free(population[j].genes);
+            free(next_population[j].genes);
+        }
+        free(population);
+        free(next_population);
+        free(best_history);
+        free(worst_history);
+        return result;
+    }
+
+    for (int i = 0; i < pop_size; i++) {
+        for (size_t g = 0; g < count; g++) {
+            if (precalc_data[g].max_covered_population > STARTING_HOSPITALS_THRESHOLD
+                && (rand() % 100 < STARTING_HOSPITALS_THRESHOLD_PROBABILITY)) {
+                population[i].genes[g] = 1;
+            } else {
+                population[i].genes[g] = (rand() % 1000 < STARTING_HOSPITALS_PROBABILITY) ? 1 : 0;
+            }
+        }
+    }
+    log_initial_population_stats(population, pop_size, count);
+
+    double evolution_start = omp_get_wtime();
+    double initial_best_fitness = 0.0;
+    int initial_best_hospitals = 0;
+
+    for (int gen = 0; gen < gen_max; gen++) {
+        double t1 = omp_get_wtime();
+#pragma omp parallel for schedule(dynamic, ITERATIONS_PER_THREAD)
+        for (int i = 0; i < pop_size; i++) {
+            fitness(&population[i], towns, precalc_data, count, workspaces[omp_get_thread_num()]);
+        }
+        double t2 = omp_get_wtime();
+
+        quick_sort_population(population, 0, pop_size - 1);
+        double t3 = omp_get_wtime();
+
+        best_history[gen] = population[0].fitness;
+        worst_history[gen] = population[pop_size - 1].fitness;
+
+        draw_fitness_point(gen, gen_max, population[0].fitness, population[pop_size - 1].fitness);
+
+        for (int i = 0; i < elitism_count; i++) {
+            copy_individual(&next_population[i], &population[i], count);
+        }
+
+#pragma omp parallel
+        {
+            unsigned int seed = SEED_OFFSET + (unsigned int)omp_get_thread_num() * 100U + (unsigned int)gen;
+
+#pragma omp for schedule(static)
+            for (int i = elitism_count; i < pop_size; i++) {
+                if (rand_r(&seed) % 100 < TOURNAMENT_PROBABILITY) {
+                    int p1 = -1;
+                    int p2 = -1;
+                    double best_fitness_p1 = -1e100;
+                    double best_fitness_p2 = -1e100;
+                    for (int t = 0; t < TOURNAMENT_SIZE; t++) {
+                        int idx = rand_r(&seed) % (pop_size / 2);
+                        if (population[idx].fitness > best_fitness_p1 || p1 == -1) {
+                            p1 = idx;
+                            best_fitness_p1 = population[idx].fitness;
+                        }
+                    }
+                    for (int t = 0; t < TOURNAMENT_SIZE; t++) {
+                        int idx = rand_r(&seed) % (pop_size / 2);
+                        if (population[idx].fitness > best_fitness_p2 || p2 == -1) {
+                            p2 = idx;
+                            best_fitness_p2 = population[idx].fitness;
+                        }
+                    }
+                    crossover(&next_population[i], &population[p1], &population[p2], count, &seed);
+                } else {
+                    int random_pool_size = (RANDOM_PARENT_POOL_SIZE < pop_size) ? RANDOM_PARENT_POOL_SIZE : pop_size;
+                    copy_individual(&next_population[i], &population[rand_r(&seed) % random_pool_size], count);
+                }
+
+                mutate(&next_population[i], precalc_data, count, &seed);
+            }
+        }
+        double t4 = omp_get_wtime();
+
+        Individual* temp_population = population;
+        population = next_population;
+        next_population = temp_population;
+
+        int is_last_gen = (gen == gen_max - 1);
+        int should_log = (gen % log_every == 0) || is_last_gen;
+
+        if (gen == 0) {
+            initial_best_fitness = population[0].fitness;
+            initial_best_hospitals = population[0].hospitals_count;
+        }
+
+        if (should_log) {
+            PopulationSummary summary = summarize_population(population, pop_size);
+            log_population_summary(&summary, gen, gen_max);
+            log_generation_timings(gen, t2 - t1, t3 - t2, t4 - t3);
+        }
+    }
+
+    double evolution_time = omp_get_wtime() - evolution_start;
+
+    fitness(&population[0], towns, precalc_data, count, workspaces[0]);
+    log_solution_details(&population[0], get_habitants_total(), "final");
+
+    printf("\n========== Bilan évolution ==========\n");
+    printf("[bilan] Durée évolution      : %.2f s (%.1f ms / génération)\n",
+           evolution_time, (evolution_time * 1000.0) / (double)gen_max);
+    printf("[bilan] Fitness initiale (g0): %.0f (%d hôpitaux)\n",
+           initial_best_fitness, initial_best_hospitals);
+    printf("[bilan] Fitness finale       : %.0f (%d hôpitaux)\n",
+           population[0].fitness, population[0].hospitals_count);
+    printf("[bilan] Gain absolu          : %.0f\n",
+           population[0].fitness - initial_best_fitness);
+    if (initial_best_fitness != 0.0) {
+        printf("[bilan] Gain relatif         : %.2f %%\n",
+               100.0 * (population[0].fitness - initial_best_fitness) / initial_best_fitness);
+    }
+    printf("=====================================\n");
+
+    result.best.genes = malloc(count * sizeof(unsigned char));
+    if (result.best.genes != NULL) {
+        copy_individual(&result.best, &population[0], count);
+        result.best_fitness_history = best_history;
+        result.worst_fitness_history = worst_history;
+        result.generations = gen_max;
+    } else {
+        perror("Echec d'allocation du resultat");
+        free(best_history);
+        free(worst_history);
+    }
+
+    for (int i = 0; i < pop_size; i++) {
+        free(population[i].genes);
+        free(next_population[i].genes);
+    }
+    free(population);
+    free(next_population);
+
+    return result;
 }

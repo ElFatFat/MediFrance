@@ -70,6 +70,30 @@ typedef struct {
     int worst_hospitals;
 } PopulationSummary;
 
+/**
+ * @struct GAContext
+ * @brief Données partagées entre plusieurs exécutions de l'algorithme génétique.
+ */
+typedef struct {
+    Town* towns;
+    size_t count;
+    OptimizedData* precalc_data;
+    unsigned char** workspaces;
+    int num_threads;
+    int log_every;
+} GAContext;
+
+/**
+ * @struct GAResult
+ * @brief Résultat d'une exécution de l'algorithme génétique.
+ */
+typedef struct {
+    Individual best;
+    double* best_fitness_history;
+    double* worst_fitness_history;
+    int generations;
+} GAResult;
+
 void set_habitants_total(long total);
 long get_habitants_total(void);
 float town_distance_km(const Town* a, const Town* b);
@@ -83,55 +107,37 @@ int audit_coverage(const Town* towns, size_t count, const OptimizedData* data, c
 
 /**
  * @brief Effectue la sectorisation spatiale par grille de hachage et liste les communes à < 10km.
- * @param towns Tableau brut de toutes les communes.
- * @param count Quantité globale de communes.
- * @return      Pointeur vers le tableau de structures optimisées alloué dynamiquement.
  */
 OptimizedData* precalc_near(Town* restrict towns, size_t count);
 
 /**
  * @brief Calcule la valeur de fitness globale et les statistiques d'un individu.
- * @param ind             Pointeur vers l'individu à évaluer.
- * @param towns           Tableau de référence des communes.
- * @param data            Structures précalculées de voisinage.
- * @param count           Nombre total de communes.
- * @param coverage_buffer Zone tampon intermédiaire pour éviter le double-comptage.
  */
 void fitness(Individual* restrict ind, Town* restrict towns, OptimizedData* restrict data, size_t count, unsigned char* restrict coverage_buffer);
 
 /**
  * @brief Trie par partitionnement récursif (Quicksort) la population d'individus par ordre décroissant.
- * @param pop   Pointeur vers le tableau d'individus.
- * @param left  Index de borne gauche.
- * @param right Index de borne droite.
  */
 void quick_sort_population(Individual* pop, int left, int right);
 
 /**
- * @brief Réalise une copie complète bloc à bloc des attributs et des gènes d'un individu source vers une destination.
- * @param dest  Pointeur de l'individu récepteur.
- * @param src   Pointeur de l'individu émetteur.
- * @param count Nombre total de gènes (NB_COMMUNES).
+ * @brief Copie un individu vers un autre.
  */
 void copy_individual(Individual* dest, const Individual* src, size_t count);
 
 /**
- * @brief Induit des perturbations génotypiques via l'ajout stratégique et l'élagage aléatoire d'hôpitaux.
- * @param ind   L'individu sujet à mutation.
- * @param data  Informations de voisinage géospatial.
- * @param count Taille du chromosome.
- * @param seed  Pointeur vers la graine du générateur de nombres pseudo-aléatoires (`rand_r`).
+ * @brief Applique des mutations sur un individu.
  */
 void mutate(Individual* ind, const OptimizedData* data, size_t count, unsigned int* seed);
 
 /**
- * @brief Produit un descendant hybride par combinaison croisée en deux points à partir de deux parents distincts.
- * @param enfant Pointeur vers la structure destinée à recueillir le génome enfant.
- * @param p1     Pointeur vers le premier parent.
- * @param p2     Pointeur vers le second parent.
- * @param count  Nombre d'éléments génotypiques à croiser.
- * @param seed   Pointeur vers la graine pseudo-aléatoire.
+ * @brief Produit un descendant par croisement en deux points.
  */
 void crossover(Individual* enfant, const Individual* p1, const Individual* p2, size_t count, unsigned int* seed);
+
+/**
+ * @brief Exécute l'algorithme génétique complet et retourne le meilleur individu trouvé.
+ */
+GAResult run_genetic_algorithm(const GAContext* ctx, int pop_size, int gen_max, int elitism_count);
 
 #endif

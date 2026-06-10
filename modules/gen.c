@@ -1,110 +1,247 @@
+/**
+ * @file gen.c
+ * @brief Moteur algorithmique de la simulation génétique et de la modélisation géospatiale.
+ */
+
 #include "gen.h"
-#include "gui.h" // Pour draw_fitness_point (tracé temps réel de la courbe)
+#include "gui.h"
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <omp.h>
 
+#define CELL_SIZE 0.1f
+/* 0.1° ≈ 11 km ; à ~48°N, 10 km en longitude ≈ 0.13° → il faut ±2 cellules */
+#define CELL_SEARCH_RADIUS 2
 
-#define CELL_SIZE 0.1 // Environ 11km, parfait pour un rayon de 10km
-#define HABITANTS_TOTAL 65141355 // Population totale de la France (constante pour le fitness)
+static long g_habitants_total = 65141355;
+
 #define HOSPITAL_COST 5000.0
 #define CHRU_BONUS 4000.0
 #define CHRU_POP_THRESHOLD 80000
-#define LAT_TO_RAD 0.0174533 // Conversion degrés en radians pour le calcul de la distance
-#define LATITUDE_FACTOR 111.32 // Facteur de conversion pour les degrés de latitude en km
-#define BEDS_PER_1000 5.4 // Nombre de lits pour 1000 habitants
+#define LAT_TO_RAD 0.0174533f
+#define LATITUDE_FACTOR 111.32f
+#define BEDS_PER_1000 5.4f
 
-#define PROB_DELETE 80 // 80% de chances de supprimer un bâtiment lors de la mutation intelligente
-#define MAX_DISCOVER_HOSPITALS 10 // Nombre maximum d'hôpitaux à découvrir lors de la mutation intelligente (pour limiter les changements drastiques)
-#define MIN_DISCOVER_HOSPITALS 3 // Nombre minimum d'hôpitaux à découvrir lors de la mutation intelligente (pour assurer une exploration suffisante)
-#define MAX_DELETE_HOSPITALS 10 // Nombre maximum d'hôpitaux à supprimer lors de la mutation intelligente (pour limiter les changements drastiques)
-#define MIN_DELETE_HOSPITALS 3 // Nombre minimum d'hôpitaux à supprimer lors de la mutation intelligente (pour assurer une exploration suffisante)
+#define PROB_DELETE 80
+#define MAX_DISCOVER_HOSPITALS 10
+#define MIN_DISCOVER_HOSPITALS 3
+#define MAX_DELETE_HOSPITALS 10
+#define MIN_DELETE_HOSPITALS 3
+#define MAX_NEIGHBORS 200
+#define MAX_TRY 150
 
-#define MAX_NEIGHBORS 200 // Nombre maximum de voisins à stocker pour chaque commune (pour limiter la mémoire)
+#define DEFAULT_POP_SIZE 200
+#define DEFAULT_GEN_MAX 1000
+#define DEFAULT_ELITISM_COUNT 15
+#define STARTING_HOSPITALS_THRESHOLD 30000
+#define STARTING_HOSPITALS_THRESHOLD_PROBABILITY 20
+#define STARTING_HOSPITALS_PROBABILITY 2
+#define SEED_OFFSET 12345
+#define TOURNAMENT_PROBABILITY 80
+#define TOURNAMENT_SIZE 10
+#define RANDOM_PARENT_POOL_SIZE 20
+#define ITERATIONS_PER_THREAD 2
+#define DEFAULT_LOG_EVERY 50
 
-#define MAX_TRY 150 // Nombre maximum de tentatives pour trouver un hôpital à fermer lors de la mutation intelligente (pour éviter les boucles infinies)
+void set_habitants_total(long total) {
+    g_habitants_total = total;
+}
 
-// --- Paramètres d'orchestration de l'algorithme génétique ---
-#define DEFAULT_POP_SIZE 500 // Valeur de repli si la taille de population fournie est invalide
-#define DEFAULT_GEN_MAX 100 // Valeur de repli si le nombre de générations fourni est invalide
-#define STARTING_HOSPITALS_THRESHOLD 30000 // Choix arbitraire pour amorcer la population avec des hôpitaux sur les zones très peuplées
-#define STARTING_HOSPITALS_THRESHOLD_PROBABILITY 20 // Probabilité (en %) de placer un hôpital sur une zone très peuplée au démarrage
-#define STARTING_HOSPITALS_PROBABILITY 2 // Probabilité (en dixièmes de %, donc 0.X%) de placer un hôpital sur une zone au démarrage (hors zones très peuplées)
-#define SEED_OFFSET 12345 // Offset pour la seed de base, afin d'avoir des résultats différents à chaque exécution
-#define TOURNAMENT_PROBABILITY 80 // Probabilité (en %) de faire du tournoi pour sélectionner les parents plutôt que du random pur
-#define TOURNAMENT_SIZE 10 // Taille du tournoi (nombre de candidats comparés)
-#define RANDOM_PARENT_POOL_SIZE 20 // Taille du pool de parents aléatoires (dans le cas où on ne fait pas de tournoi)
-#define ITERATIONS_PER_THREAD 2 // Nombre d'individus traités par chaque thread avant de synchroniser (pour limiter la contention sur les workspaces)
-#define PRINT_EVERY_X_GEN 1000 // Affichage des chronos toutes les X générations (pour ne pas polluer le terminal)
+long get_habitants_total(void) {
+    return g_habitants_total;
+}
+
+void log_precalc_summary(const OptimizedData* data, size_t count) {
+    if (data == NULL || count == 0) {
+        printf("[precalc] Aucune donnée.\n");
+        return;
+    }
+
+    int min_neighbors = data[0].neighbor_count;
+    int max_neighbors = min_neighbors;
+    long long neighbor_sum = 0;
+    int chru_eligible = 0;
+    int max_covered_pop = data[0].max_covered_population;
+    int idx_max_neighbors = 0;
+
+    for (size_t i = 0; i < count; i++) {
+        int n = data[i].neighbor_count;
+        neighbor_sum += n;
+        if (n < min_neighbors) {
+            min_neighbors = n;
+        }
+        if (n > max_neighbors) {
+            max_neighbors = n;
+            idx_max_neighbors = (int)i;
+        }
+        if (data[i].is_eligible_for_chru) {
+            chru_eligible++;
+        }
+        if (data[i].max_covered_population > max_covered_pop) {
+            max_covered_pop = data[i].max_covered_population;
+        }
+    }
+
+    double avg_neighbors = (double)neighbor_sum / (double)count;
+    printf("\n[precalc] Grille voisins (rayon %.0f km, maille %.2f°)\n", COVERAGE_RADIUS_KM, CELL_SIZE);
+    printf("[precalc]   Communes indexées     : %zu\n", count);
+    printf("[precalc]   Voisins / commune     : min %d | moy %.1f | max %d\n",
+           min_neighbors, avg_neighbors, max_neighbors);
+    printf("[precalc]   Pic de densité       : %d voisins (commune #%d)\n",
+           max_neighbors, idx_max_neighbors);
+    printf("[precalc]   Communes éligibles CHRU (>%d hab.) : %d\n",
+           CHRU_POP_THRESHOLD, chru_eligible);
+    printf("[precalc]   Pop. max théorique couverte / site : %d hab.\n", max_covered_pop);
+}
+
+PopulationSummary summarize_population(const Individual* pop, int pop_size) {
+    PopulationSummary s = {0};
+    if (pop_size <= 0) {
+        return s;
+    }
+
+    double sum_fitness = 0.0;
+    s.best_fitness = pop[0].fitness;
+    s.worst_fitness = pop[pop_size - 1].fitness;
+    s.median_fitness = pop[pop_size / 2].fitness;
+
+    s.best_desert_pop = pop[0].desert_population;
+    s.best_hospitals = pop[0].hospitals_count;
+    s.best_chru = pop[0].chru_count;
+    s.best_beds = pop[0].beds_count;
+    s.worst_hospitals = pop[pop_size - 1].hospitals_count;
+
+    for (int i = 0; i < pop_size; i++) {
+        sum_fitness += pop[i].fitness;
+    }
+    s.avg_fitness = sum_fitness / (double)pop_size;
+
+    if (g_habitants_total > 0) {
+        s.best_covered_pop = g_habitants_total - s.best_desert_pop;
+        s.best_coverage_pct = 100.0 * (double)s.best_covered_pop / (double)g_habitants_total;
+    }
+
+    return s;
+}
+
+void log_population_summary(const PopulationSummary* s, int gen, int gen_max) {
+    printf("\n[gen %4d / %d] Population (triée, meilleur en tête)\n", gen, gen_max);
+    printf("[gen %4d]   Fitness  : meilleur %.0f | médiane %.0f | pire %.0f | moyenne %.0f\n",
+           gen, s->best_fitness, s->median_fitness, s->worst_fitness, s->avg_fitness);
+    printf("[gen %4d]   Couverture: %.2f %% pop. (%ld hab.) | désert %ld hab.\n",
+           gen, s->best_coverage_pct, s->best_covered_pop, s->best_desert_pop);
+    printf("[gen %4d]   Hôpitaux  : meilleur %d | pire %d | CHRU %d | lits (meilleur) %ld\n",
+           gen, s->best_hospitals, s->worst_hospitals, s->best_chru, s->best_beds);
+}
+
+void log_generation_timings(int gen, double fitness_s, double sort_s, double repro_s) {
+    double total = fitness_s + sort_s + repro_s;
+    printf("[gen %4d]   Temps    : fitness %.3fs | tri %.3fs | repro %.3fs | total %.3fs\n",
+           gen, fitness_s, sort_s, repro_s, total);
+}
+
+void log_solution_details(const Individual* ind, long total_pop, const char* label) {
+    long covered = total_pop - ind->desert_population;
+    double coverage_pct = total_pop > 0 ? 100.0 * (double)covered / (double)total_pop : 0.0;
+    double cost_hospitals = 5000.0 * (double)ind->hospitals_count;
+    double bonus_chru = 4000.0 * (double)ind->chru_count;
+    double bed_rate = total_pop > 0 ? 1000.0 * (double)ind->beds_count / (double)total_pop : 0.0;
+
+    printf("\n[%s] Détail de la meilleure solution\n", label);
+    printf("[%s]   Fitness totale        : %.0f\n", label, ind->fitness);
+    printf("[%s]   Population couverte   : %ld / %ld (%.2f %%)\n",
+           label, covered, total_pop, coverage_pct);
+    printf("[%s]   Désert médical        : %ld hab.\n", label, ind->desert_population);
+    printf("[%s]   Hôpitaux              : %d (pénalité -%.0f)\n",
+           label, ind->hospitals_count, cost_hospitals);
+    printf("[%s]   CHRU                  : %d (bonus +%.0f)\n", label, ind->chru_count, bonus_chru);
+    printf("[%s]   Lits (5,4 / 1000)     : %ld (%.2f lits / 1000 hab.)\n",
+           label, ind->beds_count, bed_rate);
+}
+
+float town_distance_km(const Town* a, const Town* b) {
+    float lat_rad = ((a->y + b->y) * 0.5f) * LAT_TO_RAD;
+    float dx = (a->x - b->x) * LATITUDE_FACTOR * cosf(lat_rad);
+    float dy = (a->y - b->y) * LATITUDE_FACTOR;
+    return sqrtf(dx * dx + dy * dy);
+}
 
 OptimizedData* precalc_near(Town* restrict towns, size_t count) {
-    // --- ÉTAPE 1 : Trouver les bornes et créer la grille ---
     float minX = towns[0].x;
     float maxX = minX;
     float minY = towns[0].y;
     float maxY = minY;
-    for(size_t i=1; i<count; i++) {
-        if(towns[i].x < minX) minX = towns[i].x;
-        if(towns[i].x > maxX) maxX = towns[i].x;
-        if(towns[i].y < minY) minY = towns[i].y;
-        if(towns[i].y > maxY) maxY = towns[i].y;
+    for (size_t i = 1; i < count; i++) {
+        if (towns[i].x < minX) minX = towns[i].x;
+        if (towns[i].x > maxX) maxX = towns[i].x;
+        if (towns[i].y < minY) minY = towns[i].y;
+        if (towns[i].y > maxY) maxY = towns[i].y;
     }
 
     int cols = (int)((maxX - minX) / CELL_SIZE) + 1;
     int rows = (int)((maxY - minY) / CELL_SIZE) + 1;
 
-    Cell** grid = malloc(rows * sizeof(Cell*));
-    for(int i=0; i<rows; i++) {
-        grid[i] = calloc(cols, sizeof(Cell));
+    Cell** grid = malloc((size_t)rows * sizeof(Cell*));
+    if (grid == NULL) {
+        perror("Erreur d'allocation de la grille");
+        return NULL;
+    }
+    for (int i = 0; i < rows; i++) {
+        grid[i] = calloc((size_t)cols, sizeof(Cell));
         if (grid[i] == NULL) {
             perror("Erreur d'allocation de la grille");
-            // Gérer l'erreur proprement ici
+            for (int j = 0; j < i; j++) {
+                free(grid[j]);
+            }
+            free(grid);
             return NULL;
         }
     }
 
-
-// --- ÉTAPE 2 : Remplir la grille ---
     for (int i = 0; i < (int)count; i++) {
-        // Calcul des indices avec un "clamp" pour la sécurité
         int c = (int)((towns[i].x - minX) / CELL_SIZE);
         int r = (int)((towns[i].y - minY) / CELL_SIZE);
 
-        // Sécurité anti-débordement (si x == maxX ou y == maxY)
         if (c >= cols) c = cols - 1;
         if (r >= rows) r = rows - 1;
         if (c < 0) c = 0;
         if (r < 0) r = 0;
 
-        Cell* cell = &grid[r][c]; // On accède à grid[row][col]
+        Cell* cell = &grid[r][c];
 
         if (cell->count >= cell->capacity) {
-            // Initialisation de capacity si c'est le premier passage
             int new_cap = (cell->capacity == 0) ? 10 : cell->capacity * 2;
-            int* new_indices = realloc(cell->indexArray, new_cap * sizeof(int));
-            
+            int* new_indices = realloc(cell->indexArray, (size_t)new_cap * sizeof(int));
+
             if (new_indices == NULL) {
                 perror("Erreur realloc dans la grille");
-                // Gérer l'erreur proprement ici
+                for (int rr = 0; rr < rows; rr++) {
+                    if (grid[rr]->indexArray) {
+                        free(grid[rr]->indexArray);
+                    }
+                    free(grid[rr]);
+                }
+                free(grid);
                 return NULL;
             }
-            
+
             cell->indexArray = new_indices;
             cell->capacity = new_cap;
         }
         cell->indexArray[cell->count++] = i;
     }
 
-    // --- ÉTAPE 3 : Calculer les voisins (Double passe pour la mémoire) ---
     OptimizedData* data = malloc(count * sizeof(OptimizedData));
-
-    if(data == NULL) {
+    if (data == NULL) {
         perror("Erreur d'allocation des données optimisées");
-        free(data);
-        // Nettoyage de la grille avant de quitter
-        for(int i=0; i<rows; i++) { if(grid[i]->indexArray) free(grid[i]->indexArray); }
-        for(int i=0; i<rows; i++) free(grid[i]);
+        for (int rr = 0; rr < rows; rr++) {
+            if (grid[rr]->indexArray) {
+                free(grid[rr]->indexArray);
+            }
+            free(grid[rr]);
+        }
         free(grid);
         return NULL;
     }
@@ -114,61 +251,72 @@ OptimizedData* precalc_near(Town* restrict towns, size_t count) {
         data[i].neighbors = NULL;
         data[i].is_eligible_for_chru = (towns[i].population > CHRU_POP_THRESHOLD) ? 1 : 0;
 
-        // Indices cohérents avec le remplissage de la grille : ligne depuis y, colonne depuis x
         int r = (int)((towns[i].y - minY) / CELL_SIZE);
         int c = (int)((towns[i].x - minX) / CELL_SIZE);
-        // On s'assure que les indices restent dans les bornes valides
-        if (r < 0) r = 0; else if (r >= rows) r = rows - 1;
-        if (c < 0) c = 0; else if (c >= cols) c = cols - 1;
+        if (r < 0) r = 0;
+        else if (r >= rows) r = rows - 1;
+        if (c < 0) c = 0;
+        else if (c >= cols) c = cols - 1;
 
-        // On crée un tampon temporaire pour stocker les voisins trouvés
-        int tempNeighbors[MAX_NEIGHBORS]; // Une ville a rarement plus de 500 voisines à 10km
+        int tempNeighbors[MAX_NEIGHBORS];
         int foundCount = 0;
 
-        for (int dr = -1; dr <= 1; dr++) {
-            for (int dc = -1; dc <= 1; dc++) {
-                int tr = r + dr; int tc = c + dc;
-                if (tr >= 0 && tr < rows && tc >= 0 && tc < cols) {
-                    Cell* cell = &grid[tr][tc];
-                    for (int k = 0; k < cell->count; k++) {
-                        int j = cell->indexArray[k];
-                        if (i == j) continue;
+        for (int dr = -CELL_SEARCH_RADIUS; dr <= CELL_SEARCH_RADIUS; dr++) {
+            for (int dc = -CELL_SEARCH_RADIUS; dc <= CELL_SEARCH_RADIUS; dc++) {
+                int tr = r + dr;
+                int tc = c + dc;
+                if (tr < 0 || tr >= rows || tc < 0 || tc >= cols) {
+                    continue;
+                }
+                Cell* cell = &grid[tr][tc];
+                for (int k = 0; k < cell->count; k++) {
+                    int j = cell->indexArray[k];
+                    if (i == j) {
+                        continue;
+                    }
 
-                        // On convertit la LATITUDE (y) en radians pour le cosinus
-                        float latitudeInRadians = towns[i].y * LAT_TO_RAD; 
-
-                        // Le cosinus s'applique sur l'axe X (Longitude) !
-                        float distanceX = (towns[i].x - towns[j].x) * LATITUDE_FACTOR * cos(latitudeInRadians);
-                        float distanceY = (towns[i].y - towns[j].y) * LATITUDE_FACTOR; // 1 degré de latitude ≈ 111.32 km, on peut aussi utiliser une constante
-
-                        float distSq = distanceX*distanceX + distanceY*distanceY;
-
-                        if (distSq <= 100.0 && foundCount < MAX_NEIGHBORS) { // 10km au carré
-                            tempNeighbors[foundCount++] = j;
-                        }
+                    float dist = town_distance_km(&towns[i], &towns[j]);
+                    if (dist <= COVERAGE_RADIUS_KM && foundCount < MAX_NEIGHBORS) {
+                        tempNeighbors[foundCount++] = j;
                     }
                 }
             }
         }
 
-        // Allocation finale et copie
         if (foundCount > 0) {
             data[i].neighbor_count = foundCount;
-            data[i].neighbors = malloc(foundCount * sizeof(int));
-            for(int n=0; n<foundCount; n++) data[i].neighbors[n] = tempNeighbors[n];
+            data[i].neighbors = malloc((size_t)foundCount * sizeof(int));
+            if (data[i].neighbors == NULL) {
+                perror("Erreur d'allocation voisins");
+                for (int n = 0; n < i; n++) {
+                    free(data[n].neighbors);
+                }
+                free(data);
+                for (int rr = 0; rr < rows; rr++) {
+                    if (grid[rr]->indexArray) {
+                        free(grid[rr]->indexArray);
+                    }
+                    free(grid[rr]);
+                }
+                free(grid);
+                return NULL;
+            }
+            memcpy(data[i].neighbors, tempNeighbors, (size_t)foundCount * sizeof(int));
         }
 
         data[i].max_covered_population = towns[i].population;
-        for(int v = 0; v < data[i].neighbor_count; v++) {
+        for (int v = 0; v < data[i].neighbor_count; v++) {
             data[i].max_covered_population += towns[data[i].neighbors[v]].population;
         }
     }
 
-    // Nettoyage de la grille temporaire
-    for(int i=0; i<rows; i++) { if(grid[i]->indexArray) free(grid[i]->indexArray); }
-    for(int i=0; i<rows; i++) free(grid[i]);
+    for (int i = 0; i < rows; i++) {
+        if (grid[i]->indexArray) {
+            free(grid[i]->indexArray);
+        }
+        free(grid[i]);
+    }
     free(grid);
-
 
     return data;
 }
@@ -177,45 +325,130 @@ void fitness(Individual* restrict ind, Town* restrict towns, OptimizedData* rest
     ind->hospitals_count = 0;
     ind->chru_count = 0;
     ind->beds_count = 0;
-    
-    // On part du principe que TOUT le monde est au désert
-    // (Utilise la constante de population totale de ton fichier)
-    long covered_population = 0; 
+
+    long covered_population = 0;
     memset(coverage_buffer, 0, count);
 
     for (size_t i = 0; i < count; i++) {
-        if (ind->genes[i]) {
-            ind->hospitals_count++;
-            if (data[i].is_eligible_for_chru) ind->chru_count++;
+        if (!ind->genes[i]) {
+            continue;
+        }
 
-            long hospitals_bed_count = 0;
+        ind->hospitals_count++;
+        if (data[i].is_eligible_for_chru) {
+            ind->chru_count++;
+        }
 
-            // Si pas encore couverte, on ajoute sa pop
-            if (!coverage_buffer[i]) {
-                coverage_buffer[i] = 1;
-                covered_population += towns[i].population;
-                hospitals_bed_count += towns[i].population;
+        long hospitals_bed_count = 0;
+
+        if (!coverage_buffer[i]) {
+            coverage_buffer[i] = 1;
+            covered_population += towns[i].population;
+            hospitals_bed_count += towns[i].population;
+        }
+
+#pragma omp simd
+        for (int v = 0; v < data[i].neighbor_count; v++) {
+            int neighbor_index = data[i].neighbors[v];
+            if (!coverage_buffer[neighbor_index]) {
+                coverage_buffer[neighbor_index] = 1;
+                covered_population += towns[neighbor_index].population;
+                hospitals_bed_count += towns[neighbor_index].population;
             }
+        }
 
-            // Vectorize neighbor loop
-            #pragma omp simd
-            for (int v = 0; v < data[i].neighbor_count; v++) {
-                int neighbor_index = data[i].neighbors[v];
-                if (!coverage_buffer[neighbor_index]) {
-                    coverage_buffer[neighbor_index] = 1;
-                    covered_population += towns[neighbor_index].population;
-                    hospitals_bed_count += towns[neighbor_index].population;
-                }
-            }
+        ind->beds_count += (long)(hospitals_bed_count * (BEDS_PER_1000 / 1000.0f));
+    }
 
-            // 5.4 lits pour 1000 habitants
-            ind->beds_count += (long)(hospitals_bed_count * (BEDS_PER_1000 / 1000.0));
+    ind->desert_population = g_habitants_total - covered_population;
+    ind->fitness = (double)g_habitants_total
+        - (double)ind->desert_population
+        - (HOSPITAL_COST * ind->hospitals_count)
+        + (CHRU_BONUS * ind->chru_count);
+}
+
+int audit_coverage(const Town* towns, size_t count, const OptimizedData* data, const Individual* ind) {
+    int desert_but_near_hospital = 0;
+    long desert_but_near_pop = 0;
+    int covered_but_far = 0;
+    int covered_towns = 0;
+    int desert_towns = 0;
+    long covered_pop = 0;
+    long desert_pop = 0;
+
+    unsigned char* covered = calloc(count, 1);
+    if (!covered) {
+        fprintf(stderr, "[audit] Échec allocation mémoire\n");
+        return -1;
+    }
+
+    for (size_t h = 0; h < count; h++) {
+        if (!ind->genes[h]) {
+            continue;
+        }
+        covered[h] = 1;
+        for (int v = 0; v < data[h].neighbor_count; v++) {
+            covered[data[h].neighbors[v]] = 1;
         }
     }
 
-    ind->desert_population = HABITANTS_TOTAL - covered_population; // 65M - les gens qu'on a sauvés
-    ind->fitness = HABITANTS_TOTAL - (double)ind->desert_population - (HOSPITAL_COST * ind->hospitals_count) + (CHRU_BONUS * ind->chru_count);
+    for (size_t i = 0; i < count; i++) {
+        if (covered[i]) {
+            covered_towns++;
+            covered_pop += towns[i].population;
+        } else {
+            desert_towns++;
+            desert_pop += towns[i].population;
+        }
+
+        float nearest_hospital_km = -1.0f;
+        for (size_t h = 0; h < count; h++) {
+            if (!ind->genes[h]) {
+                continue;
+            }
+            float d = town_distance_km(&towns[i], &towns[h]);
+            if (nearest_hospital_km < 0.0f || d < nearest_hospital_km) {
+                nearest_hospital_km = d;
+            }
+        }
+
+        int is_desert = covered[i] ? 0 : 1;
+        if (is_desert && nearest_hospital_km >= 0.0f && nearest_hospital_km <= COVERAGE_RADIUS_KM) {
+            desert_but_near_hospital++;
+            desert_but_near_pop += towns[i].population;
+        }
+        if (!is_desert && (nearest_hospital_km < 0.0f || nearest_hospital_km > COVERAGE_RADIUS_KM + 0.05f)) {
+            covered_but_far++;
+        }
+    }
+
+    free(covered);
+
+    double pct_towns = count > 0 ? 100.0 * (double)covered_towns / (double)count : 0.0;
+    double pct_pop = g_habitants_total > 0
+        ? 100.0 * (double)covered_pop / (double)g_habitants_total
+        : 0.0;
+
+    printf("\n[audit] Contrôle couverture (rayon %.0f km)\n", COVERAGE_RADIUS_KM);
+    printf("[audit]   Communes couvertes    : %d / %zu (%.1f %%)\n",
+           covered_towns, count, pct_towns);
+    printf("[audit]   Communes en désert    : %d\n", desert_towns);
+    printf("[audit]   Pop. couverte         : %ld (%.2f %%)\n", covered_pop, pct_pop);
+    printf("[audit]   Pop. en désert        : %ld\n", desert_pop);
+    printf("[audit]   Anomalies géographiques :\n");
+    printf("[audit]     - désert mais hôpital ≤%.0f km : %d communes (%ld hab.)\n",
+           COVERAGE_RADIUS_KM, desert_but_near_hospital, desert_but_near_pop);
+    printf("[audit]     - couvert mais hôpital >%.0f km : %d communes\n",
+           COVERAGE_RADIUS_KM, covered_but_far);
+    if (desert_but_near_hospital == 0 && covered_but_far == 0) {
+        printf("[audit]   Résultat : OK (cohérent avec le modèle)\n");
+    } else {
+        printf("[audit]   Résultat : %d anomalie(s) à investiguer\n",
+               desert_but_near_hospital + covered_but_far);
+    }
+    return desert_but_near_hospital + covered_but_far;
 }
+
 void quick_sort_population(Individual* pop, int left, int right) {
     if (left >= right) return;
 
@@ -223,7 +456,7 @@ void quick_sort_population(Individual* pop, int left, int right) {
     int i = left - 1;
 
     for (int j = left; j < right; j++) {
-        if (pop[j].fitness > pivot) { // Tri décroissant
+        if (pop[j].fitness > pivot) {
             i++;
             Individual temp = pop[i];
             pop[i] = pop[j];
@@ -238,43 +471,34 @@ void quick_sort_population(Individual* pop, int left, int right) {
     quick_sort_population(pop, i + 2, right);
 }
 
-// Copie un individu vers un autre
 void copy_individual(Individual* dest, const Individual* src, size_t count) {
     dest->fitness = src->fitness;
     dest->hospitals_count = src->hospitals_count;
     dest->chru_count = src->chru_count;
     dest->desert_population = src->desert_population;
     dest->beds_count = src->beds_count;
-    // On copie les gènes (mémoire déjà allouée)
     memcpy(dest->genes, src->genes, count * sizeof(unsigned char));
 }
 
-
 void mutate(Individual* ind, const OptimizedData* data, size_t count, unsigned int* seed) {
-    
-    // 1. AJOUT MASSIF (On force l'exploration)
-    int nb_ajouts = (rand_r(seed) % (MAX_DISCOVER_HOSPITALS - MIN_DISCOVER_HOSPITALS + 1)) + MIN_DISCOVER_HOSPITALS; // On ajoute de 5 à 19 hôpitaux
+    int nb_ajouts = (rand_r(seed) % (MAX_DISCOVER_HOSPITALS - MIN_DISCOVER_HOSPITALS + 1)) + MIN_DISCOVER_HOSPITALS;
     for (int m = 0; m < nb_ajouts; m++) {
-        int r = rand_r(seed) % count;
-        // On vérifie toujours que la zone PEUT être rentable théoriquement
+        int r = (int)(rand_r(seed) % (unsigned int)count);
         if (data[r].max_covered_population >= HOSPITAL_COST) {
             ind->genes[r] = 1;
         }
     }
 
-    // 2. ÉLAGAGE MASSIF (On autorise à fermer les CHRU doublons !)
-    if (rand_r(seed) % 100 < PROB_DELETE) { // PROB_DELETE% de chances de nettoyer
+    if (rand_r(seed) % 100 < PROB_DELETE) {
         int retryAttempts = 0;
         int closeCount = 0;
-        int maxClosures = (rand_r(seed) % (MAX_DELETE_HOSPITALS - MIN_DELETE_HOSPITALS + 1)) + MIN_DELETE_HOSPITALS; // On tente d'en fermer 5 à 19
+        int maxClosures = (rand_r(seed) % (MAX_DELETE_HOSPITALS - MIN_DELETE_HOSPITALS + 1)) + MIN_DELETE_HOSPITALS;
 
         while (closeCount < maxClosures && retryAttempts < MAX_TRY) {
-            int r = rand_r(seed) % count;
-            
-            // On ferme N'IMPORTE QUEL hôpital, même si c'est un potentiel CHRU !
-            // La fitness décidera si c'était une bonne idée ou non.
+            int r = (int)(rand_r(seed) % (unsigned int)count);
+
             if (ind->genes[r] == 1) {
-                ind->genes[r] = 0; 
+                ind->genes[r] = 0;
                 closeCount++;
             }
             retryAttempts++;
@@ -283,15 +507,38 @@ void mutate(Individual* ind, const OptimizedData* data, size_t count, unsigned i
 }
 
 void crossover(Individual* enfant, const Individual* p1, const Individual* p2, size_t count, unsigned int* seed) {
-    int pivot1 = rand_r(seed) % (count / 2);
-    int pivot2 = pivot1 + (rand_r(seed) % (count / 2));
+    int pivot1 = (int)(rand_r(seed) % (unsigned int)(count / 2));
+    int pivot2 = pivot1 + (int)(rand_r(seed) % (unsigned int)(count / 2));
 
-    // Parent 1 (Début)
-    memcpy(enfant->genes, p1->genes, pivot1);
-    // Parent 2 (Milieu)
-    memcpy(enfant->genes + pivot1, p2->genes + pivot1, pivot2 - pivot1);
-    // Parent 1 (Fin)
-    memcpy(enfant->genes + pivot2, p1->genes + pivot2, count - pivot2);
+    memcpy(enfant->genes, p1->genes, (size_t)pivot1);
+    memcpy(enfant->genes + pivot1, p2->genes + pivot1, (size_t)(pivot2 - pivot1));
+    memcpy(enfant->genes + pivot2, p1->genes + pivot2, count - (size_t)pivot2);
+}
+
+static void log_initial_population_stats(Individual* population, int pop_size, size_t gene_count) {
+    long long total_hospitals = 0;
+    int min_h = (int)gene_count;
+    int max_h = 0;
+
+    for (int i = 0; i < pop_size; i++) {
+        int h = 0;
+        for (size_t g = 0; g < gene_count; g++) {
+            if (population[i].genes[g]) {
+                h++;
+            }
+        }
+        total_hospitals += h;
+        if (h < min_h) {
+            min_h = h;
+        }
+        if (h > max_h) {
+            max_h = h;
+        }
+    }
+
+    printf("[init] Population initiale (gènes aléatoires, avant fitness) :\n");
+    printf("[init]   Hôpitaux / individu : min %d | moy %.1f | max %d\n",
+           min_h, (double)total_hospitals / (double)pop_size, max_h);
 }
 
 GAResult run_genetic_algorithm(const GAContext* ctx, int pop_size, int gen_max, int elitism_count) {
@@ -300,35 +547,28 @@ GAResult run_genetic_algorithm(const GAContext* ctx, int pop_size, int gen_max, 
     OptimizedData* precalc_data = ctx->precalc_data;
     unsigned char** workspaces = ctx->workspaces;
 
-    GAResult result;
-    result.best.genes = NULL; // Sentinelle : NULL signale un échec à l'appelant
-    result.best_fitness_history = NULL;
-    result.worst_fitness_history = NULL;
-    result.generations = 0;
+    GAResult result = {0};
+    result.best.genes = NULL;
 
-    // --- Garde-fous sur les paramètres (saisie utilisateur potentiellement invalide) ---
     if (pop_size < 2) pop_size = DEFAULT_POP_SIZE;
     if (gen_max < 1) gen_max = DEFAULT_GEN_MAX;
-    // Au moins 1 élite pour garantir que le meilleur individu est conservé d'une génération à l'autre
-    if (elitism_count < 1) elitism_count = 1;
+    if (elitism_count < 1) elitism_count = DEFAULT_ELITISM_COUNT;
     if (elitism_count > pop_size / 2) elitism_count = pop_size / 2;
+    int log_every = ctx->log_every > 0 ? ctx->log_every : DEFAULT_LOG_EVERY;
 
-    // Historique de fitness (une valeur par génération) pour tracer la courbe a posteriori.
-    // En cas d'échec d'allocation, on continue sans historique (la courbe ne sera pas tracée).
-    double* best_history = malloc(gen_max * sizeof(double));
-    double* worst_history = malloc(gen_max * sizeof(double));
+    double* best_history = malloc((size_t)gen_max * sizeof(double));
+    double* worst_history = malloc((size_t)gen_max * sizeof(double));
     if (best_history == NULL || worst_history == NULL) {
         free(best_history);
         free(worst_history);
-        best_history = NULL;
-        worst_history = NULL;
+        return result;
     }
 
     printf("Lancement de l'algorithme genetique (population=%d, generations=%d, elites=%d)\n",
            pop_size, gen_max, elitism_count);
 
-    Individual* population = malloc(pop_size * sizeof(Individual));
-    Individual* next_population = malloc(pop_size * sizeof(Individual));
+    Individual* population = malloc((size_t)pop_size * sizeof(Individual));
+    Individual* next_population = malloc((size_t)pop_size * sizeof(Individual));
     if (population == NULL || next_population == NULL) {
         perror("Echec d'allocation des tableaux de population");
         free(population);
@@ -362,56 +602,53 @@ GAResult run_genetic_algorithm(const GAContext* ctx, int pop_size, int gen_max, 
         return result;
     }
 
-    // --- Amorçage de la population ---
     for (int i = 0; i < pop_size; i++) {
         for (size_t g = 0; g < count; g++) {
-            if (precalc_data[g].max_covered_population > STARTING_HOSPITALS_THRESHOLD && (rand() % 100 < STARTING_HOSPITALS_THRESHOLD_PROBABILITY)) {
+            if (precalc_data[g].max_covered_population > STARTING_HOSPITALS_THRESHOLD
+                && (rand() % 100 < STARTING_HOSPITALS_THRESHOLD_PROBABILITY)) {
                 population[i].genes[g] = 1;
             } else {
                 population[i].genes[g] = (rand() % 1000 < STARTING_HOSPITALS_PROBABILITY) ? 1 : 0;
             }
         }
     }
+    log_initial_population_stats(population, pop_size, count);
+
+    double evolution_start = omp_get_wtime();
+    double initial_best_fitness = 0.0;
+    int initial_best_hospitals = 0;
 
     for (int gen = 0; gen < gen_max; gen++) {
-        // --- ÉTAPE 1 : FITNESS ---
         double t1 = omp_get_wtime();
-        #pragma omp parallel for schedule(dynamic, ITERATIONS_PER_THREAD)
+#pragma omp parallel for schedule(dynamic, ITERATIONS_PER_THREAD)
         for (int i = 0; i < pop_size; i++) {
             fitness(&population[i], towns, precalc_data, count, workspaces[omp_get_thread_num()]);
         }
         double t2 = omp_get_wtime();
 
-        // --- ÉTAPE 2 : TRI ---
         quick_sort_population(population, 0, pop_size - 1);
         double t3 = omp_get_wtime();
 
-        // Enregistre la meilleure et la pire fitness de cette génération (population triée)
-        if (best_history) best_history[gen] = population[0].fitness;
-        if (worst_history) worst_history[gen] = population[pop_size - 1].fitness;
+        best_history[gen] = population[0].fitness;
+        worst_history[gen] = population[pop_size - 1].fitness;
 
-        // Tracé temps réel de la courbe sous la carte (les hôpitaux ne sont pas redessinés ici)
         draw_fitness_point(gen, gen_max, population[0].fitness, population[pop_size - 1].fitness);
 
-        // Copie de l'elite vers le buffer de prochaine generation.
         for (int i = 0; i < elitism_count; i++) {
             copy_individual(&next_population[i], &population[i], count);
         }
 
-        // --- ÉTAPE 3 : REPRODUCTION & MUTATION ---
-        #pragma omp parallel
+#pragma omp parallel
         {
-            // On crée une graine unique par thread et par génération
-            unsigned int seed = SEED_OFFSET + omp_get_thread_num() * 100 + gen;
+            unsigned int seed = SEED_OFFSET + (unsigned int)omp_get_thread_num() * 100U + (unsigned int)gen;
 
-            #pragma omp for schedule(static)
+#pragma omp for schedule(static)
             for (int i = elitism_count; i < pop_size; i++) {
-
-                // On fait du tournoi pour sélectionner les parents (TOURNAMENT_PROBABILITY% de chances), sinon du random pur
                 if (rand_r(&seed) % 100 < TOURNAMENT_PROBABILITY) {
-                    // Sélectionne TOURNAMENT_SIZE candidats pour chaque parent et prend le meilleur
-                    int p1 = -1, p2 = -1;
-                    double best_fitness_p1 = -1e100, best_fitness_p2 = -1e100;
+                    int p1 = -1;
+                    int p2 = -1;
+                    double best_fitness_p1 = -1e100;
+                    double best_fitness_p2 = -1e100;
                     for (int t = 0; t < TOURNAMENT_SIZE; t++) {
                         int idx = rand_r(&seed) % (pop_size / 2);
                         if (population[idx].fitness > best_fitness_p1 || p1 == -1) {
@@ -432,29 +669,50 @@ GAResult run_genetic_algorithm(const GAContext* ctx, int pop_size, int gen_max, 
                     copy_individual(&next_population[i], &population[rand_r(&seed) % random_pool_size], count);
                 }
 
-                // On mute avec la seed
                 mutate(&next_population[i], precalc_data, count, &seed);
             }
         }
         double t4 = omp_get_wtime();
 
-        // Bascule les buffers: prochaine generation devient la population courante.
         Individual* temp_population = population;
         population = next_population;
         next_population = temp_population;
 
-        // Affichage des chronos toutes les PRINT_EVERY_X_GEN générations (pour ne pas polluer le terminal)
-        if (gen % PRINT_EVERY_X_GEN == 0) {
-            printf("\n--- Gen %d ---\n", gen);
-            printf("Fitness: %.3fs | Tri: %.3fs | Repro: %.3fs | Total: %.3fs\n",
-                    t2 - t1, t3 - t2, t4 - t3, t4 - t1);
-            printf("Meilleure Fitness: %.0f (Desert: %ld) Hopitaux: %d CHRU: %d Lits_Total: %ld\n",
-                    population[0].fitness, population[0].desert_population,
-                    population[0].hospitals_count, population[0].chru_count, population[0].beds_count);
+        int is_last_gen = (gen == gen_max - 1);
+        int should_log = (gen % log_every == 0) || is_last_gen;
+
+        if (gen == 0) {
+            initial_best_fitness = population[0].fitness;
+            initial_best_hospitals = population[0].hospitals_count;
+        }
+
+        if (should_log) {
+            PopulationSummary summary = summarize_population(population, pop_size);
+            log_population_summary(&summary, gen, gen_max);
+            log_generation_timings(gen, t2 - t1, t3 - t2, t4 - t3);
         }
     }
 
-    // Le meilleur individu (élite conservée) est en tête de population après la dernière bascule.
+    double evolution_time = omp_get_wtime() - evolution_start;
+
+    fitness(&population[0], towns, precalc_data, count, workspaces[0]);
+    log_solution_details(&population[0], get_habitants_total(), "final");
+
+    printf("\n========== Bilan évolution ==========\n");
+    printf("[bilan] Durée évolution      : %.2f s (%.1f ms / génération)\n",
+           evolution_time, (evolution_time * 1000.0) / (double)gen_max);
+    printf("[bilan] Fitness initiale (g0): %.0f (%d hôpitaux)\n",
+           initial_best_fitness, initial_best_hospitals);
+    printf("[bilan] Fitness finale       : %.0f (%d hôpitaux)\n",
+           population[0].fitness, population[0].hospitals_count);
+    printf("[bilan] Gain absolu          : %.0f\n",
+           population[0].fitness - initial_best_fitness);
+    if (initial_best_fitness != 0.0) {
+        printf("[bilan] Gain relatif         : %.2f %%\n",
+               100.0 * (population[0].fitness - initial_best_fitness) / initial_best_fitness);
+    }
+    printf("=====================================\n");
+
     result.best.genes = malloc(count * sizeof(unsigned char));
     if (result.best.genes != NULL) {
         copy_individual(&result.best, &population[0], count);

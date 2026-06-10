@@ -5,7 +5,8 @@
 
 #include "settings.h"
 #include "render.h"
-#include "export.h"
+#include "../data/export.h"
+#include "../genetic/ga_log.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

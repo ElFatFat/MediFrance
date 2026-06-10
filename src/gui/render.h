@@ -1,8 +1,8 @@
 #ifndef RENDER_H
 #define RENDER_H
 
-#include "../main.h"
-#include "gen.h"
+#include "../../main.h"
+#include "../genetic/gen.h"
 #include <MLV/MLV_all.h>
 
 /**

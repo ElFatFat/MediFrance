@@ -4,12 +4,14 @@
 #include <string.h>
 #include "main.h"
 
-#include "modules/render.h"
-#include "modules/settings.h"
-#include "modules/gen.h"
-#include "modules/export.h"
-#include "modules/loader.h"
-#include "modules/constants.h"
+#include "src/gui/render.h"
+#include "src/gui/settings.h"
+#include "src/genetic/gen.h"
+#include "src/genetic/geo.h"
+#include "src/genetic/ga_log.h"
+#include "src/data/export.h"
+#include "src/data/loader.h"
+#include "src/constants.h"
 
 #include <MLV/MLV_all.h>
 

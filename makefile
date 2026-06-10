@@ -11,8 +11,8 @@ LDLIBS  = $(shell pkg-config --libs MLV) -lm -fopenmp
 # Target executable name
 TARGET  = build/medifrance
 
-# Source files (automatically finds all .c files in the current directory and modules)
-SRCS    = $(wildcard *.c) $(wildcard modules/*.c)
+# Source files (automatically finds all .c files in the current directory and src subdirectories)
+SRCS    = $(wildcard *.c) $(wildcard src/*/*.c)
 OBJS    = $(patsubst %.c,build/%.o,$(SRCS))
 
 # Default rule
@@ -26,15 +26,10 @@ quality: clean
 $(TARGET): $(OBJS)
 	$(CC) $(OBJS) -o $(TARGET) $(LDLIBS)
 
-# Compile source files into object files
-build/%.o: %.c | build build/modules
+# Compile source files into object files (creates the build subdirectory as needed)
+build/%.o: %.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
-
-build:
-	@mkdir -p build
-
-build/modules:
-	@mkdir -p build/modules
 
 # Clean, build and run the program
 run: clean all

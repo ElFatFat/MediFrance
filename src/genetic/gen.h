@@ -1,23 +1,13 @@
 #ifndef GEN_H
 #define GEN_H
 
-#include "../main.h"
+#include "../../main.h"
+#include "geo.h"
 
 /**
  * @file gen.h
- * @brief Déclarations des types de données et prototypes pour l'algorithme génétique spatialisé.
+ * @brief Types et prototypes du moteur d'algorithme génétique spatialisé.
  */
-
-/**
- * @struct OptimizedData
- * @brief Structure regroupant les données de voisinage précalculées à moins de 10km.
- */
-typedef struct {
-    int* neighbors;            ///< Tableau d'indices des communes situées à moins de 10km
-    int neighbor_count;        ///< Nombre total de communes voisines trouvées
-    int is_eligible_for_chru;  ///< Indicateur d'éligibilité CHRU : 1 si population > 80 000, sinon 0
-    int max_covered_population;///< Population maximale théoriquement couverte par ce nœud
-} OptimizedData;
 
 /**
  * @struct Individual
@@ -31,44 +21,6 @@ typedef struct {
     long desert_population;   ///< Population totale laissée sans aucune couverture médicale
     long beds_count;          ///< Somme cumulée du nombre de lits disponibles
 } Individual;
-
-/**
- * @struct Cell
- * @brief Cellule dynamique utilisée pour la sectorisation de la grille de hachage spatial.
- */
-typedef struct {
-    int* indexArray;          ///< Indices des communes résidentes dans la cellule
-    int count;                ///< Nombre effectif de communes recensées
-    int capacity;             ///< Capacité maximale allouée pour le tableau dynamique
-} Cell;
-
-/**
- * @struct ThreadWorkspace
- * @brief Espace mémoire local pour assurer l'exécution Thread-Safe et l'isolation des tampons de couverture.
- */
-typedef struct {
-    unsigned char* coverage_buffer; ///< Tableau temporaire d'analyse de couverture spatiale
-} ThreadWorkspace;
-
-#define COVERAGE_RADIUS_KM 10.0f
-
-/**
- * @struct PopulationSummary
- * @brief Statistiques agrégées sur une génération de la population.
- */
-typedef struct {
-    double best_fitness;
-    double worst_fitness;
-    double median_fitness;
-    double avg_fitness;
-    long best_covered_pop;
-    long best_desert_pop;
-    double best_coverage_pct;
-    int best_hospitals;
-    int best_chru;
-    long best_beds;
-    int worst_hospitals;
-} PopulationSummary;
 
 /**
  * @struct GAContext
@@ -96,19 +48,6 @@ typedef struct {
 
 void set_habitants_total(long total);
 long get_habitants_total(void);
-float town_distance_km(const Town* a, const Town* b);
-
-void log_precalc_summary(const OptimizedData* data, size_t count);
-PopulationSummary summarize_population(const Individual* pop, int pop_size);
-void log_population_summary(const PopulationSummary* s, int gen, int gen_max);
-void log_generation_timings(int gen, double fitness_s, double sort_s, double repro_s);
-void log_solution_details(const Individual* ind, long total_pop, const char* label);
-int audit_coverage(const Town* towns, size_t count, const OptimizedData* data, const Individual* ind);
-
-/**
- * @brief Effectue la sectorisation spatiale par grille de hachage et liste les communes à < 10km.
- */
-OptimizedData* precalc_near(Town* restrict towns, size_t count);
 
 /**
  * @brief Calcule la valeur de fitness globale et les statistiques d'un individu.

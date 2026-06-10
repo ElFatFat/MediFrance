@@ -4,7 +4,7 @@
  */
 
 #include "export.h"
-#include "constants.h"
+#include "../constants.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

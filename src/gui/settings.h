@@ -1,8 +1,8 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include "../main.h"
-#include "gen.h"
+#include "../../main.h"
+#include "../genetic/gen.h"
 
 /**
  * @file settings.h

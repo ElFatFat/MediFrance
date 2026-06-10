@@ -4,7 +4,7 @@
  */
 
 #include "gen.h"
-#include "gui.h"
+#include "render.h"
 #include "constants.h"
 #include <math.h>
 #include <stdio.h>

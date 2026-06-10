@@ -4,7 +4,8 @@
 #include <string.h>
 #include "main.h"
 
-#include "modules/gui.h"
+#include "modules/render.h"
+#include "modules/settings.h"
 #include "modules/gen.h"
 #include "modules/export.h"
 #include "modules/loader.h"

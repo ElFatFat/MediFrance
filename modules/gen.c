@@ -5,6 +5,7 @@
 
 #include "gen.h"
 #include "gui.h"
+#include "constants.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,12 +18,8 @@
 
 static long g_habitants_total = 65141355;
 
-#define HOSPITAL_COST 5000.0
-#define CHRU_BONUS 4000.0
-#define CHRU_POP_THRESHOLD 80000
 #define LAT_TO_RAD 0.0174533f
 #define LATITUDE_FACTOR 111.32f
-#define BEDS_PER_1000 5.4f
 
 #define PROB_DELETE 80
 #define MAX_DISCOVER_HOSPITALS 10
@@ -145,8 +142,8 @@ void log_generation_timings(int gen, double fitness_s, double sort_s, double rep
 void log_solution_details(const Individual* ind, long total_pop, const char* label) {
     long covered = total_pop - ind->desert_population;
     double coverage_pct = total_pop > 0 ? 100.0 * (double)covered / (double)total_pop : 0.0;
-    double cost_hospitals = 5000.0 * (double)ind->hospitals_count;
-    double bonus_chru = 4000.0 * (double)ind->chru_count;
+    double cost_hospitals = HOSPITAL_COST * (double)ind->hospitals_count;
+    double bonus_chru = CHRU_BONUS * (double)ind->chru_count;
     double bed_rate = total_pop > 0 ? 1000.0 * (double)ind->beds_count / (double)total_pop : 0.0;
 
     printf("\n[%s] Détail de la meilleure solution\n", label);

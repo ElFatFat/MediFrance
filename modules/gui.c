@@ -48,17 +48,6 @@ void init_window(void) {
     MLV_actualise_window();
 }
 
-/*void render_point(float x, float y) {
-    //MLV_draw_filled_circle((x*100)-400, y*50, 2, MLV_COLOR_RED);
-    MLV_draw_filled_circle(x, y, 1, MLV_COLOR_RED);
-    return;
-}
-
-void render_hospital(float x, float y) {
-    MLV_draw_filled_circle(x, y, 6, MLV_COLOR_GREEN);
-    return;
-}*/
-
 void create_cloud(Town *communes, size_t count) {
     printf("Affichage de la carte...\n");
     MLV_Color city_color = MLV_rgba(80, 24, 151, 255);

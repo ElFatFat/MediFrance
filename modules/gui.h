@@ -12,7 +12,6 @@
 
 void init_window(void);
 void close_window(void);
-void render_point(float x, float y);
 void create_cloud(Town *communes, size_t count);
 void draw_hospitals(Town *communes, size_t count, Individual ind, const OptimizedData* data);
 void draw_stats(Individual ind);

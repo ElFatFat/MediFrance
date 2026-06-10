@@ -96,7 +96,6 @@ int main(void) {
             towns = resized;
             capacity = new_capacity;
         }
-        town.visited = 0;
         towns[count] = town;
         count++;
     }

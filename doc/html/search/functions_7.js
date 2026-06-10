@@ -1,0 +1,7 @@
+var searchData=
+[
+  ['log_5fgeneration_5ftimings_0',['log_generation_timings',['../gen_8c.html#ab652b4b63e1743d05c6de88b28c3d35a',1,'log_generation_timings(int gen, double fitness_s, double sort_s, double repro_s):&#160;gen.c'],['../gen_8h.html#ab652b4b63e1743d05c6de88b28c3d35a',1,'log_generation_timings(int gen, double fitness_s, double sort_s, double repro_s):&#160;gen.c']]],
+  ['log_5fpopulation_5fsummary_1',['log_population_summary',['../gen_8c.html#a9a24c34192d1b18c7e3d9bde3b62c017',1,'log_population_summary(const PopulationSummary *s, int gen, int gen_max):&#160;gen.c'],['../gen_8h.html#a9a24c34192d1b18c7e3d9bde3b62c017',1,'log_population_summary(const PopulationSummary *s, int gen, int gen_max):&#160;gen.c']]],
+  ['log_5fprecalc_5fsummary_2',['log_precalc_summary',['../gen_8c.html#addb90137c4fabfba204e975c5d5ac4cf',1,'log_precalc_summary(const OptimizedData *data, size_t count):&#160;gen.c'],['../gen_8h.html#addb90137c4fabfba204e975c5d5ac4cf',1,'log_precalc_summary(const OptimizedData *data, size_t count):&#160;gen.c']]],
+  ['log_5fsolution_5fdetails_3',['log_solution_details',['../gen_8c.html#aca31a49357a6374f1ced9e65aa2e136d',1,'log_solution_details(const Individual *ind, long total_pop, const char *label):&#160;gen.c'],['../gen_8h.html#aca31a49357a6374f1ced9e65aa2e136d',1,'log_solution_details(const Individual *ind, long total_pop, const char *label):&#160;gen.c']]]
+];

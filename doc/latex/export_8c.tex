@@ -1,0 +1,100 @@
+\doxysection{modules/\+export.c File Reference}
+\hypertarget{export_8c}{}\label{export_8c}\index{modules/export.c@{modules/export.c}}
+
+
+Implémentation de la logique d\textquotesingle{}écriture et d\textquotesingle{}évaluation finale pour l\textquotesingle{}export CSV.  
+
+
+{\ttfamily \+\#include "{}export.\+h"{}}\newline
+{\ttfamily \+\#include $<$stdio.\+h$>$}\newline
+{\ttfamily \+\#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \+\#include $<$string.\+h$>$}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\+\#define \doxymbox{\hyperlink{export_8c_a15ce3a8b7daeab5ddc01de61f783e2b1}{BEDS\+\_\+\+PER\+\_\+1000}}~5.\+4f
+\begin{DoxyCompactList}\small\item\em Constante — doit rester identique à BEDS\+\_\+\+PER\+\_\+1000 dans \doxylink{gen_8c}{gen.\+c}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static long \doxymbox{\hyperlink{export_8c_a697cfa7638d053baaa9fb527787c790c}{covered\+\_\+pop\+\_\+for\+\_\+hospital}} (int i, const Town \texorpdfstring{$\ast$}{*}towns, const \doxymbox{\hyperlink{structOptimizedData}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}data, size\+\_\+t count)
+\begin{DoxyCompactList}\small\item\em Helper :\+ population couverte par un seul hôpital placé en towns\+[i]\+, en évitant le double-\/comptage entre voisins qui se recoupent. \end{DoxyCompactList}\item 
+int \doxymbox{\hyperlink{export_8c_a204325bdd184f41a396da856c7a12e1a}{export\+\_\+resultats\+\_\+csv}} (const char \texorpdfstring{$\ast$}{*}path, const Town \texorpdfstring{$\ast$}{*}towns, size\+\_\+t count, const \doxymbox{\hyperlink{structOptimizedData}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}precalc\+\_\+data, const \doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}best)
+\begin{DoxyCompactList}\small\item\em Exporte une ligne par commune dans un CSV plat consommé par le script Python. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Implémentation de la logique d\textquotesingle{}écriture et d\textquotesingle{}évaluation finale pour l\textquotesingle{}export CSV. 
+
+
+
+\label{doc-define-members}
+\Hypertarget{export_8c_doc-define-members}
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{export_8c_a15ce3a8b7daeab5ddc01de61f783e2b1}\index{export.c@{export.c}!BEDS\_PER\_1000@{BEDS\_PER\_1000}}
+\index{BEDS\_PER\_1000@{BEDS\_PER\_1000}!export.c@{export.c}}
+\doxysubsubsection{\texorpdfstring{BEDS\_PER\_1000}{BEDS\_PER\_1000}}
+{\footnotesize\ttfamily \label{export_8c_a15ce3a8b7daeab5ddc01de61f783e2b1} 
+\+\#define BEDS\+\_\+\+PER\+\_\+1000~5.\+4f}
+
+
+
+Constante — doit rester identique à BEDS\+\_\+\+PER\+\_\+1000 dans \doxylink{gen_8c}{gen.\+c}. 
+
+
+
+\label{doc-func-members}
+\Hypertarget{export_8c_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{export_8c_a697cfa7638d053baaa9fb527787c790c}\index{export.c@{export.c}!covered\_pop\_for\_hospital@{covered\_pop\_for\_hospital}}
+\index{covered\_pop\_for\_hospital@{covered\_pop\_for\_hospital}!export.c@{export.c}}
+\doxysubsubsection{\texorpdfstring{covered\_pop\_for\_hospital()}{covered\_pop\_for\_hospital()}}
+{\footnotesize\ttfamily \label{export_8c_a697cfa7638d053baaa9fb527787c790c} 
+long covered\+\_\+pop\+\_\+for\+\_\+hospital (\begin{DoxyParamCaption}\item[{int}]{i}{, }\item[{const Town \texorpdfstring{$\ast$}{*}}]{towns}{, }\item[{const \doxymbox{\hyperlink{structOptimizedData}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}}]{data}{, }\item[{size\+\_\+t}]{count}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Helper :\+ population couverte par un seul hôpital placé en towns\+[i]\+, en évitant le double-\/comptage entre voisins qui se recoupent. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em i} & Index de la commune hébergeant l\textquotesingle{}hôpital. \\
+\hline
+{\em towns} & Tableau complet de toutes les communes. \\
+\hline
+{\em data} & Données optimisées contenant la liste des voisins. \\
+\hline
+{\em count} & Nombre total de communes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+La population cumulée nette couverte par cet hôpital. 
+\end{DoxyReturn}
+\Hypertarget{export_8c_a204325bdd184f41a396da856c7a12e1a}\index{export.c@{export.c}!export\_resultats\_csv@{export\_resultats\_csv}}
+\index{export\_resultats\_csv@{export\_resultats\_csv}!export.c@{export.c}}
+\doxysubsubsection{\texorpdfstring{export\_resultats\_csv()}{export\_resultats\_csv()}}
+{\footnotesize\ttfamily \label{export_8c_a204325bdd184f41a396da856c7a12e1a} 
+int export\+\_\+resultats\+\_\+csv (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{path}{, }\item[{const Town \texorpdfstring{$\ast$}{*}}]{towns}{, }\item[{size\+\_\+t}]{count}{, }\item[{const \doxymbox{\hyperlink{structOptimizedData}{Optimized\+Data}} \texorpdfstring{$\ast$}{*}}]{precalc\+\_\+data}{, }\item[{const \doxymbox{\hyperlink{structIndividual}{Individual}} \texorpdfstring{$\ast$}{*}}]{best}{}\end{DoxyParamCaption})}
+
+
+
+Exporte une ligne par commune dans un CSV plat consommé par le script Python. 
+
+Colonnes produites (une ligne par commune) :\+ nom\+\_\+dep — nom du département ville — nom de la commune population — population de la commune has\+\_\+hospital — 1 si un hôpital est placé ici, 0 sinon is\+\_\+desert — 1 si la commune n\textquotesingle{}est couverte par aucun hôpital, 0 sinon nb\+\_\+beds — nombre de lits de l\textquotesingle{}hôpital (0 si pas d\textquotesingle{}hôpital dans cette commune)
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & Chemin du fichier CSV à créer \\
+\hline
+{\em towns} & Tableau de toutes les communes \\
+\hline
+{\em count} & Nombre de communes \\
+\hline
+{\em precalc\+\_\+data} & Données précalculées (neighbors, populations couvertes) \\
+\hline
+{\em best} & Meilleur individu issu de l\textquotesingle{}algorithme génétique \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+0 en cas de succès, -\/1 en cas d\textquotesingle{}erreur 
+\end{DoxyReturn}

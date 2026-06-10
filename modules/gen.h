@@ -105,13 +105,39 @@ void log_generation_timings(int gen, double fitness_s, double sort_s, double rep
 void log_solution_details(const Individual* ind, long total_pop, const char* label);
 int audit_coverage(const Town* towns, size_t count, const OptimizedData* data, const Individual* ind);
 
+/**
+ * @brief Effectue la sectorisation spatiale par grille de hachage et liste les communes à < 10km.
+ */
 OptimizedData* precalc_near(Town* restrict towns, size_t count);
+
+/**
+ * @brief Calcule la valeur de fitness globale et les statistiques d'un individu.
+ */
 void fitness(Individual* restrict ind, Town* restrict towns, OptimizedData* restrict data, size_t count, unsigned char* restrict coverage_buffer);
+
+/**
+ * @brief Trie par partitionnement récursif (Quicksort) la population d'individus par ordre décroissant.
+ */
 void quick_sort_population(Individual* pop, int left, int right);
+
+/**
+ * @brief Copie un individu vers un autre.
+ */
 void copy_individual(Individual* dest, const Individual* src, size_t count);
+
+/**
+ * @brief Applique des mutations sur un individu.
+ */
 void mutate(Individual* ind, const OptimizedData* data, size_t count, unsigned int* seed);
+
+/**
+ * @brief Produit un descendant par croisement en deux points.
+ */
 void crossover(Individual* enfant, const Individual* p1, const Individual* p2, size_t count, unsigned int* seed);
 
+/**
+ * @brief Exécute l'algorithme génétique complet et retourne le meilleur individu trouvé.
+ */
 GAResult run_genetic_algorithm(const GAContext* ctx, int pop_size, int gen_max, int elitism_count);
 
 #endif

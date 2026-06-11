@@ -4,9 +4,14 @@
 #include <string.h>
 #include "main.h"
 
-#include "modules/gui.h"
-#include "modules/gen.h"
-#include "modules/export.h"
+#include "src/gui/render.h"
+#include "src/gui/settings.h"
+#include "src/genetic/gen.h"
+#include "src/genetic/geo.h"
+#include "src/genetic/ga_log.h"
+#include "src/data/export.h"
+#include "src/data/loader.h"
+#include "src/constants.h"
 
 #include <MLV/MLV_all.h>
 
@@ -24,7 +29,7 @@ static void log_run_configuration(int num_threads, int log_every) {
     printf("[config] Threads OpenMP    : %d (max %d)\n", num_threads, MAX_THREADS);
     printf("[config] Élitisme            : %d\n", ELITISM_COUNT);
     printf("[config] Rayon couverture    : %.0f km\n", COVERAGE_RADIUS_KM);
-    printf("[config] Coût / hôpital      : 5000 | Bonus CHRU : 4000\n");
+    printf("[config] Coût / hôpital      : %.0f | Bonus CHRU : %.0f\n", HOSPITAL_COST, CHRU_BONUS);
     printf("[config] Logs tous les       : %d génération(s) (MEDIFRANCE_LOG_EVERY)\n", log_every);
     printf("================================================\n\n");
 }
@@ -50,59 +55,13 @@ int main(void) {
     log_run_configuration(num_threads, log_every);
 
     const char* csv_path = CSV_PATH;
-    FILE* file = fopen(csv_path, "r");
-    struct Town* towns = NULL;
-    size_t capacity = 0;
+    double start_time = omp_get_wtime();
     size_t count = 0;
-    char line[512];
-
-    if (file == NULL) {
-        perror("Unable to open CSV file");
+    struct Town* towns = load_towns_csv(csv_path, &count);
+    if (towns == NULL) {
         return 1;
     }
-    double start_time = omp_get_wtime();
-    while (fgets(line, sizeof(line), file) != NULL) {
-        struct Town town;
-        int parsed = sscanf(
-            line,
-            "%d,%49[^,],%d,%49[^,],%d,%49[^,],%d,%d,%f,%f",
-            &town.insee_code,
-            town.name,
-            &town.region,
-            town.region_name,
-            &town.departement,
-            town.department_name,
-            &town.postal_code,
-            &town.population,
-            &town.y,
-            &town.x
-        );
-
-        if (parsed != 10) {
-            continue;
-        }
-
-        if (count == capacity) {
-            size_t new_capacity = (capacity == 0) ? 1024 : capacity * 2;
-            struct Town* resized = realloc(towns, new_capacity * sizeof(*towns));
-
-            if (resized == NULL) {
-                perror("Memory allocation failed");
-                free(towns);
-                fclose(file);
-                return 1;
-            }
-
-            towns = resized;
-            capacity = new_capacity;
-        }
-        town.visited = 0;
-        towns[count] = town;
-        count++;
-    }
-
     double load_time = omp_get_wtime() - start_time;
-    fclose(file);
 
     long total_population = 0;
     for (size_t i = 0; i < count; i++) {

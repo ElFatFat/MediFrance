@@ -4,14 +4,10 @@
  */
 
 #include "export.h"
+#include "../constants.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-/**
- * @brief Constante — doit rester identique à BEDS_PER_1000 dans gen.c
- */
-#define BEDS_PER_1000 5.4f
 
 /**
  * @brief Helper : population couverte par un seul hôpital placé en towns[i],

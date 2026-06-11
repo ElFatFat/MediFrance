@@ -14,13 +14,6 @@ typedef struct Town {
     int population;
     float x;
     float y;
-    int visited;
 } Town;
-
-typedef struct Hopital {
-    char name[256];
-    float x; // Longitude
-    float y; // Latitude
-} Hopital;
 
 #endif

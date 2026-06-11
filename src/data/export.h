@@ -1,8 +1,8 @@
 #ifndef EXPORT_H
 #define EXPORT_H
 
-#include "../main.h"
-#include "gen.h"
+#include "../../main.h"
+#include "../genetic/gen.h"
 
 /**
  * @file export.h

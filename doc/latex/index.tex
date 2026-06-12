@@ -1,7 +1,7 @@
 \chapter{Medi\+France }
 \hypertarget{index}{}\label{index}\index{MediFrance@{MediFrance}}
-\label{index_md_README}%
-\Hypertarget{index_md_README}%
+\label{index_md__r_e_a_d_m_e}%
+\Hypertarget{index_md__r_e_a_d_m_e}%
 
 
 Projet de géomatique et santé publique (ESIEE, S2) :\+ optimiser la répartition des hôpitaux en {\bfseries{France métropolitaine}} (Corse et DOM-\/\+TOM exclus) à l’aide d’un {\bfseries{algorithme génétique}}.
@@ -56,11 +56,11 @@ L’objectif est de maximiser la population couverte dans un rayon de {\bfseries
 
 \begin{DoxyTable}{2}{}{}{1}
 \SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Chemin  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Rôle  \\
-{\ttfamily main.\+c}  &Point d’entrée :\+ chargement CSV, boucle GA, logs, export, GUI  \\
-{\ttfamily main.\+h}  &Structure {\ttfamily Town} (commune)  \\
-{\ttfamily \doxylink{gen_8c}{modules/\+gen.\+c}} /\+ {\ttfamily \doxylink{gen_8h}{gen.\+h}}  &Précalcul voisins, fitness, sélection, croisement, mutation, audit  \\
-{\ttfamily \doxylink{export_8c}{modules/\+export.\+c}}  &Écriture de {\ttfamily data/\+resultats\+\_\+hopitaux.\+csv}  \\
-{\ttfamily \doxylink{gui_8c}{modules/\+gui.\+c}}  &Carte MLV + courbe de fitness en temps réel  \\
+{\ttfamily \doxylink{main_8c}{main.\+c}}  &Point d’entrée :\+ chargement CSV, boucle GA, logs, export, GUI  \\
+{\ttfamily \doxylink{main_8h}{main.\+h}}  &Structure {\ttfamily \doxylink{struct_town}{Town}} (commune)  \\
+{\ttfamily modules/\+gen.\+c} /\+ {\ttfamily \doxylink{gen_8h}{gen.\+h}}  &Précalcul voisins, fitness, sélection, croisement, mutation, audit  \\
+{\ttfamily modules/\+export.\+c}  &Écriture de {\ttfamily data/\+resultats\+\_\+hopitaux.\+csv}  \\
+{\ttfamily modules/\+gui.\+c}  &Carte MLV + courbe de fitness en temps réel  \\
 {\ttfamily data/\+communes-\/france-\/metrople-\/2025.\+csv}  &Données d’entrée (métropole)  \\
 {\ttfamily data/\+resultats\+\_\+hopitaux.\+csv}  &Résultat du meilleur individu (généré)  \\
 {\ttfamily scripts-\/pdf-\/generation/\+pdfgenerator.\+py}  &Rapport PDF à partir du CSV  \\
@@ -122,10 +122,10 @@ Plus la fitness est {\bfseries{élevée}}, meilleure est la solution.
 \begin{DoxyEnumerate}
 \item La France est découpée en cellules de {\bfseries{0,1°}} (\texorpdfstring{$\sim$}{\string~}11 km).
 \item Chaque commune est indexée dans sa cellule {\ttfamily (ligne, colonne)}.
-\item Pour chaque commune, on inspecte une fenêtre {\bfseries{5×5}} de cellules ({\ttfamily \doxylink{gen_8c_a85973c3c404e740ee4edcb31be7e8640}{CELL\+\_\+\+SEARCH\+\_\+\+RADIUS} = 2}) et on ne garde que les communes à {\bfseries{≤ 10 km}} (distance symétrique).
+\item Pour chaque commune, on inspecte une fenêtre {\bfseries{5×5}} de cellules ({\ttfamily \doxylink{geo_8c_a85973c3c404e740ee4edcb31be7e8640}{CELL\+\_\+\+SEARCH\+\_\+\+RADIUS} = 2}) et on ne garde que les communes à {\bfseries{≤ 10 km}} (distance symétrique).
 \end{DoxyEnumerate}
 
-Résultat stocké dans {\ttfamily \doxylink{structOptimizedData}{Optimized\+Data}} :\+
+Résultat stocké dans {\ttfamily \doxylink{struct_optimized_data}{Optimized\+Data}} :\+
 
 
 \begin{DoxyItemize}
@@ -137,16 +137,16 @@ Résultat stocké dans {\ttfamily \doxylink{structOptimizedData}{Optimized\+Data
 
 \DoxyHorRuler{0}
 \hypertarget{index_autotoc_md15}{}\doxysection{\texorpdfstring{Algorithme génétique (détail)}{Algorithme génétique (détail)}}\label{index_autotoc_md15}
-Paramètres par défaut dans {\ttfamily main.\+c} :\+
+Paramètres par défaut dans {\ttfamily \doxylink{main_8c}{main.\+c}} :\+
 
 
 \begin{DoxyTable}{3}{}{}{1}
 \SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Paramètre  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Valeur  &\SetCell{c,bg=\tableheadbgcolor,font=\bfseries}Rôle  \\
-{\ttfamily POP\+\_\+\+SIZE}  &200  &Taille de la population  \\
-{\ttfamily GEN\+\_\+\+MAX}  &1000  &Nombre de générations  \\
-{\ttfamily ELITISM\+\_\+\+COUNT}  &15  &Meilleurs conservés tels quels  \\
-{\ttfamily TOURNAMENT\+\_\+\+PROBABILITY}  &80 \%  &Probabilité de sélection par tournoi  \\
-{\ttfamily TOURNAMENT\+\_\+\+SIZE}  &10  &Candidats tirés par parent  \\
+{\ttfamily \doxylink{main_8c_aea5b3e4c9df97408e95b67cdf3f992fb}{POP\+\_\+\+SIZE}}  &200  &Taille de la population  \\
+{\ttfamily \doxylink{main_8c_a4007a1fbfe7a4d37b2b8a3621742988b}{GEN\+\_\+\+MAX}}  &1000  &Nombre de générations  \\
+{\ttfamily \doxylink{main_8c_a55efae245e0d6d108e06eb157d101f21}{ELITISM\+\_\+\+COUNT}}  &15  &Meilleurs conservés tels quels  \\
+{\ttfamily \doxylink{gen_8c_a2b4c0b0ffaa520491df3a2d2f67adc18}{TOURNAMENT\+\_\+\+PROBABILITY}}  &80 \%  &Probabilité de sélection par tournoi  \\
+{\ttfamily \doxylink{gen_8c_a4795a6c0c61cad90658d73b3eef3371c}{TOURNAMENT\+\_\+\+SIZE}}  &10  &Candidats tirés par parent  \\
 Open\+MP  &jusqu’à 12 threads  &Fitness et reproduction parallèles  \\
 \end{DoxyTable}
 \hypertarget{index_autotoc_md16}{}\doxysubsection{\texorpdfstring{Initialisation}{Initialisation}}\label{index_autotoc_md16}
@@ -155,7 +155,7 @@ Pour chaque individu et chaque commune :\+
 
 \begin{DoxyItemize}
 \item Si la zone peut couvrir \texorpdfstring{$>$}{>} 30 000 hab. ({\ttfamily max\+\_\+covered\+\_\+population}) :\+ {\bfseries{20 \%}} de chance d’y placer un hôpital au départ.
-\item Sinon :\+ {\bfseries{0,2 \%}} de chance ({\ttfamily STARTING\+\_\+\+HOSPITALS\+\_\+\+PROBABILITY}).
+\item Sinon :\+ {\bfseries{0,2 \%}} de chance ({\ttfamily \doxylink{gen_8c_a9bc2a97f7159fad6f8113eee7f1b5f53}{STARTING\+\_\+\+HOSPITALS\+\_\+\+PROBABILITY}}).
 \end{DoxyItemize}
 
 La population de départ est donc très dense en hôpitaux ; la sélection fait converger vers moins d’établissements mais mieux placés.\hypertarget{index_autotoc_md17}{}\doxysubsection{\texorpdfstring{Boucle par génération ({\ttfamily main.\+c})}{Boucle par génération ({\ttfamily main.\+c})}}\label{index_autotoc_md17}
@@ -303,7 +303,7 @@ Préfixes utiles :\+ {\ttfamily \+[config]\+}, {\ttfamily \+[precalc]\+}, {\ttfa
 
 \DoxyHorRuler{0}
 \hypertarget{index_autotoc_md35}{}\doxysection{\texorpdfstring{Paramètres modifiables}{Paramètres modifiables}}\label{index_autotoc_md35}
-Les constantes principales sont en tête de {\ttfamily main.\+c} (taille population, générations, tournoi, élitisme) et dans {\ttfamily \doxylink{gen_8c}{modules/\+gen.\+c}} (rayon 10 km, coûts, mutation). Après modification :\+ {\ttfamily make} puis relancer.
+Les constantes principales sont en tête de {\ttfamily \doxylink{main_8c}{main.\+c}} (taille population, générations, tournoi, élitisme) et dans {\ttfamily modules/\+gen.\+c} (rayon 10 km, coûts, mutation). Après modification :\+ {\ttfamily make} puis relancer.
 
 \DoxyHorRuler{0}
 \hypertarget{index_autotoc_md37}{}\doxysection{\texorpdfstring{Limites du modèle (à connaître)}{Limites du modèle (à connaître)}}\label{index_autotoc_md37}

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['get_5fhabitants_5ftotal_0',['get_habitants_total',['../gen_8c.html#a66e67dcc0db3fc0078ea32cdbe009dca',1,'get_habitants_total(void):&#160;gen.c'],['../gen_8h.html#a66e67dcc0db3fc0078ea32cdbe009dca',1,'get_habitants_total(void):&#160;gen.c']]]
+  ['fitness_0',['fitness',['../gen_8c.html#a2130763af2275811d57ca432ade18661',1,'fitness(Individual *restrict ind, Town *restrict towns, OptimizedData *restrict data, size_t count, unsigned char *restrict coverage_buffer):&#160;gen.c'],['../gen_8h.html#a2130763af2275811d57ca432ade18661',1,'fitness(Individual *restrict ind, Town *restrict towns, OptimizedData *restrict data, size_t count, unsigned char *restrict coverage_buffer):&#160;gen.c']]]
 ];

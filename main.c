@@ -1,3 +1,7 @@
+/**
+ * @file main.c
+ * @brief Point d'entrée principal, configuration multithread OpenMP et séquence d'exécution applicative.
+ */
 #include <stdio.h>
 #include <omp.h>
 #include <stdlib.h>
@@ -22,6 +26,14 @@
 #define MAX_THREADS 12
 #define PRINT_EVERY_X_GEN 50
 
+/**
+ * @brief Affiche un récapitulatif formaté des paramètres système actifs au démarrage.
+ * * Permet à l'utilisateur de valider immédiatement les configurations matérielles et logicielles 
+ * (nombre de cœurs alloués, chemin des données, rayon de couverture mathématique).
+ *
+ * @param num_threads Nombre effectif de cœurs logiques esclaves pris en charge par OpenMP.
+ * @param log_every   Fréquence de journalisation des itérations.
+ */
 static void log_run_configuration(int num_threads, int log_every) {
     printf("\n========== MediFrance — configuration ==========\n");
     printf("[config] Communes CSV      : %s\n", CSV_PATH);

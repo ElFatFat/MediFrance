@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['precalc_5fnear_0',['precalc_near',['../gen_8c.html#a6cec5a7122032798f0faa0b0ce053d6f',1,'precalc_near(Town *restrict towns, size_t count):&#160;gen.c'],['../gen_8h.html#a6cec5a7122032798f0faa0b0ce053d6f',1,'precalc_near(Town *restrict towns, size_t count):&#160;gen.c']]]
+  ['key_5fto_5fdigit_0',['key_to_digit',['../settings_8c.html#a2367f462e801777aad48289b3b10aca6',1,'settings.c']]]
 ];

@@ -91,7 +91,7 @@ $(function(){initNavTree('index.html','',''); });
   <div class="headertitle"><div class="title">MediFrance </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md_README"></a></p>
+<div class="textblock"><p><a class="anchor" id="md__r_e_a_d_m_e"></a></p>
 <p>Projet de géomatique et santé publique (ESIEE, S2) : optimiser la répartition des hôpitaux en <b>France métropolitaine</b> (Corse et DOM-TOM exclus) à l’aide d’un <b>algorithme génétique</b>.</p>
 <p>L’objectif est de maximiser la population couverte dans un rayon de <b>10 km</b> autour de chaque hôpital, tout en limitant le nombre d’établissements (coût) et en favorisant les <b>CHRU</b> sur les grandes communes.</p>
 <hr  />
@@ -140,15 +140,15 @@ Structure du dépôt</h1>
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Chemin  </th><th class="markdownTableHeadNone">Rôle  </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">main.c</span>  </td><td class="markdownTableBodyNone">Point d’entrée : chargement CSV, boucle GA, logs, export, GUI  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt"><a class="el" href="main_8c.html" title="Point d&#39;entrée principal, configuration multithread OpenMP et séquence d&#39;exécution applicative.">main.c</a></span>  </td><td class="markdownTableBodyNone">Point d’entrée : chargement CSV, boucle GA, logs, export, GUI  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">main.h</span>  </td><td class="markdownTableBodyNone">Structure <span class="tt">Town</span> (commune)  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt"><a class="el" href="main_8h.html" title="Modélisation pivot des structures de données géographiques globales du projet.">main.h</a></span>  </td><td class="markdownTableBodyNone">Structure <span class="tt"><a class="el" href="struct_town.html" title="Représente l&#39;enregistrement complet d&#39;une entité administrative communale française.">Town</a></span> (commune)  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt"><a class="el" href="gen_8c.html" title="Moteur algorithmique de la simulation génétique et de la modélisation géospatiale.">modules/gen.c</a></span> / <span class="tt"><a class="el" href="gen_8h.html" title="Déclarations des types de données et prototypes pour l&#39;algorithme génétique spatialisé.">gen.h</a></span>  </td><td class="markdownTableBodyNone">Précalcul voisins, fitness, sélection, croisement, mutation, audit  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">modules/gen.c</span> / <span class="tt"><a class="el" href="gen_8h.html" title="Déclarations des types, structures et opérateurs du moteur d&#39;algorithme génétique spatialisé.">gen.h</a></span>  </td><td class="markdownTableBodyNone">Précalcul voisins, fitness, sélection, croisement, mutation, audit  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt"><a class="el" href="export_8c.html" title="Implémentation de la logique d&#39;écriture et d&#39;évaluation finale pour l&#39;export CSV.">modules/export.c</a></span>  </td><td class="markdownTableBodyNone">Écriture de <span class="tt">data/resultats_hopitaux.csv</span>  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">modules/export.c</span>  </td><td class="markdownTableBodyNone">Écriture de <span class="tt">data/resultats_hopitaux.csv</span>  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt"><a class="el" href="gui_8c.html" title="Implémentation des fonctionnalités graphiques et projection géographique en pixels.">modules/gui.c</a></span>  </td><td class="markdownTableBodyNone">Carte MLV + courbe de fitness en temps réel  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt">modules/gui.c</span>  </td><td class="markdownTableBodyNone">Carte MLV + courbe de fitness en temps réel  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><span class="tt">data/communes-france-metrople-2025.csv</span>  </td><td class="markdownTableBodyNone">Données d’entrée (métropole)  </td></tr>
 <tr class="markdownTableRowOdd">
@@ -207,9 +207,9 @@ Grille spatiale</h2>
 <ol type="1">
 <li>La France est découpée en cellules de <b>0,1°</b> (~11 km).</li>
 <li>Chaque commune est indexée dans sa cellule <span class="tt">(ligne, colonne)</span>.</li>
-<li>Pour chaque commune, on inspecte une fenêtre <b>5×5</b> de cellules (<span class="tt"><a class="el" href="gen_8c.html#a85973c3c404e740ee4edcb31be7e8640">CELL_SEARCH_RADIUS</a> = 2</span>) et on ne garde que les communes à <b>≤ 10 km</b> (distance symétrique).</li>
+<li>Pour chaque commune, on inspecte une fenêtre <b>5×5</b> de cellules (<span class="tt"><a class="el" href="geo_8c.html#a85973c3c404e740ee4edcb31be7e8640">CELL_SEARCH_RADIUS</a> = 2</span>) et on ne garde que les communes à <b>≤ 10 km</b> (distance symétrique).</li>
 </ol>
-<p>Résultat stocké dans <span class="tt"><a class="el" href="structOptimizedData.html" title="Structure regroupant les données de voisinage précalculées à moins de 10km.">OptimizedData</a></span> :</p>
+<p>Résultat stocké dans <span class="tt"><a class="el" href="struct_optimized_data.html" title="Structure regroupant les métriques géospatiales précalculées d&#39;une commune.">OptimizedData</a></span> :</p>
 <ul>
 <li><span class="tt">neighbors[]</span> — indices des communes voisines</li>
 <li><span class="tt">neighbor_count</span></li>
@@ -219,20 +219,20 @@ Grille spatiale</h2>
 <hr  />
 <h1 class="doxsection"><a class="anchor" id="autotoc_md15"></a>
 Algorithme génétique (détail)</h1>
-<p>Paramètres par défaut dans <span class="tt">main.c</span> :</p>
+<p>Paramètres par défaut dans <span class="tt"><a class="el" href="main_8c.html" title="Point d&#39;entrée principal, configuration multithread OpenMP et séquence d&#39;exécution applicative.">main.c</a></span> :</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Paramètre  </th><th class="markdownTableHeadNone">Valeur  </th><th class="markdownTableHeadNone">Rôle  </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">POP_SIZE</span>  </td><td class="markdownTableBodyNone">200  </td><td class="markdownTableBodyNone">Taille de la population  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt"><a class="el" href="main_8c.html#aea5b3e4c9df97408e95b67cdf3f992fb">POP_SIZE</a></span>  </td><td class="markdownTableBodyNone">200  </td><td class="markdownTableBodyNone">Taille de la population  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">GEN_MAX</span>  </td><td class="markdownTableBodyNone">1000  </td><td class="markdownTableBodyNone">Nombre de générations  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt"><a class="el" href="main_8c.html#a4007a1fbfe7a4d37b2b8a3621742988b">GEN_MAX</a></span>  </td><td class="markdownTableBodyNone">1000  </td><td class="markdownTableBodyNone">Nombre de générations  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">ELITISM_COUNT</span>  </td><td class="markdownTableBodyNone">15  </td><td class="markdownTableBodyNone">Meilleurs conservés tels quels  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt"><a class="el" href="main_8c.html#a55efae245e0d6d108e06eb157d101f21">ELITISM_COUNT</a></span>  </td><td class="markdownTableBodyNone">15  </td><td class="markdownTableBodyNone">Meilleurs conservés tels quels  </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><span class="tt">TOURNAMENT_PROBABILITY</span>  </td><td class="markdownTableBodyNone">80 %  </td><td class="markdownTableBodyNone">Probabilité de sélection par tournoi  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt"><a class="el" href="gen_8c.html#a2b4c0b0ffaa520491df3a2d2f67adc18">TOURNAMENT_PROBABILITY</a></span>  </td><td class="markdownTableBodyNone">80 %  </td><td class="markdownTableBodyNone">Probabilité de sélection par tournoi  </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><span class="tt">TOURNAMENT_SIZE</span>  </td><td class="markdownTableBodyNone">10  </td><td class="markdownTableBodyNone">Candidats tirés par parent  </td></tr>
+<td class="markdownTableBodyNone"><span class="tt"><a class="el" href="gen_8c.html#a4795a6c0c61cad90658d73b3eef3371c">TOURNAMENT_SIZE</a></span>  </td><td class="markdownTableBodyNone">10  </td><td class="markdownTableBodyNone">Candidats tirés par parent  </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">OpenMP  </td><td class="markdownTableBodyNone">jusqu’à 12 threads  </td><td class="markdownTableBodyNone">Fitness et reproduction parallèles  </td></tr>
 </table>
@@ -241,7 +241,7 @@ Initialisation</h2>
 <p>Pour chaque individu et chaque commune :</p>
 <ul>
 <li>Si la zone peut couvrir &gt; 30 000 hab. (<span class="tt">max_covered_population</span>) : <b>20 %</b> de chance d’y placer un hôpital au départ.</li>
-<li>Sinon : <b>0,2 %</b> de chance (<span class="tt">STARTING_HOSPITALS_PROBABILITY</span>).</li>
+<li>Sinon : <b>0,2 %</b> de chance (<span class="tt"><a class="el" href="gen_8c.html#a9bc2a97f7159fad6f8113eee7f1b5f53">STARTING_HOSPITALS_PROBABILITY</a></span>).</li>
 </ul>
 <p>La population de départ est donc très dense en hôpitaux ; la sélection fait converger vers moins d’établissements mais mieux placés.</p>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md17"></a>
@@ -358,7 +358,7 @@ Nettoyer</h2>
 </div><!-- fragment --><hr  />
 <h1 class="doxsection"><a class="anchor" id="autotoc_md35"></a>
 Paramètres modifiables</h1>
-<p>Les constantes principales sont en tête de <span class="tt">main.c</span> (taille population, générations, tournoi, élitisme) et dans <span class="tt"><a class="el" href="gen_8c.html" title="Moteur algorithmique de la simulation génétique et de la modélisation géospatiale.">modules/gen.c</a></span> (rayon 10 km, coûts, mutation). Après modification : <span class="tt">make</span> puis relancer.</p>
+<p>Les constantes principales sont en tête de <span class="tt"><a class="el" href="main_8c.html" title="Point d&#39;entrée principal, configuration multithread OpenMP et séquence d&#39;exécution applicative.">main.c</a></span> (taille population, générations, tournoi, élitisme) et dans <span class="tt">modules/gen.c</span> (rayon 10 km, coûts, mutation). Après modification : <span class="tt">make</span> puis relancer.</p>
 <hr  />
 <h1 class="doxsection"><a class="anchor" id="autotoc_md37"></a>
 Limites du modèle (à connaître)</h1>

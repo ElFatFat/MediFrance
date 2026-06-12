@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.16.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MediFrance: modules/gen.h File Reference</title>
+<title>MediFrance: src/genetic/gen.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -92,102 +92,45 @@ $(function(){initNavTree('gen_8h.html','',''); });
 </div><!--header-->
 <div class="contents">
 
-<p>Déclarations des types de données et prototypes pour l'algorithme génétique spatialisé.  
+<p>Déclarations des types, structures et opérateurs du moteur d'algorithme génétique spatialisé.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;../main.h&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="main_8h_source.html">../../main.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="geo_8h_source.html">geo.h</a>&quot;</code><br />
 </div>
 <p><a href="gen_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Data Structures</h2></td></tr>
-<tr class="memitem:OptimizedData" id="r_OptimizedData"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structOptimizedData.html">OptimizedData</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure regroupant les données de voisinage précalculées à moins de 10km.  <a href="structOptimizedData.html#details">More...</a><br /></td></tr>
-<tr class="memitem:Individual" id="r_Individual"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structIndividual.html">Individual</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Représente un chromosome ou solution potentielle de notre population.  <a href="structIndividual.html#details">More...</a><br /></td></tr>
-<tr class="memitem:Cell" id="r_Cell"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structCell.html">Cell</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cellule dynamique utilisée pour la sectorisation de la grille de hachage spatial.  <a href="structCell.html#details">More...</a><br /></td></tr>
-<tr class="memitem:ThreadWorkspace" id="r_ThreadWorkspace"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structThreadWorkspace.html">ThreadWorkspace</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Espace mémoire local pour assurer l'exécution Thread-Safe et l'isolation des tampons de couverture.  <a href="structThreadWorkspace.html#details">More...</a><br /></td></tr>
-<tr class="memitem:PopulationSummary" id="r_PopulationSummary"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structPopulationSummary.html">PopulationSummary</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Statistiques agrégées sur une génération de la population.  <a href="structPopulationSummary.html#details">More...</a><br /></td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:a79ab32520452ce6c84ca51c1fedce026" id="r_a79ab32520452ce6c84ca51c1fedce026"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a79ab32520452ce6c84ca51c1fedce026">COVERAGE_RADIUS_KM</a>&#160;&#160;&#160;10.0f</td></tr>
+<tr class="memitem:Individual" id="r_Individual"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_individual.html">Individual</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Représente un chromosome ou solution potentielle dans la population.  <a href="struct_individual.html#details">More...</a><br /></td></tr>
+<tr class="memitem:GAContext" id="r_GAContext"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_g_a_context.html">GAContext</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Contexte d'exécution regroupant les paramètres et buffers partagés de l'algorithme.  <a href="struct_g_a_context.html#details">More...</a><br /></td></tr>
+<tr class="memitem:GAResult" id="r_GAResult"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_g_a_result.html">GAResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure de stockage du bilan d'une simulation complète.  <a href="struct_g_a_result.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:aab84f5d957572e618361d137320f5e41" id="r_aab84f5d957572e618361d137320f5e41"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#aab84f5d957572e618361d137320f5e41">set_habitants_total</a> (long total)</td></tr>
+<tr class="memdesc:aab84f5d957572e618361d137320f5e41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Définit la constante de population totale française de référence.  <br /></td></tr>
 <tr class="memitem:a66e67dcc0db3fc0078ea32cdbe009dca" id="r_a66e67dcc0db3fc0078ea32cdbe009dca"><td class="memItemLeft">long&#160;</td><td class="memItemRight"><a class="el" href="#a66e67dcc0db3fc0078ea32cdbe009dca">get_habitants_total</a> (void)</td></tr>
-<tr class="memitem:ad03cce4b8e5f7953afbf3b5f1a6c8f9f" id="r_ad03cce4b8e5f7953afbf3b5f1a6c8f9f"><td class="memItemLeft">float&#160;</td><td class="memItemRight"><a class="el" href="#ad03cce4b8e5f7953afbf3b5f1a6c8f9f">town_distance_km</a> (const Town *a, const Town *b)</td></tr>
-<tr class="memitem:addb90137c4fabfba204e975c5d5ac4cf" id="r_addb90137c4fabfba204e975c5d5ac4cf"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#addb90137c4fabfba204e975c5d5ac4cf">log_precalc_summary</a> (const <a class="el" href="structOptimizedData.html">OptimizedData</a> *data, size_t count)</td></tr>
-<tr class="memitem:ac90c6eca4081b04bd584fc9d4253c577" id="r_ac90c6eca4081b04bd584fc9d4253c577"><td class="memItemLeft"><a class="el" href="structPopulationSummary.html">PopulationSummary</a>&#160;</td><td class="memItemRight"><a class="el" href="#ac90c6eca4081b04bd584fc9d4253c577">summarize_population</a> (const <a class="el" href="structIndividual.html">Individual</a> *pop, int pop_size)</td></tr>
-<tr class="memitem:a9a24c34192d1b18c7e3d9bde3b62c017" id="r_a9a24c34192d1b18c7e3d9bde3b62c017"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a9a24c34192d1b18c7e3d9bde3b62c017">log_population_summary</a> (const <a class="el" href="structPopulationSummary.html">PopulationSummary</a> *s, int gen, int gen_max)</td></tr>
-<tr class="memitem:ab652b4b63e1743d05c6de88b28c3d35a" id="r_ab652b4b63e1743d05c6de88b28c3d35a"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ab652b4b63e1743d05c6de88b28c3d35a">log_generation_timings</a> (int gen, double fitness_s, double sort_s, double repro_s)</td></tr>
-<tr class="memitem:aca31a49357a6374f1ced9e65aa2e136d" id="r_aca31a49357a6374f1ced9e65aa2e136d"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#aca31a49357a6374f1ced9e65aa2e136d">log_solution_details</a> (const <a class="el" href="structIndividual.html">Individual</a> *ind, long total_pop, const char *label)</td></tr>
-<tr class="memitem:ab6f718130844983b1e6be8e3c5f72646" id="r_ab6f718130844983b1e6be8e3c5f72646"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ab6f718130844983b1e6be8e3c5f72646">audit_coverage</a> (const Town *towns, size_t count, const <a class="el" href="structOptimizedData.html">OptimizedData</a> *data, const <a class="el" href="structIndividual.html">Individual</a> *ind)</td></tr>
-<tr class="memitem:a6cec5a7122032798f0faa0b0ce053d6f" id="r_a6cec5a7122032798f0faa0b0ce053d6f"><td class="memItemLeft"><a class="el" href="structOptimizedData.html">OptimizedData</a> *&#160;</td><td class="memItemRight"><a class="el" href="#a6cec5a7122032798f0faa0b0ce053d6f">precalc_near</a> (Town *restrict towns, size_t count)</td></tr>
-<tr class="memdesc:a6cec5a7122032798f0faa0b0ce053d6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Effectue la sectorisation spatiale par grille de hachage et liste les communes à &lt; 10km.  <br /></td></tr>
-<tr class="memitem:a2130763af2275811d57ca432ade18661" id="r_a2130763af2275811d57ca432ade18661"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a2130763af2275811d57ca432ade18661">fitness</a> (<a class="el" href="structIndividual.html">Individual</a> *restrict ind, Town *restrict towns, <a class="el" href="structOptimizedData.html">OptimizedData</a> *restrict data, size_t count, unsigned char *restrict coverage_buffer)</td></tr>
-<tr class="memdesc:a2130763af2275811d57ca432ade18661"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calcule la valeur de fitness globale et les statistiques d'un individu.  <br /></td></tr>
-<tr class="memitem:a2ef24c894c8474a841a2b8750bb6068a" id="r_a2ef24c894c8474a841a2b8750bb6068a"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a2ef24c894c8474a841a2b8750bb6068a">quick_sort_population</a> (<a class="el" href="structIndividual.html">Individual</a> *pop, int left, int right)</td></tr>
-<tr class="memdesc:a2ef24c894c8474a841a2b8750bb6068a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trie par partitionnement récursif (Quicksort) la population d'individus par ordre décroissant.  <br /></td></tr>
-<tr class="memitem:a9f35970a2e93d420619fefa6831f15f3" id="r_a9f35970a2e93d420619fefa6831f15f3"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a9f35970a2e93d420619fefa6831f15f3">copy_individual</a> (<a class="el" href="structIndividual.html">Individual</a> *dest, const <a class="el" href="structIndividual.html">Individual</a> *src, size_t count)</td></tr>
-<tr class="memdesc:a9f35970a2e93d420619fefa6831f15f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Réalise une copie complète bloc à bloc des attributs et des gènes d'un individu source vers une destination.  <br /></td></tr>
-<tr class="memitem:a4be36c24ac07e27f922ecbb557f38491" id="r_a4be36c24ac07e27f922ecbb557f38491"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a4be36c24ac07e27f922ecbb557f38491">mutate</a> (<a class="el" href="structIndividual.html">Individual</a> *ind, const <a class="el" href="structOptimizedData.html">OptimizedData</a> *data, size_t count, unsigned int *seed)</td></tr>
-<tr class="memdesc:a4be36c24ac07e27f922ecbb557f38491"><td class="mdescLeft">&#160;</td><td class="mdescRight">Induit des perturbations génotypiques via l'ajout stratégique et l'élagage aléatoire d'hôpitaux.  <br /></td></tr>
-<tr class="memitem:a6f22b5042a9b07a7b4362cd5b9c2f089" id="r_a6f22b5042a9b07a7b4362cd5b9c2f089"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a6f22b5042a9b07a7b4362cd5b9c2f089">crossover</a> (<a class="el" href="structIndividual.html">Individual</a> *enfant, const <a class="el" href="structIndividual.html">Individual</a> *p1, const <a class="el" href="structIndividual.html">Individual</a> *p2, size_t count, unsigned int *seed)</td></tr>
-<tr class="memdesc:a6f22b5042a9b07a7b4362cd5b9c2f089"><td class="mdescLeft">&#160;</td><td class="mdescRight">Produit un descendant hybride par combinaison croisée en deux points à partir de deux parents distincts.  <br /></td></tr>
+<tr class="memdesc:a66e67dcc0db3fc0078ea32cdbe009dca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Récupère la population totale française utilisée dans les calculs de ratios.  <br /></td></tr>
+<tr class="memitem:a2130763af2275811d57ca432ade18661" id="r_a2130763af2275811d57ca432ade18661"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a2130763af2275811d57ca432ade18661">fitness</a> (<a class="el" href="struct_individual.html">Individual</a> *restrict ind, <a class="el" href="struct_town.html">Town</a> *restrict towns, <a class="el" href="struct_optimized_data.html">OptimizedData</a> *restrict data, size_t count, unsigned char *restrict coverage_buffer)</td></tr>
+<tr class="memdesc:a2130763af2275811d57ca432ade18661"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calcule la valeur de fitness globale et extrait les statistiques médicales d'un individu.  <br /></td></tr>
+<tr class="memitem:a2ef24c894c8474a841a2b8750bb6068a" id="r_a2ef24c894c8474a841a2b8750bb6068a"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a2ef24c894c8474a841a2b8750bb6068a">quick_sort_population</a> (<a class="el" href="struct_individual.html">Individual</a> *pop, int left, int right)</td></tr>
+<tr class="memdesc:a2ef24c894c8474a841a2b8750bb6068a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trie la population d'individus par ordre décroissant de fitness.  <br /></td></tr>
+<tr class="memitem:a9f35970a2e93d420619fefa6831f15f3" id="r_a9f35970a2e93d420619fefa6831f15f3"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a9f35970a2e93d420619fefa6831f15f3">copy_individual</a> (<a class="el" href="struct_individual.html">Individual</a> *dest, const <a class="el" href="struct_individual.html">Individual</a> *src, size_t count)</td></tr>
+<tr class="memdesc:a9f35970a2e93d420619fefa6831f15f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copie l'intégralité des données et des gènes d'un individu source vers un individu destination.  <br /></td></tr>
+<tr class="memitem:a4be36c24ac07e27f922ecbb557f38491" id="r_a4be36c24ac07e27f922ecbb557f38491"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a4be36c24ac07e27f922ecbb557f38491">mutate</a> (<a class="el" href="struct_individual.html">Individual</a> *ind, const <a class="el" href="struct_optimized_data.html">OptimizedData</a> *data, size_t count, unsigned int *seed)</td></tr>
+<tr class="memdesc:a4be36c24ac07e27f922ecbb557f38491"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applique des opérateurs de mutation intelligents sur le chromosome d'un individu.  <br /></td></tr>
+<tr class="memitem:a6f22b5042a9b07a7b4362cd5b9c2f089" id="r_a6f22b5042a9b07a7b4362cd5b9c2f089"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a6f22b5042a9b07a7b4362cd5b9c2f089">crossover</a> (<a class="el" href="struct_individual.html">Individual</a> *enfant, const <a class="el" href="struct_individual.html">Individual</a> *p1, const <a class="el" href="struct_individual.html">Individual</a> *p2, size_t count, unsigned int *seed)</td></tr>
+<tr class="memdesc:a6f22b5042a9b07a7b4362cd5b9c2f089"><td class="mdescLeft">&#160;</td><td class="mdescRight">Produit un individu enfant par croisement en deux points (crossover) à partir de deux parents.  <br /></td></tr>
+<tr class="memitem:ad004d12257f533a917b15257492ea31c" id="r_ad004d12257f533a917b15257492ea31c"><td class="memItemLeft"><a class="el" href="struct_g_a_result.html">GAResult</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad004d12257f533a917b15257492ea31c">run_evolution</a> (<a class="el" href="struct_g_a_context.html">GAContext</a> *ctx, int pop_size, int gen_max)</td></tr>
+<tr class="memdesc:ad004d12257f533a917b15257492ea31c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exécute la boucle d'évolution complète de l'algorithme génétique.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Déclarations des types de données et prototypes pour l'algorithme génétique spatialisé. </p>
-</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="a79ab32520452ce6c84ca51c1fedce026" name="a79ab32520452ce6c84ca51c1fedce026"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a79ab32520452ce6c84ca51c1fedce026">&#9670;&#160;</a></span>COVERAGE_RADIUS_KM</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define COVERAGE_RADIUS_KM&#160;&#160;&#160;10.0f</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="ab6f718130844983b1e6be8e3c5f72646" name="ab6f718130844983b1e6be8e3c5f72646"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab6f718130844983b1e6be8e3c5f72646">&#9670;&#160;</a></span>audit_coverage()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int audit_coverage </td>
-          <td>(</td>
-          <td class="paramtype">const Town *</td>          <td class="paramname"><span class="paramname"><em>towns</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>count</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="structOptimizedData.html">OptimizedData</a> *</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="structIndividual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>ind</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
+<div class="textblock"><p>Déclarations des types, structures et opérateurs du moteur d'algorithme génétique spatialisé. </p>
+<p>Ce module gère la structure des chromosomes, l'évaluation de la pertinence des solutions (fitness), le tri récursif, ainsi que les cycles de reproduction (crossover, mutation). </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
 <a id="a9f35970a2e93d420619fefa6831f15f3" name="a9f35970a2e93d420619fefa6831f15f3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9f35970a2e93d420619fefa6831f15f3">&#9670;&#160;</a></span>copy_individual()</h2>
 
@@ -197,12 +140,12 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">void copy_individual </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structIndividual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>dest</em></span>, </td>
+          <td class="paramtype"><a class="el" href="struct_individual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>dest</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="structIndividual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>src</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="struct_individual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>src</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -212,15 +155,19 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Réalise une copie complète bloc à bloc des attributs et des gènes d'un individu source vers une destination. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Copie l'intégralité des données et des gènes d'un individu source vers un individu destination. </p>
+<ul>
+<li>Gère la duplication profonde du tableau dynamique de gènes. Indispensable pour préserver l'élite d'une génération à l'autre sans partage de pointeurs.</li>
+<li><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">dest</td><td>Pointeur de l'individu récepteur. </td></tr>
-    <tr><td class="paramname">src</td><td>Pointeur de l'individu émetteur. </td></tr>
-    <tr><td class="paramname">count</td><td>Nombre total de gènes (NB_COMMUNES). </td></tr>
+    <tr><td class="paramname">dest</td><td>Pointeur vers l'individu cible. </td></tr>
+    <tr><td class="paramname">src</td><td>Pointeur vers l'individu d'origine à copier. </td></tr>
+    <tr><td class="paramname">count</td><td>Nombre total de gènes à copier (nombre de communes). </td></tr>
   </table>
   </dd>
 </dl>
+</li>
+</ul>
 
 </div>
 </div>
@@ -233,17 +180,17 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">void crossover </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structIndividual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>enfant</em></span>, </td>
+          <td class="paramtype"><a class="el" href="struct_individual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>enfant</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="structIndividual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>p1</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="struct_individual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>p1</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="structIndividual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>p2</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="struct_individual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>p2</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -258,17 +205,21 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Produit un descendant hybride par combinaison croisée en deux points à partir de deux parents distincts. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Produit un individu enfant par croisement en deux points (crossover) à partir de deux parents. </p>
+<ul>
+<li>Sélectionne deux pivots aléatoires au sein du chromosome pour segmenter et recombiner les blocs géographiques des parents, favorisant la transmission de sous-systèmes d'hôpitaux viables.</li>
+<li><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">enfant</td><td>Pointeur vers la structure destinée à recueillir le génome enfant. </td></tr>
-    <tr><td class="paramname">p1</td><td>Pointeur vers le premier parent. </td></tr>
-    <tr><td class="paramname">p2</td><td>Pointeur vers le second parent. </td></tr>
-    <tr><td class="paramname">count</td><td>Nombre d'éléments génotypiques à croiser. </td></tr>
-    <tr><td class="paramname">seed</td><td>Pointeur vers la graine pseudo-aléatoire. </td></tr>
+    <tr><td class="paramname">enfant</td><td>Pointeur vers l'individu enfant à générer. </td></tr>
+    <tr><td class="paramname">p1</td><td>Pointeur vers le premier parent sélectionné. </td></tr>
+    <tr><td class="paramname">p2</td><td>Pointeur vers le second parent sélectionné. </td></tr>
+    <tr><td class="paramname">count</td><td>Nombre total de gènes. </td></tr>
+    <tr><td class="paramname">seed</td><td>Pointeur vers la seed <span class="tt">rand_r</span> du thread. </td></tr>
   </table>
   </dd>
 </dl>
+</li>
+</ul>
 
 </div>
 </div>
@@ -281,17 +232,17 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">void fitness </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structIndividual.html">Individual</a> *restrict</td>          <td class="paramname"><span class="paramname"><em>ind</em></span>, </td>
+          <td class="paramtype"><a class="el" href="struct_individual.html">Individual</a> *restrict</td>          <td class="paramname"><span class="paramname"><em>ind</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Town *restrict</td>          <td class="paramname"><span class="paramname"><em>towns</em></span>, </td>
+          <td class="paramtype"><a class="el" href="struct_town.html">Town</a> *restrict</td>          <td class="paramname"><span class="paramname"><em>towns</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="structOptimizedData.html">OptimizedData</a> *restrict</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
+          <td class="paramtype"><a class="el" href="struct_optimized_data.html">OptimizedData</a> *restrict</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -306,17 +257,23 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calcule la valeur de fitness globale et les statistiques d'un individu. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Calcule la valeur de fitness globale et extrait les statistiques médicales d'un individu. </p>
+<ul>
+<li>Cette fonction applique le modèle mathématique métier : elle évalue la population couverte à moins de 10km (en évitant le double comptage grâce à un buffer de masquage), applique les pénalités financières par hôpital ouvert, attribue des bonus pour les CHRU légitimes et calcule le besoin en lits.</li>
+<li><dl class="section note"><dt>Note</dt><dd>Cette fonction utilise le mot-clé <span class="tt">restrict</span> pour optimiser la vectorisation par le compilateur.</dd></dl>
+</li>
+<li><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">ind</td><td>Pointeur vers l'individu à évaluer. </td></tr>
-    <tr><td class="paramname">towns</td><td>Tableau de référence des communes. </td></tr>
-    <tr><td class="paramname">data</td><td>Structures précalculées de voisinage. </td></tr>
+    <tr><td class="paramname">towns</td><td>Tableau de toutes les communes. </td></tr>
+    <tr><td class="paramname">data</td><td>Données de voisinage précalculées. </td></tr>
     <tr><td class="paramname">count</td><td>Nombre total de communes. </td></tr>
-    <tr><td class="paramname">coverage_buffer</td><td>Zone tampon intermédiaire pour éviter le double-comptage. </td></tr>
+    <tr><td class="paramname">coverage_buffer</td><td>Buffer de travail isolé pour l'exclusion mutuelle du thread appelant. </td></tr>
   </table>
   </dd>
 </dl>
+</li>
+</ul>
 
 </div>
 </div>
@@ -335,109 +292,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-</div>
-</div>
-<a id="ab652b4b63e1743d05c6de88b28c3d35a" name="ab652b4b63e1743d05c6de88b28c3d35a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab652b4b63e1743d05c6de88b28c3d35a">&#9670;&#160;</a></span>log_generation_timings()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void log_generation_timings </td>
-          <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>gen</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>fitness_s</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>sort_s</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>repro_s</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a9a24c34192d1b18c7e3d9bde3b62c017" name="a9a24c34192d1b18c7e3d9bde3b62c017"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9a24c34192d1b18c7e3d9bde3b62c017">&#9670;&#160;</a></span>log_population_summary()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void log_population_summary </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="structPopulationSummary.html">PopulationSummary</a> *</td>          <td class="paramname"><span class="paramname"><em>s</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>gen</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>gen_max</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="addb90137c4fabfba204e975c5d5ac4cf" name="addb90137c4fabfba204e975c5d5ac4cf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#addb90137c4fabfba204e975c5d5ac4cf">&#9670;&#160;</a></span>log_precalc_summary()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void log_precalc_summary </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="structOptimizedData.html">OptimizedData</a> *</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>count</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="aca31a49357a6374f1ced9e65aa2e136d" name="aca31a49357a6374f1ced9e65aa2e136d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aca31a49357a6374f1ced9e65aa2e136d">&#9670;&#160;</a></span>log_solution_details()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void log_solution_details </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="structIndividual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>ind</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">long</td>          <td class="paramname"><span class="paramname"><em>total_pop</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>label</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
+<p>Récupère la population totale française utilisée dans les calculs de ratios. </p>
+<dl class="section return"><dt>Returns</dt><dd>Valeur courante de la population totale de référence. </dd></dl>
 
 </div>
 </div>
@@ -450,12 +306,12 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">void mutate </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structIndividual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>ind</em></span>, </td>
+          <td class="paramtype"><a class="el" href="struct_individual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>ind</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="structOptimizedData.html">OptimizedData</a> *</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="struct_optimized_data.html">OptimizedData</a> *</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -470,47 +326,20 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Induit des perturbations génotypiques via l'ajout stratégique et l'élagage aléatoire d'hôpitaux. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Applique des opérateurs de mutation intelligents sur le chromosome d'un individu. </p>
+<ul>
+<li>Combine deux approches stochastiques : l'exploration active (ouverture de nouveaux hôpitaux sur des secteurs à fort potentiel de population) et l'élagage ciblé (fermeture de structures ou de CHRU doublons pour limiter le coût financier global).</li>
+<li><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ind</td><td>L'individu sujet à mutation. </td></tr>
-    <tr><td class="paramname">data</td><td>Informations de voisinage géospatial. </td></tr>
-    <tr><td class="paramname">count</td><td>Taille du chromosome. </td></tr>
-    <tr><td class="paramname">seed</td><td>Pointeur vers la graine du générateur de nombres pseudo-aléatoires (<span class="tt">rand_r</span>). </td></tr>
+    <tr><td class="paramname">ind</td><td>Pointeur vers l'individu à muter. </td></tr>
+    <tr><td class="paramname">data</td><td>Données géospatiales de voisinage. </td></tr>
+    <tr><td class="paramname">count</td><td>Nombre total de gènes. </td></tr>
+    <tr><td class="paramname">seed</td><td>Pointeur vers la seed <span class="tt">rand_r</span> propre au thread pour garantir la thread-safety. </td></tr>
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a id="a6cec5a7122032798f0faa0b0ce053d6f" name="a6cec5a7122032798f0faa0b0ce053d6f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6cec5a7122032798f0faa0b0ce053d6f">&#9670;&#160;</a></span>precalc_near()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structOptimizedData.html">OptimizedData</a> * precalc_near </td>
-          <td>(</td>
-          <td class="paramtype">Town *restrict</td>          <td class="paramname"><span class="paramname"><em>towns</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>count</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Effectue la sectorisation spatiale par grille de hachage et liste les communes à &lt; 10km. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">towns</td><td>Tableau brut de toutes les communes. </td></tr>
-    <tr><td class="paramname">count</td><td>Quantité globale de communes. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Pointeur vers le tableau de structures optimisées alloué dynamiquement. </dd></dl>
+</li>
+</ul>
 
 </div>
 </div>
@@ -523,7 +352,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">void quick_sort_population </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structIndividual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>pop</em></span>, </td>
+          <td class="paramtype"><a class="el" href="struct_individual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>pop</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -538,15 +367,60 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Trie par partitionnement récursif (Quicksort) la population d'individus par ordre décroissant. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Trie la population d'individus par ordre décroissant de fitness. </p>
+<ul>
+<li>Implémente l'algorithme Quicksort (tri rapide) par partitionnement récursif. L'élément à l'index 0 contiendra toujours la meilleure solution (élite) à la fin du tri.</li>
+<li><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">pop</td><td>Pointeur vers le tableau d'individus. </td></tr>
-    <tr><td class="paramname">left</td><td>Index de borne gauche. </td></tr>
-    <tr><td class="paramname">right</td><td>Index de borne droite. </td></tr>
+    <tr><td class="paramname">pop</td><td>Tableau d'individus constituant la population. </td></tr>
+    <tr><td class="paramname">left</td><td>Index de départ de la sous-section à trier (généralement 0). </td></tr>
+    <tr><td class="paramname">right</td><td>Index de fin de la sous-section à trier (généralement POP_SIZE - 1). </td></tr>
   </table>
   </dd>
 </dl>
+</li>
+</ul>
+
+</div>
+</div>
+<a id="ad004d12257f533a917b15257492ea31c" name="ad004d12257f533a917b15257492ea31c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad004d12257f533a917b15257492ea31c">&#9670;&#160;</a></span>run_evolution()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_g_a_result.html">GAResult</a> run_evolution </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_g_a_context.html">GAContext</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>pop_size</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>gen_max</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Exécute la boucle d'évolution complète de l'algorithme génétique. </p>
+<ul>
+<li>Orchestre l'intégralité de la simulation à partir d'un contexte : parallélisation OpenMP de la fitness, tri rapide, sélection par tournoi, préservation de l'élite, croisements/mutations et gestion de la mémoire par double-buffering.</li>
+<li><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>Le contexte contenant les paramètres et pointeurs de données de la simulation. </td></tr>
+    <tr><td class="paramname">pop_size</td><td>Taille fixe de la population (ex: 500). </td></tr>
+    <tr><td class="paramname">gen_max</td><td>Nombre maximum de générations (ex: 10000). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Une structure <a class="el" href="struct_g_a_result.html" title="Structure de stockage du bilan d&#39;une simulation complète.">GAResult</a> contenant l'élite finale et les historiques de fitness. </dd></dl>
+</li>
+</ul>
 
 </div>
 </div>
@@ -565,47 +439,13 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-</div>
-</div>
-<a id="ac90c6eca4081b04bd584fc9d4253c577" name="ac90c6eca4081b04bd584fc9d4253c577"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac90c6eca4081b04bd584fc9d4253c577">&#9670;&#160;</a></span>summarize_population()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structPopulationSummary.html">PopulationSummary</a> summarize_population </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="structIndividual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>pop</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>pop_size</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ad03cce4b8e5f7953afbf3b5f1a6c8f9f" name="ad03cce4b8e5f7953afbf3b5f1a6c8f9f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad03cce4b8e5f7953afbf3b5f1a6c8f9f">&#9670;&#160;</a></span>town_distance_km()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">float town_distance_km </td>
-          <td>(</td>
-          <td class="paramtype">const Town *</td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Town *</td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
+<p>Définit la constante de population totale française de référence. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">total</td><td>Nombre d'habitants total. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -622,7 +462,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="dir_e05d7e2b1ecd646af5bb94391405f3b5.html">modules</a></li><li class="navelem"><a href="gen_8h.html">gen.h</a></li>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_abd725aa775a3c1e7b09d25ed50aac69.html">genetic</a></li><li class="navelem"><a href="gen_8h.html">gen.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.16.1 </li>
   </ul>
 </div>

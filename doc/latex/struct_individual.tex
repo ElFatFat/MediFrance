@@ -2,7 +2,7 @@
 \hypertarget{struct_individual}{}\label{struct_individual}\index{Individual@{Individual}}
 
 
-Représente un chromosome ou solution potentielle de notre population.  
+Représente un chromosome ou solution potentielle dans la population.  
 
 
 
@@ -13,21 +13,26 @@ Représente un chromosome ou solution potentielle de notre population.
 \begin{DoxyCompactItemize}
 \item 
 unsigned char \texorpdfstring{$\ast$}{*} \doxymbox{\hyperlink{struct_individual_a6d7ade7dbd5c6e6e29ad96c195fe2bd0}{genes}}
-\begin{DoxyCompactList}\small\item\em Tableau binaire de taille NB\+\_\+\+COMMUNES (1 si hôpital présent, 0 sinon). \end{DoxyCompactList}\item 
+\item 
 double \doxymbox{\hyperlink{struct_individual_aa836a17c3f643f8b5d9032161c8a07ae}{fitness}}
-\begin{DoxyCompactList}\small\item\em Note/\+\+Score de qualité de la solution (à optimiser). \end{DoxyCompactList}\item 
+\item 
 int \doxymbox{\hyperlink{struct_individual_a68329a2be701bdc684152eee500ef55a}{hospitals\+\_\+count}}
-\begin{DoxyCompactList}\small\item\em Compteur global du nombre d\textquotesingle{}hôpitaux ouverts. \end{DoxyCompactList}\item 
+\item 
 int \doxymbox{\hyperlink{struct_individual_aaf9f8d059c46d14d37ccf0b94c069a7b}{chru\+\_\+count}}
-\begin{DoxyCompactList}\small\item\em Compteur du nombre d\textquotesingle{}établissements CHRU. \end{DoxyCompactList}\item 
+\item 
 long \doxymbox{\hyperlink{struct_individual_a47792e70f0b0341dce6733eb59ec074d}{desert\+\_\+population}}
-\begin{DoxyCompactList}\small\item\em Population totale laissée sans aucune couverture médicale. \end{DoxyCompactList}\item 
+\item 
 long \doxymbox{\hyperlink{struct_individual_a9922071a74f531cbb7235b6d3f2432bc}{beds\+\_\+count}}
-\begin{DoxyCompactList}\small\item\em Somme cumulée du nombre de lits disponibles. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}
-Représente un chromosome ou solution potentielle de notre population. 
+Représente un chromosome ou solution potentielle dans la population. 
+
+
+\begin{DoxyItemize}
+\item Un individu stocke une carte complète d\textquotesingle{}implantation des hôpitaux en France ainsi que les statistiques issues de son évaluation géospatiale par la fonction de fitness. 
+\end{DoxyItemize}
 
 \label{doc-variable-members}
 \Hypertarget{struct_individual_doc-variable-members}
@@ -38,62 +43,38 @@ Représente un chromosome ou solution potentielle de notre population.
 {\footnotesize\ttfamily \label{struct_individual_a9922071a74f531cbb7235b6d3f2432bc} 
 long Individual::\+beds\+\_\+count}
 
-
-
-Somme cumulée du nombre de lits disponibles. 
-
-\Hypertarget{struct_individual_aaf9f8d059c46d14d37ccf0b94c069a7b}\index{Individual@{Individual}!chru\_count@{chru\_count}}
+Somme cumulée du nombre de lits médicaux déployés. \Hypertarget{struct_individual_aaf9f8d059c46d14d37ccf0b94c069a7b}\index{Individual@{Individual}!chru\_count@{chru\_count}}
 \index{chru\_count@{chru\_count}!Individual@{Individual}}
 \doxysubsubsection{\texorpdfstring{chru\_count}{chru\_count}}
 {\footnotesize\ttfamily \label{struct_individual_aaf9f8d059c46d14d37ccf0b94c069a7b} 
 int Individual::\+chru\+\_\+count}
 
-
-
-Compteur du nombre d\textquotesingle{}établissements CHRU. 
-
-\Hypertarget{struct_individual_a47792e70f0b0341dce6733eb59ec074d}\index{Individual@{Individual}!desert\_population@{desert\_population}}
+Nombre d\textquotesingle{}établissements ayant obtenu le statut et le bonus CHRU. \Hypertarget{struct_individual_a47792e70f0b0341dce6733eb59ec074d}\index{Individual@{Individual}!desert\_population@{desert\_population}}
 \index{desert\_population@{desert\_population}!Individual@{Individual}}
 \doxysubsubsection{\texorpdfstring{desert\_population}{desert\_population}}
 {\footnotesize\ttfamily \label{struct_individual_a47792e70f0b0341dce6733eb59ec074d} 
 long Individual::\+desert\+\_\+population}
 
-
-
-Population totale laissée sans aucune couverture médicale. 
-
-\Hypertarget{struct_individual_aa836a17c3f643f8b5d9032161c8a07ae}\index{Individual@{Individual}!fitness@{fitness}}
+Population totale résiduelle laissée hors de portée de soins (désert médical). \Hypertarget{struct_individual_aa836a17c3f643f8b5d9032161c8a07ae}\index{Individual@{Individual}!fitness@{fitness}}
 \index{fitness@{fitness}!Individual@{Individual}}
 \doxysubsubsection{\texorpdfstring{fitness}{fitness}}
 {\footnotesize\ttfamily \label{struct_individual_aa836a17c3f643f8b5d9032161c8a07ae} 
 double Individual::\+fitness}
 
-
-
-Note/\+\+Score de qualité de la solution (à optimiser). 
-
-\Hypertarget{struct_individual_a6d7ade7dbd5c6e6e29ad96c195fe2bd0}\index{Individual@{Individual}!genes@{genes}}
+Score de qualité global de la solution (à maximiser). \Hypertarget{struct_individual_a6d7ade7dbd5c6e6e29ad96c195fe2bd0}\index{Individual@{Individual}!genes@{genes}}
 \index{genes@{genes}!Individual@{Individual}}
 \doxysubsubsection{\texorpdfstring{genes}{genes}}
 {\footnotesize\ttfamily \label{struct_individual_a6d7ade7dbd5c6e6e29ad96c195fe2bd0} 
 unsigned char\texorpdfstring{$\ast$}{*} Individual::\+genes}
 
-
-
-Tableau binaire de taille NB\+\_\+\+COMMUNES (1 si hôpital présent, 0 sinon). 
-
-\Hypertarget{struct_individual_a68329a2be701bdc684152eee500ef55a}\index{Individual@{Individual}!hospitals\_count@{hospitals\_count}}
+Tableau binaire de taille NB\+\_\+\+COMMUNES (1 si hôpital présent, 0 sinon). \Hypertarget{struct_individual_a68329a2be701bdc684152eee500ef55a}\index{Individual@{Individual}!hospitals\_count@{hospitals\_count}}
 \index{hospitals\_count@{hospitals\_count}!Individual@{Individual}}
 \doxysubsubsection{\texorpdfstring{hospitals\_count}{hospitals\_count}}
 {\footnotesize\ttfamily \label{struct_individual_a68329a2be701bdc684152eee500ef55a} 
 int Individual::\+hospitals\+\_\+count}
 
-
-
-Compteur global du nombre d\textquotesingle{}hôpitaux ouverts. 
-
-
+Nombre total d\textquotesingle{}hôpitaux implantés dans cette solution. 
 
 The documentation for this struct was generated from the following file:\+\begin{DoxyCompactItemize}
 \item 
-modules/\+\doxymbox{\hyperlink{gen_8h}{gen.\+h}}\end{DoxyCompactItemize}
+src/\+genetic/\+\doxymbox{\hyperlink{gen_8h}{gen.\+h}}\end{DoxyCompactItemize}

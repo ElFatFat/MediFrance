@@ -6,6 +6,8 @@ import subprocess
 import platform
 import hashlib
 import json
+import sys
+import time
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -43,6 +45,14 @@ TRANSFORMER = pyproj.Transformer.from_crs("EPSG:4326", "EPSG:2154", always_xy=Tr
 def format_plur(n, sing, plur=None):
     return f"{int(n):,} {sing if int(n) <= 1 else (plur or sing + 's')}".replace(",", " ")
 
+def log_step(message):
+    print(message, flush=True)
+
+def log_progress(current, total, label, detail=""):
+    pct = int(100 * current / total) if total else 100
+    suffix = f" — {detail}" if detail else ""
+    log_step(f"[{current:3d}/{total}] ({pct:3d}%) {label}{suffix}")
+
 def init_directories_and_fonts():
     for d in [OUTPUT_DIR, MAPS_DIR, ARTIFACTS_DIR]:
         os.makedirs(d, exist_ok=True)
@@ -56,6 +66,8 @@ def open_explorer(file_path):
         abs_path = os.path.abspath(file_path)
         if "microsoft" in platform.release().lower():
             subprocess.run(["bash", "-c", f'explorer.exe /select,$(wslpath -w "{abs_path}")'])
+        elif platform.system() == "Darwin":
+            subprocess.run(["open", "-R", abs_path])
         else:
             subprocess.run(["xdg-open", os.path.dirname(abs_path)])
     except Exception as e:
@@ -223,11 +235,16 @@ def handle_dept_map(pdf, ax, dept_name, dept_df, saved_hashes, new_hashes):
     current_hash = hashlib.md5(fingerprint.encode('utf-8')).hexdigest()
     new_hashes[dept_name] = current_hash
 
-    if not (saved_hashes.get(dept_name) == current_hash and os.path.exists(map_path)):
-        if not generate_map_for_dept(ax, dept_df, dept_name, map_path):
-            pdf.cell(0, 5, "(Erreur d'affichage cartographique)", new_x="LMARGIN", new_y="NEXT")
-            return
+    if saved_hashes.get(dept_name) == current_hash and os.path.exists(map_path):
+        pdf.image(map_path, x=20, w=170)
+        return "carte en cache"
+
+    if not generate_map_for_dept(ax, dept_df, dept_name, map_path):
+        pdf.cell(0, 5, "(Erreur d'affichage cartographique)", new_x="LMARGIN", new_y="NEXT")
+        return "erreur carte"
+
     pdf.image(map_path, x=20, w=170)
+    return "carte générée"
 
 def print_hospital_table(pdf, town_list):
     if town_list.empty:
@@ -259,30 +276,76 @@ def load_hashes():
     except Exception: return {}
 
 def generate_report(df_data):
+    started = time.perf_counter()
+    log_step("=== Génération du rapport PDF ===")
+
+    log_step("Initialisation des dossiers et polices...")
     init_directories_and_fonts()
+
+    log_step("Calcul des statistiques par département...")
     stats, dept_groups = compute_stats(df_data)
+    total_depts = len(stats)
+    log_step(f"  → {total_depts} départements, {len(df_data):,} communes".replace(",", " "))
+
+    log_step("Préparation du document PDF...")
     pdf, dept_links = setup_pdf_and_links(stats, dept_groups)
     saved_hashes, new_hashes = load_hashes(), {}
-    
+
+    log_step("Génération du sommaire...")
     generate_toc(pdf, stats, dept_links)
     fig, ax = plt.subplots(figsize=(7, 5))
 
-    for _, row in stats.iterrows():
+    log_step(f"Traitement des départements ({total_depts})...")
+    maps_generated = maps_cached = maps_failed = 0
+
+    for index, (_, row) in enumerate(stats.iterrows(), 1):
+        dept_name = row["nom_dep"]
+        dept_df = dept_groups[dept_name]
+        hospitals = dept_df[dept_df["has_hospital"] == 1].sort_values("ville")
+
         pdf.add_page()
-        pdf.set_link(dept_links[row["nom_dep"]], y=pdf.get_y(), page=pdf.page_no())
+        pdf.set_link(dept_links[dept_name], y=pdf.get_y(), page=pdf.page_no())
         print_dept_summary(pdf, row)
-        handle_dept_map(pdf, ax, row["nom_dep"], dept_groups[row["nom_dep"]], saved_hashes, new_hashes)
-        print_hospital_table(pdf, dept_groups[row["nom_dep"]][dept_groups[row["nom_dep"]]["has_hospital"] == 1].sort_values("ville"))
+        map_status = handle_dept_map(pdf, ax, dept_name, dept_df, saved_hashes, new_hashes)
+        print_hospital_table(pdf, hospitals)
+
+        if map_status == "carte générée":
+            maps_generated += 1
+        elif map_status == "carte en cache":
+            maps_cached += 1
+        else:
+            maps_failed += 1
+
+        hosp_count = len(hospitals)
+        log_progress(
+            index,
+            total_depts,
+            dept_name,
+            f"{map_status}, {hosp_count} hôpita{'ux' if hosp_count != 1 else 'l'}",
+        )
 
     plt.close(fig)
-    with open(HASH_FILE, "w") as f: json.dump(new_hashes, f)
+
+    log_step("Enregistrement du cache cartographique...")
+    with open(HASH_FILE, "w") as f:
+        json.dump(new_hashes, f)
+
+    log_step(f"Export du PDF vers {OUTPUT_PDF} ...")
     pdf.output(OUTPUT_PDF)
-    print(f"Rapport PDF généré avec succès : {OUTPUT_PDF}")
+
+    elapsed = time.perf_counter() - started
+    log_step("")
+    log_step("=== Terminé ===")
+    log_step(f"  PDF       : {OUTPUT_PDF}")
+    log_step(f"  Cartes    : {maps_generated} générées, {maps_cached} en cache, {maps_failed} en erreur")
+    log_step(f"  Durée     : {elapsed:.1f} s")
     open_explorer(OUTPUT_PDF)
 
 if __name__ == "__main__":
     try:
+        log_step(f"Chargement de {INPUT_CSV} ...")
         df = pd.read_csv(INPUT_CSV)
         generate_report(df)
     except FileNotFoundError:
-        print(f"Erreur: {INPUT_CSV} n'existe pas.")
+        print(f"Erreur: {INPUT_CSV} n'existe pas.", file=sys.stderr)
+        sys.exit(1)

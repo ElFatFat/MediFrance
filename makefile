@@ -1,7 +1,7 @@
 # Compiler and flags
-CC      = gcc
+#CC      = gcc
 #CC for macOS in VM. Running gcc with x86_64 architecture to avoid issues with MLV library on ARM-based Macs.
-#CC      = x86_64-linux-gnu-gcc
+CC      = x86_64-linux-gnu-gcc
 BASE_CFLAGS = -fopenmp -Ofast $(shell pkg-config --cflags MLV)
 WARN_CFLAGS = -Wall -Wextra
 CFLAGS ?= $(BASE_CFLAGS) $(WARN_CFLAGS)
@@ -45,4 +45,11 @@ clean:
 	rm -f $(OBJS) $(TARGET) *.o
 	rm -rf build
 
-.PHONY: all clean quality
+# Python PDF report
+pdf-deps:
+	./scripts-pdf-generation/install-deps.sh
+
+pdf:
+	./scripts-pdf-generation/run-pdf.sh
+
+.PHONY: all clean quality run doc pdf-deps pdf

@@ -9,38 +9,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/**
- * @brief Helper : population couverte par un seul hôpital placé en towns[i],
- * en évitant le double-comptage entre voisins qui se recoupent.
- *
- * @param i      Index de la commune hébergeant l'hôpital.
- * @param towns  Tableau complet de toutes les communes.
- * @param data   Données optimisées contenant la liste des voisins.
- * @param count  Nombre total de communes.
- * @return       La population cumulée nette couverte par cet hôpital.
- */
-static long covered_pop_for_hospital(int i,
-                                     const Town* towns,
-                                     const OptimizedData* data,
-                                     size_t count) {
-    unsigned char* mark = calloc(count, 1);
-    if (!mark) return towns[i].population;
-
-    long total = 0;
-    mark[i] = 1;
-    total += towns[i].population;
-
-    for (int v = 0; v < data[i].neighbor_count; v++) {
-        int j = data[i].neighbors[v];
-        if (!mark[j]) {
-            mark[j] = 1;
-            total += towns[j].population;
-        }
-    }
-    free(mark);
-    return total;
-}
-
 int export_resultats_csv(const char* path,
                          const Town* towns,
                          size_t count,
@@ -61,19 +29,45 @@ int export_resultats_csv(const char* path,
 
     /* --- Calcul du nombre de lits par hôpital (indexé sur les communes) --- */
     int* beds_per_town = calloc(count, sizeof(int));
-    if (!beds_per_town) {
+    unsigned char* bed_assign = calloc(count, 1);
+    if (!beds_per_town || !bed_assign) {
         perror("export: calloc beds_per_town");
         free(covered);
+        free(beds_per_town);
+        free(bed_assign);
         return -1;
     }
 
     for (size_t i = 0; i < count; i++) {
-        if (!best->genes[i]) continue;
-        long pop_cov = covered_pop_for_hospital((int)i, towns, precalc_data, count);
-        int beds = (int)(pop_cov * (BEDS_PER_1000 / 1000.0f));
-        if (beds < 10) beds = 10; /* plancher réglementaire */
-        beds_per_town[i] = beds;
+        if (!best->genes[i]) {
+            continue;
+        }
+
+        long pop_cov = 0;
+
+        if (!bed_assign[i]) {
+            bed_assign[i] = 1;
+            pop_cov += towns[i].population;
+        }
+
+        for (int v = 0; v < precalc_data[i].neighbor_count; v++) {
+            int j = precalc_data[i].neighbors[v];
+            if (!bed_assign[j]) {
+                bed_assign[j] = 1;
+                pop_cov += towns[j].population;
+            }
+        }
+
+        if (pop_cov > 0) {
+            int beds = (int)(pop_cov * (BEDS_PER_1000 / 1000.0f));
+            if (beds < 10) {
+                beds = 10;
+            }
+            beds_per_town[i] = beds;
+        }
     }
+
+    free(bed_assign);
 
     /* --- Écriture du CSV --- */
     FILE* f = fopen(path, "w");

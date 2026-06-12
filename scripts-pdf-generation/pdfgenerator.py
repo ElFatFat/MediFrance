@@ -301,7 +301,7 @@ def generate_report(df_data):
     for index, (_, row) in enumerate(stats.iterrows(), 1):
         dept_name = row["nom_dep"]
         dept_df = dept_groups[dept_name]
-        hospitals = dept_df[dept_df["has_hospital"] == 1].sort_values("ville")
+        hospitals = dept_df[(dept_df["has_hospital"] == 1) & (dept_df["nb_beds"] > 0)].sort_values("ville")
 
         pdf.add_page()
         pdf.set_link(dept_links[dept_name], y=pdf.get_y(), page=pdf.page_no())

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.16.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>MediFrance: modules/export.c File Reference</title>
+<title>MediFrance: src/data/export.c File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -95,93 +95,19 @@ $(function(){initNavTree('export_8c.html','',''); });
 <p>Implémentation de la logique d'écriture et d'évaluation finale pour l'export CSV.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="export_8h_source.html">export.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="constants_8h_source.html">../constants.h</a>&quot;</code><br />
 <code>#include &lt;stdio.h&gt;</code><br />
 <code>#include &lt;stdlib.h&gt;</code><br />
 <code>#include &lt;string.h&gt;</code><br />
 </div><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:a15ce3a8b7daeab5ddc01de61f783e2b1" id="r_a15ce3a8b7daeab5ddc01de61f783e2b1"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a15ce3a8b7daeab5ddc01de61f783e2b1">BEDS_PER_1000</a>&#160;&#160;&#160;5.4f</td></tr>
-<tr class="memdesc:a15ce3a8b7daeab5ddc01de61f783e2b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constante — doit rester identique à BEDS_PER_1000 dans <a class="el" href="gen_8c.html" title="Moteur algorithmique de la simulation génétique et de la modélisation géospatiale.">gen.c</a>.  <br /></td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a697cfa7638d053baaa9fb527787c790c" id="r_a697cfa7638d053baaa9fb527787c790c"><td class="memItemLeft">static long&#160;</td><td class="memItemRight"><a class="el" href="#a697cfa7638d053baaa9fb527787c790c">covered_pop_for_hospital</a> (int i, const Town *towns, const <a class="el" href="structOptimizedData.html">OptimizedData</a> *data, size_t count)</td></tr>
-<tr class="memdesc:a697cfa7638d053baaa9fb527787c790c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper : population couverte par un seul hôpital placé en towns[i], en évitant le double-comptage entre voisins qui se recoupent.  <br /></td></tr>
-<tr class="memitem:a204325bdd184f41a396da856c7a12e1a" id="r_a204325bdd184f41a396da856c7a12e1a"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a204325bdd184f41a396da856c7a12e1a">export_resultats_csv</a> (const char *path, const Town *towns, size_t count, const <a class="el" href="structOptimizedData.html">OptimizedData</a> *precalc_data, const <a class="el" href="structIndividual.html">Individual</a> *best)</td></tr>
+<tr class="memitem:a204325bdd184f41a396da856c7a12e1a" id="r_a204325bdd184f41a396da856c7a12e1a"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a204325bdd184f41a396da856c7a12e1a">export_resultats_csv</a> (const char *path, const <a class="el" href="struct_town.html">Town</a> *towns, size_t count, const <a class="el" href="struct_optimized_data.html">OptimizedData</a> *precalc_data, const <a class="el" href="struct_individual.html">Individual</a> *best)</td></tr>
 <tr class="memdesc:a204325bdd184f41a396da856c7a12e1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exporte une ligne par commune dans un CSV plat consommé par le script Python.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Implémentation de la logique d'écriture et d'évaluation finale pour l'export CSV. </p>
-</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="a15ce3a8b7daeab5ddc01de61f783e2b1" name="a15ce3a8b7daeab5ddc01de61f783e2b1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a15ce3a8b7daeab5ddc01de61f783e2b1">&#9670;&#160;</a></span>BEDS_PER_1000</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BEDS_PER_1000&#160;&#160;&#160;5.4f</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Constante — doit rester identique à BEDS_PER_1000 dans <a class="el" href="gen_8c.html" title="Moteur algorithmique de la simulation génétique et de la modélisation géospatiale.">gen.c</a>. </p>
-
-</div>
-</div>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="a697cfa7638d053baaa9fb527787c790c" name="a697cfa7638d053baaa9fb527787c790c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a697cfa7638d053baaa9fb527787c790c">&#9670;&#160;</a></span>covered_pop_for_hospital()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">long covered_pop_for_hospital </td>
-          <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>i</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Town *</td>          <td class="paramname"><span class="paramname"><em>towns</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="structOptimizedData.html">OptimizedData</a> *</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>count</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Helper : population couverte par un seul hôpital placé en towns[i], en évitant le double-comptage entre voisins qui se recoupent. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">i</td><td>Index de la commune hébergeant l'hôpital. </td></tr>
-    <tr><td class="paramname">towns</td><td>Tableau complet de toutes les communes. </td></tr>
-    <tr><td class="paramname">data</td><td>Données optimisées contenant la liste des voisins. </td></tr>
-    <tr><td class="paramname">count</td><td>Nombre total de communes. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>La population cumulée nette couverte par cet hôpital. </dd></dl>
-
-</div>
-</div>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
 <a id="a204325bdd184f41a396da856c7a12e1a" name="a204325bdd184f41a396da856c7a12e1a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a204325bdd184f41a396da856c7a12e1a">&#9670;&#160;</a></span>export_resultats_csv()</h2>
 
@@ -196,7 +122,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Town *</td>          <td class="paramname"><span class="paramname"><em>towns</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="struct_town.html">Town</a> *</td>          <td class="paramname"><span class="paramname"><em>towns</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -206,12 +132,12 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="structOptimizedData.html">OptimizedData</a> *</td>          <td class="paramname"><span class="paramname"><em>precalc_data</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="struct_optimized_data.html">OptimizedData</a> *</td>          <td class="paramname"><span class="paramname"><em>precalc_data</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="structIndividual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>best</em></span>&#160;)</td>
+          <td class="paramtype">const <a class="el" href="struct_individual.html">Individual</a> *</td>          <td class="paramname"><span class="paramname"><em>best</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -245,7 +171,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="dir_e05d7e2b1ecd646af5bb94391405f3b5.html">modules</a></li><li class="navelem"><a href="export_8c.html">export.c</a></li>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_c1be8d27e7f84178e95f152701110b19.html">data</a></li><li class="navelem"><a href="export_8c.html">export.c</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.16.1 </li>
   </ul>
 </div>

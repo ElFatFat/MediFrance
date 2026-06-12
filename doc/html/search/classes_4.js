@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['threadworkspace_0',['ThreadWorkspace',['../structThreadWorkspace.html',1,'']]]
+  ['populationsummary_0',['PopulationSummary',['../struct_population_summary.html',1,'']]]
 ];

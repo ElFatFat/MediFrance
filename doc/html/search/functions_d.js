@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['town_5fdistance_5fkm_0',['town_distance_km',['../gen_8c.html#ad03cce4b8e5f7953afbf3b5f1a6c8f9f',1,'town_distance_km(const Town *a, const Town *b):&#160;gen.c'],['../gen_8h.html#ad03cce4b8e5f7953afbf3b5f1a6c8f9f',1,'town_distance_km(const Town *a, const Town *b):&#160;gen.c']]]
+  ['quick_5fsort_5fpopulation_0',['quick_sort_population',['../gen_8c.html#a2ef24c894c8474a841a2b8750bb6068a',1,'quick_sort_population(Individual *pop, int left, int right):&#160;gen.c'],['../gen_8h.html#a2ef24c894c8474a841a2b8750bb6068a',1,'quick_sort_population(Individual *pop, int left, int right):&#160;gen.c']]]
 ];

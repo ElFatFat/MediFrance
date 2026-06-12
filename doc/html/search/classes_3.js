@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['populationsummary_0',['PopulationSummary',['../structPopulationSummary.html',1,'']]]
+  ['optimizeddata_0',['OptimizedData',['../struct_optimized_data.html',1,'']]]
 ];

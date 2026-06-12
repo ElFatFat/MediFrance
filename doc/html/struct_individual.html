@@ -92,7 +92,7 @@ $(function(){initNavTree('struct_individual.html','',''); });
 </div><!--header-->
 <div class="contents">
 
-<p>Représente un chromosome ou solution potentielle de notre population.  
+<p>Représente un chromosome ou solution potentielle dans la population.  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="gen_8h_source.html">gen.h</a>&gt;</code></p>
@@ -100,20 +100,17 @@ $(function(){initNavTree('struct_individual.html','',''); });
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Data Fields</h2></td></tr>
 <tr class="memitem:a6d7ade7dbd5c6e6e29ad96c195fe2bd0" id="r_a6d7ade7dbd5c6e6e29ad96c195fe2bd0"><td class="memItemLeft">unsigned char *&#160;</td><td class="memItemRight"><a class="el" href="#a6d7ade7dbd5c6e6e29ad96c195fe2bd0">genes</a></td></tr>
-<tr class="memdesc:a6d7ade7dbd5c6e6e29ad96c195fe2bd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tableau binaire de taille NB_COMMUNES (1 si hôpital présent, 0 sinon).  <br /></td></tr>
 <tr class="memitem:aa836a17c3f643f8b5d9032161c8a07ae" id="r_aa836a17c3f643f8b5d9032161c8a07ae"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#aa836a17c3f643f8b5d9032161c8a07ae">fitness</a></td></tr>
-<tr class="memdesc:aa836a17c3f643f8b5d9032161c8a07ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Note/Score de qualité de la solution (à optimiser).  <br /></td></tr>
 <tr class="memitem:a68329a2be701bdc684152eee500ef55a" id="r_a68329a2be701bdc684152eee500ef55a"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a68329a2be701bdc684152eee500ef55a">hospitals_count</a></td></tr>
-<tr class="memdesc:a68329a2be701bdc684152eee500ef55a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compteur global du nombre d'hôpitaux ouverts.  <br /></td></tr>
 <tr class="memitem:aaf9f8d059c46d14d37ccf0b94c069a7b" id="r_aaf9f8d059c46d14d37ccf0b94c069a7b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aaf9f8d059c46d14d37ccf0b94c069a7b">chru_count</a></td></tr>
-<tr class="memdesc:aaf9f8d059c46d14d37ccf0b94c069a7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compteur du nombre d'établissements CHRU.  <br /></td></tr>
 <tr class="memitem:a47792e70f0b0341dce6733eb59ec074d" id="r_a47792e70f0b0341dce6733eb59ec074d"><td class="memItemLeft">long&#160;</td><td class="memItemRight"><a class="el" href="#a47792e70f0b0341dce6733eb59ec074d">desert_population</a></td></tr>
-<tr class="memdesc:a47792e70f0b0341dce6733eb59ec074d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Population totale laissée sans aucune couverture médicale.  <br /></td></tr>
 <tr class="memitem:a9922071a74f531cbb7235b6d3f2432bc" id="r_a9922071a74f531cbb7235b6d3f2432bc"><td class="memItemLeft">long&#160;</td><td class="memItemRight"><a class="el" href="#a9922071a74f531cbb7235b6d3f2432bc">beds_count</a></td></tr>
-<tr class="memdesc:a9922071a74f531cbb7235b6d3f2432bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Somme cumulée du nombre de lits disponibles.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Représente un chromosome ou solution potentielle de notre population. </p>
+<div class="textblock"><p>Représente un chromosome ou solution potentielle dans la population. </p>
+<ul>
+<li>Un individu stocke une carte complète d'implantation des hôpitaux en France ainsi que les statistiques issues de son évaluation géospatiale par la fonction de fitness. </li>
+</ul>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Field Documentation</h2>
 <a id="a9922071a74f531cbb7235b6d3f2432bc" name="a9922071a74f531cbb7235b6d3f2432bc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9922071a74f531cbb7235b6d3f2432bc">&#9670;&#160;</a></span>beds_count</h2>
@@ -126,8 +123,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Somme cumulée du nombre de lits disponibles. </p>
+<p>Somme cumulée du nombre de lits médicaux déployés. </p>
 
 </div>
 </div>
@@ -142,8 +138,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Compteur du nombre d'établissements CHRU. </p>
+<p>Nombre d'établissements ayant obtenu le statut et le bonus CHRU. </p>
 
 </div>
 </div>
@@ -158,8 +153,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Population totale laissée sans aucune couverture médicale. </p>
+<p>Population totale résiduelle laissée hors de portée de soins (désert médical). </p>
 
 </div>
 </div>
@@ -174,8 +168,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Note/Score de qualité de la solution (à optimiser). </p>
+<p>Score de qualité global de la solution (à maximiser). </p>
 
 </div>
 </div>
@@ -190,7 +183,6 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
 <p>Tableau binaire de taille NB_COMMUNES (1 si hôpital présent, 0 sinon). </p>
 
 </div>
@@ -206,13 +198,12 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Compteur global du nombre d'hôpitaux ouverts. </p>
+<p>Nombre total d'hôpitaux implantés dans cette solution. </p>
 
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>modules/<a class="el" href="gen_8h_source.html">gen.h</a></li>
+<li>src/genetic/<a class="el" href="gen_8h_source.html">gen.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

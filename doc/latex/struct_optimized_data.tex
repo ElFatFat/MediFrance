@@ -2,28 +2,33 @@
 \hypertarget{struct_optimized_data}{}\label{struct_optimized_data}\index{OptimizedData@{OptimizedData}}
 
 
-Structure regroupant les données de voisinage précalculées à moins de 10km.  
+Structure regroupant les métriques géospatiales précalculées d\textquotesingle{}une commune.  
 
 
 
 
-{\ttfamily \+\#include $<$gen.\+h$>$}
+{\ttfamily \+\#include $<$geo.\+h$>$}
 
 \doxysubsubsection*{Data Fields}
 \begin{DoxyCompactItemize}
 \item 
 int \texorpdfstring{$\ast$}{*} \doxymbox{\hyperlink{struct_optimized_data_a3df6b61c0c51f4f326fc6ecebae1a690}{neighbors}}
-\begin{DoxyCompactList}\small\item\em Tableau d\textquotesingle{}indices des communes situées à moins de 10km. \end{DoxyCompactList}\item 
+\item 
 int \doxymbox{\hyperlink{struct_optimized_data_a113e84c82c78765bb135f98e5b3fac42}{neighbor\+\_\+count}}
-\begin{DoxyCompactList}\small\item\em Nombre total de communes voisines trouvées. \end{DoxyCompactList}\item 
+\item 
 int \doxymbox{\hyperlink{struct_optimized_data_ada10310d8445f3ef02eb49ce70ff0c04}{is\+\_\+eligible\+\_\+for\+\_\+chru}}
-\begin{DoxyCompactList}\small\item\em Indicateur d\textquotesingle{}éligibilité CHRU :\+ 1 si population \texorpdfstring{$>$}{>} 80 000, sinon 0. \end{DoxyCompactList}\item 
+\item 
 int \doxymbox{\hyperlink{struct_optimized_data_a99b89635d0b9e62494177c46d1a386a0}{max\+\_\+covered\+\_\+population}}
-\begin{DoxyCompactList}\small\item\em Population maximale théoriquement couverte par ce nœud. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}
-Structure regroupant les données de voisinage précalculées à moins de 10km. 
+Structure regroupant les métriques géospatiales précalculées d\textquotesingle{}une commune. 
+
+
+\begin{DoxyItemize}
+\item Contient des listes d\textquotesingle{}adjacence optimisées permettant à la fonction de fitness de s\textquotesingle{}exécuter en un temps minimal sans refaire de calculs trigonométriques. 
+\end{DoxyItemize}
 
 \label{doc-variable-members}
 \Hypertarget{struct_optimized_data_doc-variable-members}
@@ -34,42 +39,26 @@ Structure regroupant les données de voisinage précalculées à moins de 10km.
 {\footnotesize\ttfamily \label{struct_optimized_data_ada10310d8445f3ef02eb49ce70ff0c04} 
 int Optimized\+Data::\+is\+\_\+eligible\+\_\+for\+\_\+chru}
 
-
-
-Indicateur d\textquotesingle{}éligibilité CHRU :\+ 1 si population \texorpdfstring{$>$}{>} 80 000, sinon 0. 
-
-\Hypertarget{struct_optimized_data_a99b89635d0b9e62494177c46d1a386a0}\index{OptimizedData@{OptimizedData}!max\_covered\_population@{max\_covered\_population}}
+Indicateur d\textquotesingle{}éligibilité au statut CHRU (1 si la commune seule \texorpdfstring{$>$}{>} 80 000 habitants, 0 sinon). \Hypertarget{struct_optimized_data_a99b89635d0b9e62494177c46d1a386a0}\index{OptimizedData@{OptimizedData}!max\_covered\_population@{max\_covered\_population}}
 \index{max\_covered\_population@{max\_covered\_population}!OptimizedData@{OptimizedData}}
 \doxysubsubsection{\texorpdfstring{max\_covered\_population}{max\_covered\_population}}
 {\footnotesize\ttfamily \label{struct_optimized_data_a99b89635d0b9e62494177c46d1a386a0} 
 int Optimized\+Data::\+max\+\_\+covered\+\_\+population}
 
-
-
-Population maximale théoriquement couverte par ce nœud. 
-
-\Hypertarget{struct_optimized_data_a113e84c82c78765bb135f98e5b3fac42}\index{OptimizedData@{OptimizedData}!neighbor\_count@{neighbor\_count}}
+Somme cumulée des populations de la commune et de tous ses voisins directs. \Hypertarget{struct_optimized_data_a113e84c82c78765bb135f98e5b3fac42}\index{OptimizedData@{OptimizedData}!neighbor\_count@{neighbor\_count}}
 \index{neighbor\_count@{neighbor\_count}!OptimizedData@{OptimizedData}}
 \doxysubsubsection{\texorpdfstring{neighbor\_count}{neighbor\_count}}
 {\footnotesize\ttfamily \label{struct_optimized_data_a113e84c82c78765bb135f98e5b3fac42} 
 int Optimized\+Data::\+neighbor\+\_\+count}
 
-
-
-Nombre total de communes voisines trouvées. 
-
-\Hypertarget{struct_optimized_data_a3df6b61c0c51f4f326fc6ecebae1a690}\index{OptimizedData@{OptimizedData}!neighbors@{neighbors}}
+Nombre exact de communes voisines indexées dans le tableau. \Hypertarget{struct_optimized_data_a3df6b61c0c51f4f326fc6ecebae1a690}\index{OptimizedData@{OptimizedData}!neighbors@{neighbors}}
 \index{neighbors@{neighbors}!OptimizedData@{OptimizedData}}
 \doxysubsubsection{\texorpdfstring{neighbors}{neighbors}}
 {\footnotesize\ttfamily \label{struct_optimized_data_a3df6b61c0c51f4f326fc6ecebae1a690} 
 int\texorpdfstring{$\ast$}{*} Optimized\+Data::\+neighbors}
 
-
-
-Tableau d\textquotesingle{}indices des communes situées à moins de 10km. 
-
-
+Tableau d\textquotesingle{}indices (ID internes) des communes situées à moins de 10km. 
 
 The documentation for this struct was generated from the following file:\+\begin{DoxyCompactItemize}
 \item 
-modules/\+\doxymbox{\hyperlink{gen_8h}{gen.\+h}}\end{DoxyCompactItemize}
+src/\+genetic/\+\doxymbox{\hyperlink{geo_8h}{geo.\+h}}\end{DoxyCompactItemize}

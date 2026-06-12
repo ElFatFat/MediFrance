@@ -92,24 +92,23 @@ $(function(){initNavTree('struct_optimized_data.html','',''); });
 </div><!--header-->
 <div class="contents">
 
-<p>Structure regroupant les données de voisinage précalculées à moins de 10km.  
+<p>Structure regroupant les métriques géospatiales précalculées d'une commune.  
  <a href="#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="gen_8h_source.html">gen.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="geo_8h_source.html">geo.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Data Fields</h2></td></tr>
 <tr class="memitem:a3df6b61c0c51f4f326fc6ecebae1a690" id="r_a3df6b61c0c51f4f326fc6ecebae1a690"><td class="memItemLeft">int *&#160;</td><td class="memItemRight"><a class="el" href="#a3df6b61c0c51f4f326fc6ecebae1a690">neighbors</a></td></tr>
-<tr class="memdesc:a3df6b61c0c51f4f326fc6ecebae1a690"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tableau d'indices des communes situées à moins de 10km.  <br /></td></tr>
 <tr class="memitem:a113e84c82c78765bb135f98e5b3fac42" id="r_a113e84c82c78765bb135f98e5b3fac42"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a113e84c82c78765bb135f98e5b3fac42">neighbor_count</a></td></tr>
-<tr class="memdesc:a113e84c82c78765bb135f98e5b3fac42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nombre total de communes voisines trouvées.  <br /></td></tr>
 <tr class="memitem:ada10310d8445f3ef02eb49ce70ff0c04" id="r_ada10310d8445f3ef02eb49ce70ff0c04"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ada10310d8445f3ef02eb49ce70ff0c04">is_eligible_for_chru</a></td></tr>
-<tr class="memdesc:ada10310d8445f3ef02eb49ce70ff0c04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicateur d'éligibilité CHRU : 1 si population &gt; 80 000, sinon 0.  <br /></td></tr>
 <tr class="memitem:a99b89635d0b9e62494177c46d1a386a0" id="r_a99b89635d0b9e62494177c46d1a386a0"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a99b89635d0b9e62494177c46d1a386a0">max_covered_population</a></td></tr>
-<tr class="memdesc:a99b89635d0b9e62494177c46d1a386a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Population maximale théoriquement couverte par ce nœud.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Structure regroupant les données de voisinage précalculées à moins de 10km. </p>
+<div class="textblock"><p>Structure regroupant les métriques géospatiales précalculées d'une commune. </p>
+<ul>
+<li>Contient des listes d'adjacence optimisées permettant à la fonction de fitness de s'exécuter en un temps minimal sans refaire de calculs trigonométriques. </li>
+</ul>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Field Documentation</h2>
 <a id="ada10310d8445f3ef02eb49ce70ff0c04" name="ada10310d8445f3ef02eb49ce70ff0c04"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ada10310d8445f3ef02eb49ce70ff0c04">&#9670;&#160;</a></span>is_eligible_for_chru</h2>
@@ -122,8 +121,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Indicateur d'éligibilité CHRU : 1 si population &gt; 80 000, sinon 0. </p>
+<p>Indicateur d'éligibilité au statut CHRU (1 si la commune seule &gt; 80 000 habitants, 0 sinon). </p>
 
 </div>
 </div>
@@ -138,8 +136,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Population maximale théoriquement couverte par ce nœud. </p>
+<p>Somme cumulée des populations de la commune et de tous ses voisins directs. </p>
 
 </div>
 </div>
@@ -154,8 +151,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Nombre total de communes voisines trouvées. </p>
+<p>Nombre exact de communes voisines indexées dans le tableau. </p>
 
 </div>
 </div>
@@ -170,13 +166,12 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Tableau d'indices des communes situées à moins de 10km. </p>
+<p>Tableau d'indices (ID internes) des communes situées à moins de 10km. </p>
 
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>modules/<a class="el" href="gen_8h_source.html">gen.h</a></li>
+<li>src/genetic/<a class="el" href="geo_8h_source.html">geo.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

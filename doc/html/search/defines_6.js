@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['window_5fheight_0',['WINDOW_HEIGHT',['../gui_8c.html#a5473cf64fa979b48335079c99532e243',1,'gui.c']]],
-  ['window_5fwidth_1',['WINDOW_WIDTH',['../gui_8c.html#a498d9f026138406895e9a34b504ac6a6',1,'gui.c']]]
+  ['hospital_5fcost_0',['HOSPITAL_COST',['../constants_8h.html#a6b2d35c814f5f73894a604470e0d7860',1,'constants.h']]]
 ];
